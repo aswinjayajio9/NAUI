@@ -22,6 +22,7 @@ import SheetComponent from "./SheetComponent";
 import DashboardComponent from "./DashboardComponent";
 // replaced NetworkDefinitionPage with DefinitionWizard
 import DefinitionWizard from "./DefinitionWizard";
+import { data as sampleo9data } from "./sampleo9data";
 
 function NetworkAggHomePage() {
   const [firstSheetFilters, setFirstSheetFilters] = useState({});

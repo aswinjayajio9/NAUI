@@ -17,6 +17,7 @@ app.add_middleware(
 )
 
 DATA_FOLDER = r"D:\NetworkAggUI\NAUI\networkaggbackend\data"
+DATA_FOLDER_OUT = r"D:\NetworkAggUI\NAUI\networkaggbackend\data_out"
 
 def clean_dataframe(df: pd.DataFrame):
     """
@@ -40,15 +41,18 @@ def read_csv(filename: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# POST endpoint: Write JSON to CSV file
-@app.post("/write/{filename}")
-def write_csv(filename: str, data: Dict[str, Any]):
-    filepath = os.path.join(DATA_FOLDER, filename)
+from fastapi import Request
+import io
 
+@app.post("/write/{filename}")
+async def write_csv(filename: str, request: Request):
+    filepath = os.path.join(DATA_FOLDER_OUT, filename)
     try:
-        # Convert JSON to DataFrame
-        print(data)
-        df = pd.DataFrame(data)
+        body = await request.body()
+        csv_str = body.decode("utf-8")
+        print(csv_str)
+        df = pd.read_csv(io.StringIO(csv_str))
+        print(df)
         df.to_csv(filepath, index=False)
         return {"status": "success", "file": filename}
     except Exception as e:
