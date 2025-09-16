@@ -1,0 +1,6 @@
+Parameter,Calculation,Calculation Details,Example
+Lead Time,Sum,Cumulative Lead Times,
+Consume Per,Average,,
+Lot Size,Minimum,"Minimum lot size across SKU's","min(1000, 1200, 1100) = 1000 units"
+Activity Share,Measure,"Activity Share is splitted by custom measure",
+BOM Effectiveness,Overlap,"Overlapping active dates across resources","Max of Start date, Min of End Date"

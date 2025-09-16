@@ -1,0 +1,7 @@
+Parameter,Calculation,Calculation Details,Example
+Lead Time,Sum,Cumulative lead times,
+Consume Per,Weighted Average,"Need to consider the historic demands of the SKU's to derive the consume pers",
+Demand on hand,Sum,"Sum of demand for all SKU's under Product Category. Sum of on hand inventory for all SKUs.","500 (SKU1) + 700 (SKU2) = 1200 units"
+Safety Stock,Average,"Aggregate the safety stock from individual SKUs into the Product Category level. Or calculate separately based on variance to Product Category level (sum, Average, RMS, etc.)",
+Changeover Losses,Average,Average of changeover losses per SKU,"(2% + 2.5%)/2 = 2.25%"
+Lot Size,Minimum,Minimum lot size across SKU's,"min(1200, 1100, 1500) = 1100 units"c

@@ -1,0 +1,8 @@
+Parameter,Enable
+Lead Time,True
+Consume Per,True
+Lot Size,True
+Activity Share,False
+Time Varying Yield,False
+BOM Effectiveness,True
+Sourcing Proportion,False

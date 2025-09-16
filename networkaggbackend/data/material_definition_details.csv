@@ -1,0 +1,14 @@
+Level 1 Item,Level 2 Item,Level 3 Item,Item Type,Item Part of MP Network,Rule,User Override
+FG1,,,Finished Goods,Yes,Rule 1,
+FG1,SFG1,,Semi-Finished Goods,Yes,Rule 2,
+FG1,SFG2,,Semi-Finished Goods,Yes,Rule 2,
+FG1,SFG2,RM 1,Raw Materials,,Rule 2,
+FG1,SFG2,RM 2,Raw Materials,,Rule 2,Yes
+FG1,SFG2,RM 3,Raw Materials,,Rule 2,
+FG1,SFG2,RM 4,Raw Materials,,Rule 2,
+FG1,SFG 3,,Semi-Finished Goods,Yes,Rule 2,
+FG1,SFG 3,RM 5,Raw Materials,,Rule 2,
+FG1,SFG 3,RM 6,Raw Materials,,Rule 2,
+FG1,SFG 3,RM 7,Raw Materials,,Rule 2,
+FG1,SFG 3,RM 8,Raw Materials,,Rule 2,
+FG1,RM 9,,Raw Materials,Yes,Rule 2,

@@ -1,0 +1,3 @@
+Scope,Rule Desc,Rule Number,Brand,Sub-Brand,Item Type
+"Material = RM's","Skipping of Non Critical Raw Mater",1,ALL,ALL,RM
+"Material =Packaging","Skipping all packaging SFG",2,Lipton,Lipton998,SFG

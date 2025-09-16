@@ -1,0 +1,4 @@
+name,status,latency
+Network 1,Success,20ms
+Network 2,Warning,50ms
+Network 3,Failure,200ms

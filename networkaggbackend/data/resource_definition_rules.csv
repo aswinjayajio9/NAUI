@@ -1,0 +1,4 @@
+Scope,Rule Desc,Rule Number,Plant,Region,Resource Type
+"Resource = Baking Ovens","Consolidating Alternate Resources",1,All,APAC,Machine
+"Resource = Smoking Chamber","Consolidating Alternate Resources",2,"Plant1, Plant 2",NA,Machine
+"Resource = Resource 1, Resource 2, Resource 3","Consolidate Selected Resources",3,Plant 4,APAC,Machine

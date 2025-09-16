@@ -1,0 +1,20 @@
+node_modules
+
+# temporary / local files
+*.tmp
+*.temp
+*.swp
+*~
+*.bak
+*.log
+*.cache/
+.vscode/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# XML files
+networkaggbackend/.idea/networkaggbackend.iml

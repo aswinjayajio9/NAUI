@@ -1,0 +1,7 @@
+Parameter,Calculation,Calculation Details,Example
+Throughput Downtime,Sum,Sum of capacities of all resources,"100 + 100 + 100 = 300 units/hour"
+Lot Size,Minimum,Sum of downtimes,"1 + 0.5 + 1.5 = 3 hours/day"
+Effectivity Dates,Overlap,Minimum lot size across all resources,"min(1000, 1200, 1100) = 1000 units"
+Consume per,Average,Avg of consumption rates across resources,"0.5, 0.5, 0.5 = .5 liters per unit"
+Changeover Losses,Sum,Sum of individual changeover losses,"2% + 2% + 2% = 6%"
+Cost per Resource Usage,Sum,Sum of costs per unit produced,"0.05 + 3 = $0.15 per unit"

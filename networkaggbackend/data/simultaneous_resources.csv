@@ -1,0 +1,7 @@
+Parameter,Calculation,Calculation Details,Example
+Throughput Downtime,Minimum,Minimum of individual resources Capacities,"min(200, 180, 150) = 150 units/hr"
+Lot Size,Minimum,Total downtime of all involved resources,"sum(1h, 2h, 1.5h) = 4.5h/day. make it configurable, if parallel then max"
+Effectivity Dates,Overlap,Minimum lot size across resources,"min(1000, 900, 950) = 900 units"
+Consume per,Weighted Avg,Overlapping active dates across resources,"Max of Start date, Min of End Date"
+Changeover Losses,Max,Based on BOM,"1 bottle needs 0.5L juice, 1 cap, 1 label"
+Cost per Resource Usage,Weighted Avg,Cost per unit produced,"Cutter Cost = $0.05/bottle, Packer = $0.03/bottle"

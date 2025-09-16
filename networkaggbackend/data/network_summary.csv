@@ -1,0 +1,6 @@
+Network,Version,Base,No# BOMs,No# Routings,No# FQNs,No# SFQNs,No# RFMs,No# Resources,Network Validated,Last NW Run
+ERP,CVW,NA,500,2000,100,200,600,2500,"25 Errors, 0 Warnings",15th July 08:00
+OP,CVW,ERP,400,2400,200,240,400,2800,"0 Errors, 0 Warnings",15th July 20:00
+MP,Version 2,OP,325,1490,60,190,380,1960,"16 Errors, 0 Warnings",1st June 20:01
+S&OP,CVW,OP,240,1440,95,200,300,1740,"12 Errors, 0 Warnings",1st June 20:01
+LRP,CVW,MP,72,432,14,43,86,575,"0 Errors, 0 Warnings",28th March 20:02

@@ -1,0 +1,6 @@
+Type,Exception,Network,Group,Node,Reason
+Error,Manufacturing Hanging Node,LRP,Hanging Resource Node,PACK_KEG_1_BREWERY NORTH,Capacity is present but the Association is null
+Warning,Out of Range,MP,Manufacturing Min LotSize Outside Range,DILUTE_1_BREWERY NORTH,Breached MFG Min LotSize Threshold Min
+Warning,Out of Range,MP,Procurement Lead Time Outside Range,RM2_BREWERY NORTH,Breached PROC Lead Time Threshold Min
+Warning,Out of Range,MP,BOILER Efficacy Outside Horizon,Beer_DCI,Breached BOIL Efficacy Threshold Max
+Warning,Out of Range,MP,Manufacturing Lead Time Outside Range,PACK_CAN_1_BREWERY SOUTH,Breached MFG Routing Lead Time Threshold Min

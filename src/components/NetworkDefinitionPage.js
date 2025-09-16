@@ -1,0 +1,177 @@
+import React from "react";
+import {
+  Box,
+  Flex,
+  Button,
+  Heading,
+  SimpleGrid,
+  Text,
+  Stack,
+  useToast,
+} from "@chakra-ui/react";
+// NavigateDefinition removed (parent will render it)
+import SheetComponent from "./SheetComponent";
+import NetworkGraph from "./NetworkGraph";
+
+/*
+  NetworkDefinitionPage
+  - Dummy layout that matches the pasted image: step progress + several sheet-like boxes
+  - Uses simple Chakra tables with sample rows. Replace these boxes with SheetComponent + real URLs later.
+*/
+
+export default function NetworkDefinitionPage({
+  srcPlan,
+  srcVersion,
+  tgtPlan,
+  tgtVersion,
+  filters,
+  onBack,
+  onNext,    // injected by DefinitionWizard
+  onPrev,    // injected by DefinitionWizard
+  isFirst,   // injected by DefinitionWizard
+  isLast,    // injected by DefinitionWizard
+}) {
+  const sampleSummaryRows = [
+    { network: "ERP", version: "CWV", base: "ERP", boms: 500, rfms: 600, resources: 2500 },
+    { network: "MP", version: "Version 2", base: "OP", boms: 325, rfms: 380, resources: 1960 },
+    { network: "LRP", version: "CWV", base: "MP", boms: 72, rfms: 86, resources: 575 },
+  ];
+
+  const sampleDetailsRows = [
+    { type: "Error", exception: "Manufacturing Hanging Node", network: "LRP", node: "PACK_KEG_1_BREWERY NORTH" },
+    { type: "Warning", exception: "Out of Range", network: "MP", node: "DILUTE_1_BREWERY NORTH" },
+  ];
+
+  const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
+  const toast = useToast();
+  const [abdmRunning, setAbdmRunning] = React.useState(false);
+
+  const runAbdm = async () => {
+    setAbdmRunning(true);
+    try {
+      const res = await fetch("http://127.0.0.1:8998/run/abdm", { method: "POST" });
+      if (!res.ok) throw new Error(await res.text());
+      toast({ title: "ABDM started", status: "success", duration: 3000 });
+    } catch (err) {
+      toast({ title: "ABDM failed", description: err.message, status: "error", duration: 5000 });
+    } finally {
+      setAbdmRunning(false);
+    }
+  };
+
+  return (
+    <Box p={6}>
+      <Flex mb={4} justify="space-between" align="center">
+        <Flex gap={3} align="center">
+          <Button size="sm" onClick={onBack}>Back</Button>
+          <Heading size="md">Network Model - Definition</Heading>
+        </Flex>
+        <Stack spacing={0} align="flex-end">
+          <Text fontSize="sm" color="gray.600">Source: {srcPlan} / {srcVersion}</Text>
+          <Text fontSize="sm" color="gray.600">Target: {tgtPlan} / {tgtVersion}</Text>
+        </Stack>
+      </Flex>
+
+      {/* Planning Level Definition Section */}
+      <Box w="100%" mb={6}>
+        <Heading size="sm" mb={3}>
+            Planning Level Definition
+        </Heading>
+
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
+            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+            <SheetComponent dataUrl="http://127.0.0.1:8998/read/source_planning_definition.csv" />
+            </Box>
+            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+            <SheetComponent dataUrl="http://127.0.0.1:8998/read/target_planning_definition.csv" />
+            </Box>
+        </SimpleGrid>
+      </Box>
+
+      {/* Material Definition - Rules Section */}
+      <Box w="100%" mb={6}>
+        <Flex justify="space-between" align="center" mb={3}>
+          <Heading size="sm">Material Definition - Rules</Heading>
+          <Button
+            size="sm"
+            colorScheme="teal"
+            onClick={runAbdm}
+            isLoading={abdmRunning}
+            aria-label="Run ABDM"
+          >
+            Run ABDM
+          </Button>
+        </Flex>
+
+        <SimpleGrid columns={1} spacing={6}>
+          <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+            <SheetComponent dataUrl="http://127.0.0.1:8998/read/material_definition_rules.csv" />
+          </Box>
+        </SimpleGrid>
+      </Box>
+
+      {/* Summary of Material Definition */}
+      <Box w="100%" mb={6}>
+        <Heading size="sm" mb={3}>
+            Summary of Material Definition
+        </Heading>
+
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
+            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+            <SheetComponent dataUrl="http://127.0.0.1:8998/read/summary_definition1.csv" />
+            </Box>
+            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+            <SheetComponent dataUrl="http://127.0.0.1:8998/read/summary_definition2.csv" />
+            </Box>
+        </SimpleGrid>
+      </Box>
+
+      {/* Material Definition - Details (toggle Table / Network) */}
+      <Box w="100%" mb={6}>
+        <Flex justify="space-between" align="center" mb={3}>
+          <Heading size="sm">Material Definition - Details</Heading>
+          <Stack direction="row" spacing={2}>
+            <Button
+              size="sm"
+              variant={detailsView === "table" ? "solid" : "outline"}
+              colorScheme={detailsView === "table" ? "blue" : undefined}
+              onClick={() => setDetailsView("table")}
+            >
+              Table
+            </Button>
+            <Button
+              size="sm"
+              variant={detailsView === "network" ? "solid" : "outline"}
+              colorScheme={detailsView === "network" ? "blue" : undefined}
+              onClick={() => setDetailsView("network")}
+            >
+              Network
+            </Button>
+          </Stack>
+        </Flex>
+
+        {detailsView === "table" ? (
+          <SimpleGrid columns={1} spacing={6}>
+            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+              <SheetComponent dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv" />
+            </Box>
+          </SimpleGrid>
+        ) : (
+          <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+            <NetworkGraph dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv" />
+          </Box>
+        )}
+      </Box>
+
+      {/* Page-level navigation */}
+      <Flex mt={4} gap={2} justify="flex-end">
+        <Button size="sm" onClick={onPrev} isDisabled={isFirst}>
+          Previous
+        </Button>
+        <Button size="sm" colorScheme="blue" onClick={onNext}>
+          {isLast ? "Finish" : "Next"}
+        </Button>
+      </Flex>
+    </Box>
+  );
+}

@@ -1,0 +1,14 @@
+Resource,Is Alternate Resource,Is Simultaneous Resource,Resource Type,Resource Category,Consolidated,Rule,User Override,Resource Level 1,Resource Level 2,Resource Level 3,Resource Level 4
+Resource 1,Yes,,Machine,Smoke Chamber,Yes,Rule 1,,Resource 1,Resource 2,Resource 3,Resource 4
+Resource 2,Yes,,Machine,Smoke Chamber,Yes,Rule 1,,Resource 1,Resource 2,Resource 3,Resource 4
+Resource 3,Yes,,Machine,Smoke Chamber,Yes,Rule 1,,Resource 1,Resource 2,Resource 3,Resource 4
+Resource 4,Yes,,Machine,Smoke Chamber,Yes,Rule 1,,Resource 1,Resource 2,Resource 3,Resource 4
+Resource 5,,,Machine,Smoke Chamber,,,,,,,
+Resource 6,,,Machine,Baking Oven,,,,Resource 6,Resource 7,Resource 8,Resource 9
+Resource 7,Yes,,Machine,Baking Oven,Yes,Rule 2,,Resource 6,Resource 7,Resource 8,Resource 9
+Resource 8,Yes,,Machine,Baking Oven,Yes,Rule 2,,Resource 6,Resource 7,Resource 8,Resource 9
+Resource 9,Yes,,Machine,Baking Oven,Yes,Rule 2,,Resource 6,Resource 7,Resource 8,Resource 9
+Resource 10,,,Machine,Baking Oven,,,,,,,
+Resource 11,Yes,Yes,Machine,Baking Oven,Yes,Rule 3,,Resource 11,Resource 12,,
+Resource 12,Yes,Yes,Machine,Baking Oven,Yes,Rule 3,,Resource 11,Resource 12,,
+Resource 13,Yes,,Machine,Baking Oven,,,,,,,
