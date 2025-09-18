@@ -5,9 +5,7 @@ export default function NavigateDefinition({
   steps = [
     "Planning Level Definition",
     "Resource Definition",
-    "Location Definition",
     "Parameters Definition",
-    "Preview",
   ],
   initialStep = 0,
   current,      // optional controlled prop (number)

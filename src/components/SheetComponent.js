@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Table,
   Input,
@@ -17,6 +17,8 @@ import {
   EyeOutlined,
   FilterOutlined,
   SearchOutlined,
+  CaretUpOutlined,
+  CaretDownOutlined,
 } from "@ant-design/icons";
 import ChartComponent from "./chartComponent";
 // Add import for parser functions from the helper
@@ -47,22 +49,26 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
   const [viewMode, setViewMode] = useState("table"); // "table" or "chart"
   const [saveLoading, setSaveLoading] = useState(false);
 
+  // Add sort state for header keyboard/controls
+  const [sortConfig, setSortConfig] = useState({ col: null, order: null });
+
   // Add state for O9 payload components (to avoid conflict with existing filters)
   const [o9OriginalPayload, setO9OriginalPayload] = useState(null);
   const [o9Measures, setO9Measures] = useState([]);
   const [o9Attributes, setO9Attributes] = useState([]);
   const [o9Filters, setO9Filters] = useState([]);
+  const [dimensions, setDimensions] = useState([]); // New: Dimension columns
+  const [measures, setMeasures] = useState([]); // New: Measure columns
+  const [treeData, setTreeData] = useState([]); // New: Tree structure
 
   // Refs for cell inputs (for keyboard navigation)
   const cellRefs = useRef({});
 
-  // Effect: Load and parse data from dataUrl or data prop
-  useEffect(() => {
-    loadData();
-  }, [dataUrl, data]);
+  // Ref for column drag index (for reordering)
+  const dragIndexRef = useRef(null);
 
-  // Helper: Load data (supports JSON, CSV, or pre-parsed objects)
-  const loadData = async () => {
+  // Helper: Load data (supports JSON, CSV, or pre-parsed objects) - now wrapped in useCallback
+  const loadData = useCallback(async () => {
     let mounted = true;
     setLoading(true);
     setError(null);
@@ -71,6 +77,9 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
       let rows = [];
       let colsFromPayload = null;
       let payload = null;
+      let dims = [];
+      let meas = [];
+      let tree = [];
 
       if (data && typeof data === "object") {
         if (data?.Meta && data?.Data) {
@@ -78,6 +87,9 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           const parsed = parseMetaDataPayload(data);
           rows = parsed.rows;
           colsFromPayload = parsed.cols;
+          dims = parsed.dimensions;
+          meas = parsed.measures;
+          tree = parsed.treeData;
         } else {
           rows = parseGenericJson(data);
         }
@@ -87,6 +99,9 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           const parsed = parseMetaDataPayload(dataUrl);
           rows = parsed.rows;
           colsFromPayload = parsed.cols;
+          dims = parsed.dimensions;
+          meas = parsed.measures;
+          tree = parsed.treeData;
         } else {
           rows = parseGenericJson(dataUrl);
         }
@@ -103,6 +118,9 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
             const parsed = parseMetaDataPayload(json);
             rows = parsed.rows;
             colsFromPayload = parsed.cols;
+            dims = parsed.dimensions;
+            meas = parsed.measures;
+            tree = parsed.treeData;
           } else {
             rows = parseGenericJson(json);
           }
@@ -121,32 +139,38 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         const levelAttrs = modelDef.LevelAttributes || [];
         const attrMap = {};
         payload.Meta?.forEach(meta => {
-          attrMap[meta.Name] = meta;
+          attrMap[meta.Alias] = meta;  // Use Alias as key for mapping
         });
         const attrs = levelAttrs.filter(a => !a.IsFilter).map(a => ({
           ...a,
-          DimensionValues: attrMap[a.Name]?.DimensionValues || [],
+          DimensionValues: attrMap[a.Name]?.DimensionValues || [],  // Map by Name
         }));
         setO9Attributes(attrs);
         setO9Filters(payload.Filters || []);
+        setDimensions(dims);
+        setMeasures(meas);
+        setTreeData(tree);
       } else {
         setO9OriginalPayload(null);
         setO9Measures([]);
         setO9Attributes([]);
         setO9Filters([]);
+        setDimensions([]);
+        setMeasures([]);
+        setTreeData([]);
       }
 
       setOriginalData(rows);
       setDataSource(rows);
-      setColumns(colsFromPayload ? buildColumnsFromPayload(colsFromPayload) : buildEditableColumns(rows));
+      setColumns(colsFromPayload ? buildColumnsFromPayload(colsFromPayload, dims) : buildEditableColumns(rows));
 
       // Store snapshot for edit detection
       initialDataRef.current = rows.map((r) => ({ ...r }));
       editedKeysRef.current.clear();
       setEditedKeys([]);
 
-      // Notify parent of initial filters
-      const optionsMap = computeOptionsMap(rows);
+      // Notify parent of initial filters (only dimensions)
+      const optionsMap = computeOptionsMap(rows, dims);
       if (onFiltersChange) onFiltersChange({ activeFilters: {}, options: optionsMap });
     } catch (err) {
       if (mounted) setError(err.message || String(err));
@@ -155,32 +179,162 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     }
 
     return () => { mounted = false; };
+  }, [dataUrl, data, onFiltersChange]);  // Add dependencies: re-create loadData only when these change
+
+  // Effect: Load and parse data from dataUrl or data prop
+  useEffect(() => {
+    loadData();
+  }, [loadData]);  // Now depend on loadData (stable due to useCallback)
+
+  // Add state for hovered cell
+  const [hoveredCell, setHoveredCell] = useState(null);
+
+  // Helper: Build columns from payload (editable with highlighting and sticky dimensions)
+  const buildColumnsFromPayload = (colsFromPayload, dims) => {
+    const dimHeaders = dims.map(d => d.header); // Extract dimension headers
+    const measureHeaders = measures.map(m => m.header); // Extract measure headers
+
+    return colsFromPayload.map((c, idx) => {
+      const isDimension = dimHeaders.includes(c.dataIndex);
+      const editable = measureHeaders.includes(c.dataIndex); // Only measures editable/draggable
+
+      // store header text and flags; actual title node will be rendered at render-time so it can reflect current sort state
+      return {
+        headerText: String(c.title).toUpperCase(),
+        dataIndex: c.dataIndex,
+        key: c.key,
+        editable,
+        isDimension,
+        // preserve render and onCell behavior
+        render: (text, record) => renderEditableCell(text, record, c.dataIndex, editable),
+        onCell: (record) => ({
+          onMouseEnter: () => setHoveredCell(`${record.key}-${c.dataIndex}`),
+          onMouseLeave: () => setHoveredCell(null),
+        }),
+      };
+    });
   };
 
-  // Helper: Build columns from payload (editable with highlighting)
-  const buildColumnsFromPayload = (colsFromPayload) => {
-    return colsFromPayload.map((c) => ({
-      title: String(c.title).toUpperCase(),
-      dataIndex: c.dataIndex,
-      key: c.key,
-      render: (text, record) => renderEditableCell(text, record, c.dataIndex),
-    }));
-  };
-
-  // Helper: Build editable columns from data keys
+  // Helper: Build editable columns from data keys (assume all are measures for non-O9 data)
   const buildEditableColumns = (rows) => {
     const first = rows?.[0] || {};
     const keys = Object.keys(first).filter((k) => k !== "key");
-    return keys.map((k) => ({
-      title: String(k).toUpperCase(),
-      dataIndex: k,
-      key: k,
-      render: (text, record) => renderEditableCell(text, record, k),
-    }));
+    const dimHeaders = dimensions.map(d => d.header);
+
+    return keys.map((k, idx) => {
+      const isDimension = dimHeaders.includes(k);
+      // store headerText and flags; actual title node will be rendered at render-time
+      return {
+        headerText: String(k).toUpperCase(),
+        dataIndex: k,
+        key: k,
+        editable: !isDimension, // dimensions non-editable
+        isDimension,
+        render: (text, record) => renderEditableCell(text, record, k, !isDimension),
+        onCell: (record) => ({
+          onMouseEnter: () => setHoveredCell(`${record.key}-${k}`),
+          onMouseLeave: () => setHoveredCell(null),
+        }),
+      };
+    });
   };
 
-  // Helper: Render editable cell (input or checkbox with edit highlighting)
-  const renderEditableCell = (text, record, dataIndex) => {
+  // New: header renderer that attaches sort icons (dimension-only), drag handlers and keyboard support
+  const renderHeader = (text, dataIndex, isDimension, idx) => {
+    const activeAsc = sortConfig.col === dataIndex && sortConfig.order === "asc";
+    const activeDesc = sortConfig.col === dataIndex && sortConfig.order === "desc";
+
+    const onSort = (order, e) => {
+      e?.stopPropagation();
+      // apply sort
+      handleSort(dataIndex, order);
+    };
+
+    return (
+      <div
+        tabIndex={0}
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", userSelect: "none" }}
+        onKeyDown={(e) => {
+          if (!isDimension) return;
+          if (e.key === "ArrowUp") {
+            e.preventDefault();
+            handleSort(dataIndex, "asc");
+          } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            handleSort(dataIndex, "desc");
+          }
+        }}
+        // drag handlers only active when this column is a dimension
+        draggable={!!isDimension}
+        onDragStart={(e) => {
+          if (!isDimension) return;
+          dragIndexRef.current = idx;
+          e.dataTransfer.effectAllowed = "move";
+        }}
+        onDragOver={(e) => {
+          if (!isDimension) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+        }}
+        onDrop={(e) => {
+          if (!isDimension) return;
+          e.preventDefault();
+          const from = dragIndexRef.current;
+          const to = idx;
+          if (from == null || from === to) return;
+          // Only allow moves where both source and target are dimensions
+          const prev = columns;
+          const fromIsDim = prev?.[from]?.isDimension;
+          const toIsDim = prev?.[to]?.isDimension;
+          if (!fromIsDim || !toIsDim) return;
+          setColumns((prevCols) => {
+            const next = [...prevCols];
+            const [moved] = next.splice(from, 1);
+            next.splice(to, 0, moved);
+            return next;
+          });
+          dragIndexRef.current = null;
+        }}
+      >
+        <div style={{ flex: 1, paddingRight: 8 }}>{text}</div>
+        {/* Only show sort icons for dimensions, placed on rightmost side */}
+        {isDimension ? (
+          <div style={{ display: "flex", gap: 6 }}>
+            <CaretUpOutlined
+              onClick={(e) => onSort("asc", e)}
+              style={{ color: activeAsc ? "#1890ff" : undefined, cursor: "pointer" }}
+            />
+            <CaretDownOutlined
+              onClick={(e) => onSort("desc", e)}
+              style={{ color: activeDesc ? "#1890ff" : undefined, cursor: "pointer" }}
+            />
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
+  // New: perform sort and update dataSource (simple localeCompare; numeric-aware)
+  const handleSort = (col, order) => {
+    setSortConfig({ col, order });
+    const arr = [...dataSource];
+    arr.sort((a, b) => {
+      const av = a[col] ?? "";
+      const bv = b[col] ?? "";
+      // numeric-aware comparison when both look numeric
+      const aNum = Number(String(av).replace(/,/g, ""));
+      const bNum = Number(String(bv).replace(/,/g, ""));
+      if (!Number.isNaN(aNum) && !Number.isNaN(bNum)) {
+        return aNum - bNum;
+      }
+      return String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: "base" });
+    });
+    if (order === "desc") arr.reverse();
+    setDataSource(arr);
+  };
+
+  // Helper: Render editable cell (input or checkbox with edit highlighting and hover)
+  const renderEditableCell = (text, record, dataIndex, editable = true) => {
     const value = text ?? "";
     const isNum = (v) => !Number.isNaN(Number(String(v).replace(/,/g, "")));
     const valueStr = String(value).toLowerCase();
@@ -188,15 +342,26 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     const initRow = initialDataRef.current.find((ir) => ir.key === record.key);
     const initVal = initRow?.[dataIndex];
     const cellEdited = String(initVal ?? "") !== String(value ?? "");
+    const isHovered = hoveredCell === `${record.key}-${dataIndex}`;
     const commonStyle = {
       border: "none",
       padding: 0,
-      backgroundColor: cellEdited ? "#fff6d6" : "transparent",
+      backgroundColor: cellEdited ? "#fff6d6" : isHovered ? "#f0f0f0" : "transparent",  // Add hover highlight
       width: "100%",
       borderRadius: 2,
     };
     const id = `${record.key}:::${dataIndex}`;
 
+    // If not editable (dimension), render plain text
+    if (!editable) {
+      return (
+        <div style={{ ...commonStyle, padding: "4px", textAlign: isNum(value) ? "center" : "left" }}>
+          {String(value)}
+        </div>
+      );
+    }
+
+    // Editable (measure): render input or checkbox
     if (isBool) {
       const checked = value === true || valueStr === "true";
       return (
@@ -205,12 +370,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
             id={id}
             checked={checked}
             onChange={(e) => {
-              const updatedRow = handleCellChange(e.target.checked, record.key, dataIndex);
-              // Trigger save for checkbox (immediate, guarded by savingRef)
-              if (!savingRef.current) {
-                savingRef.current = true;
-                saveRow(record.key, updatedRow).finally(() => savingRef.current = false);
-              }
+              handleCellChange(e.target.checked, record.key, dataIndex);
             }}
             style={commonStyle}
             onClick={(e) => e.stopPropagation()}
@@ -225,13 +385,6 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           ref={(el) => { cellRefs.current[id] = el; }}
           value={String(value)}
           onChange={(e) => handleCellChange(e.target.value, record.key, dataIndex)}
-          onBlur={() => {
-            // Save on focus change (blur) if not already saving
-            if (!savingRef.current) {
-              savingRef.current = true;
-              saveRow(record.key).finally(() => savingRef.current = false);
-            }
-          }}
           onKeyDown={(e) => handleKeyDown(e, record.key, dataIndex)}
           onFocus={(e) => e.target.select?.()}
           onMouseDown={(e) => e.stopPropagation()}
@@ -361,25 +514,25 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
   // Handler: Open filter modal
   const openFilter = () => setFilterVisible(true);
 
-  // Helper: Compute options map for filters
-  const computeOptionsMap = (data = originalData) => {
+  // Helper: Compute options map for filters (only dimensions)
+  const computeOptionsMap = (data = originalData, dims = dimensions) => {
     const map = {};
-    columns.forEach((col) => {
+    dims.forEach((dim) => {
       const set = new Set();
       data.forEach((r) => {
-        const v = r[col.dataIndex];
+        const v = r[dim.header];
         if (v != null && String(v).trim()) set.add(String(v));
       });
-      map[col.dataIndex] = Array.from(set).sort();
+      map[dim.header] = Array.from(set).sort();
     });
     return map;
   };
 
-  // Handler: Apply filters
+  // Handler: Apply filters (only on dimensions)
   const applyFilters = () => {
     let filtered = originalData.slice();
     Object.entries(filters).forEach(([col, q]) => {
-      if (!q) return;
+      if (!q || !dimensions.some(d => d.header === col)) return;  // Only filter dimensions
       const qq = String(q).toLowerCase();
       filtered = filtered.filter((r) => String(r[col] ?? "").toLowerCase().includes(qq));
     });
@@ -403,255 +556,227 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
   // Helper: Build CSV string
   const buildCSV = (rows, cols) => {
     const header = cols.join(",");
-    const lines = rows.map((r) => cols.map((c) => {
-      const v = String(r[c] ?? "");
-      return v.includes(",") || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v;
-    }).join(","));
+    const lines = rows.map((r) => 
+      cols.map((c) => {
+        const v = String(r[c] ?? "");
+        return v.includes(",") || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v;
+      }).join(",")
+    );
     return [header, ...lines].join("\r\n");
   };
 
-  // Helper: Generate unique filename
-  const generateFilenameHash = async (prefix = "edited", ext = "csv") => {
-    try {
-      const seed = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      const data = new TextEncoder().encode(seed);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-      return `${prefix}_${hashHex.slice(0, 16)}.${ext}`;
-    } catch {
-      return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    }
-  };
-
-  // Helper: Save single row
+  // Handler: Save a row (manual save for edited rows)
   const saveRow = async (key, updatedRow = null) => {
-    const row = updatedRow || originalData.find((r) => r.key === key);
-    if (!row) return;
-
-    // Skip if no edits for this row
-    if (!editedKeysRef.current.has(key)) return;
-
-    // Only proceed if we have the necessary data from payload
-    if (!o9OriginalPayload || !o9Measures.length || !o9Attributes.length) {
-      // Fallback to original CSV save if no payload data
-      const cols = columns.map((c) => c.dataIndex);
-      const csv = buildCSV([row], cols);
-      try {
-        const filename = await generateFilenameHash("edited_network", "csv");
-        const res = await fetch(`http://127.0.0.1:8998/write/${filename}`, {
-          method: "POST",
-          headers: { "Content-Type": "text/csv;charset=utf-8" },
-          body: csv,
-        });
-        if (!res.ok) throw new Error(`Save failed: ${res.status} ${res.statusText}`);
-        message.success(`Auto-saved ${filename}`);
-      } catch (err) {
-        message.error(String(err.message || err));
-      } finally {
-        // No timer to clear
-      }
-      return;
+    if (!updatedRow) {
+      updatedRow = dataSource.find((r) => r.key === key);
     }
+    if (!updatedRow) return;
 
     try {
-      const payload = createCellEditPayload(row, o9Measures, o9Attributes, o9Filters);
-      // Wrap o9Interface.cellEdit in a Promise for async/await
-      const response = await new Promise((resolve, reject) => {
-        o9Interface.cellEdit(payload, {}, (result) => {
-          if (result && result.error) {
-            reject(new Error(`Cell edit failed: ${result.error}`));
-          } else {
-            resolve(result);
-          }
-        });
+      const payload = createCellEditPayload(
+        updatedRow,
+        o9Measures,
+        o9Attributes,
+        o9Filters,
+        parseInt(key)
+      );
+
+      const response = await fetch('https://your-o9-endpoint.com/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
-      // Assume response is a payload with updated data; parse and update sheet
-      if (response?.Meta && response?.Data) {
-        const parsed = parseMetaDataPayload(response);
-        const updatedRows = parsed.rows;
-        const updatedCols = parsed.cols;
+      if (!response.ok) throw new Error(`Save failed: ${response.status}`);
 
-        // Update dataSource and originalData with new rows
-        setOriginalData(updatedRows);
-        setDataSource(updatedRows);
-        setColumns(updatedCols ? buildColumnsFromPayload(updatedCols) : buildEditableColumns(updatedRows));
+      // On success, remove from edited keys and update initial snapshot
+      editedKeysRef.current.delete(key);
+      setEditedKeys(Array.from(editedKeysRef.current));
+      initialDataRef.current = initialDataRef.current.map((r) =>
+        r.key === key ? { ...updatedRow } : r
+      );
 
-        // Update snapshot
-        initialDataRef.current = updatedRows.map((r) => ({ ...r }));
-
-        // Clear edited state for this row
-        if (editedKeysRef.current.has(key)) {
-          editedKeysRef.current.delete(key);
-          setEditedKeys(Array.from(editedKeysRef.current));
-        }
-
-        message.success("Cell edit saved and sheet updated");
-      } else {
-        throw new Error("Invalid response from cellEdit");
-      }
-    } catch (err) {
-      message.error(`Cell edit failed: ${err.message || String(err)}`);
-      // On error, the value remains as is, and yellow highlight stays
-    } finally {
-      // No timer to clear
+      message.success(`Row ${key} saved successfully`);
+    } catch (error) {
+      console.error('Save error:', error);
+      message.error(`Save failed for row ${key}: ${error.message}`);
     }
   };
 
   // Handler: Save all edited rows
-  const onSaveEdits = async () => {
-    const keys = Array.from(editedKeysRef.current);
-    if (!keys.length) {
-      message.info("No edits to save");
+  const saveAllEdited = async () => {
+    if (editedKeys.length === 0) {
+      message.info('No changes to save');
       return;
     }
-    const rowsToSend = originalData.filter((r) => keys.includes(r.key));
-    const cols = columns.map((c) => c.dataIndex);
-    const csv = buildCSV(rowsToSend, cols);
+
     setSaveLoading(true);
     try {
-      const filename = await generateFilenameHash("edited_network", "csv");
-      const res = await fetch(`http://127.0.0.1:8998/write/${filename}`, {
-        method: "POST",
-        headers: { "Content-Type": "text/csv;charset=utf-8" },
-        body: csv,
-      });
-      if (!res.ok) throw new Error(`Save failed: ${res.status} ${res.statusText}`);
-      initialDataRef.current = originalData.map((r) => ({ ...r }));
-      editedKeysRef.current.clear();
-      setEditedKeys([]);
-      message.success(`Edits saved as ${filename}`);
-    } catch (err) {
-      message.error(String(err.message || err));
+      const promises = editedKeys.map((key) => saveRow(key));
+      await Promise.all(promises);
+      message.success('All changes saved successfully');
+    } catch (error) {
+      message.error('Some saves failed');
     } finally {
       setSaveLoading(false);
     }
   };
 
-  // Helper: Prepare chart data
-  const chartFromData = (rows, cols) => {
-    if (!rows?.length || !cols?.length) return { series: [], categories: [] };
-    const keys = Object.keys(rows[0]).filter((k) => k !== "key");
-    const categoryKey = keys[0];
-    const seriesKeys = keys.slice(1).filter((k) => rows.some((r) => !Number.isNaN(Number(r[k]))));
-    const categories = rows.map((r) => r[categoryKey]);
-    const series = seriesKeys.map((k) => ({
-      name: k,
-      data: rows.map((r) => {
-        const n = Number(String(r[k]).replace(/,/g, ""));
-        return Number.isFinite(n) ? n : null;
-      }),
-    }));
-    return { categories, series, categoryKey };
+  // Before rendering the table, build columns with dynamic header nodes so sort icons reflect current sortConfig
+  const columnsWithTitles = columns.map((c, idx) => {
+    // keep dimensions frozen on the left, but mark measures for reversed coloring
+    const isDim = !!c.isDimension;
+    const nextIsDim = !!columns[idx + 1]?.isDimension;
+    let className;
+    if (isDim) {
+      className = nextIsDim ? "naui-dim-col" : "naui-dim-col naui-dim-last";
+    } else {
+      // apply a class to measures so we can color them instead of dimensions
+      className = "naui-meas-col";
+    }
+    return {
+      ...c,
+      title: renderHeader(c.headerText ?? String(c.title ?? ""), c.dataIndex, isDim, idx),
+      className,
+      // freeze dimension columns to left; give them a fixed width so Ant Table can freeze them properly
+      fixed: isDim ? "left" : undefined,
+      width: isDim ? 180 : c.width,
+    };
+  });
+
+  // Render section
+  if (loading) return <Spin size="large" />;
+  if (error) return <Alert message={error} type="error" showIcon />;
+
+  const commonTableProps = {
+    rowKey: "key",
+    pagination: false,
+    size: "small",
+    scroll: { x: "max-content", y: 500 },
+    rowSelection: {
+      selectedRowKeys,
+      onChange: (keys) => setSelectedRowKeys(keys),
+    },
+    onRow: (record) => ({
+      onClick: () => {
+        const isSelected = selectedRowKeys.includes(record.key);
+        setSelectedRowKeys(isSelected ? selectedRowKeys.filter((k) => k !== record.key) : [...selectedRowKeys, record.key]);
+      },
+    }),
   };
 
-  // Render
-  const selectedRows = selectedRowKeys.length ? dataSource.filter((r) => selectedRowKeys.includes(r.key)) : [dataSource[0]].filter(Boolean);
-  const rowSelection = { selectedRowKeys, onChange: setSelectedRowKeys };
-
   return (
-    <div style={{ width: "100%", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <h3 style={{ margin: 0 }}>Sheet</h3>
-        <Space>
-          <Input
-            placeholder="Quick search..."
-            prefix={<SearchOutlined />}
-            size="small"
-            onChange={(e) => {
-              const q = e.target.value.trim().toLowerCase();
-              setDataSource(q ? originalData.filter((r) => Object.values(r).some((v) => String(v ?? "").toLowerCase().includes(q))) : originalData);
-            }}
-            style={{ width: 260 }}
-          />
-          <Tooltip title="View selected (or first row)">
-            <Button icon={<EyeOutlined />} onClick={onView} size="small" />
-          </Tooltip>
-          <Tooltip title="Download selected (or all)">
-            <Button icon={<DownloadOutlined />} onClick={onDownload} size="small" />
-          </Tooltip>
-          <Tooltip title="Filters">
-            <Button icon={<FilterOutlined />} onClick={openFilter} size="small" />
-          </Tooltip>
-        </Space>
-      </div>
+    <div style={{ padding: 16, backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }}>
+      {/* Styles for frozen dimension columns and hard divider after last dimension */}
+      <style>{`
+        /* subtle background for all measure columns (reversed coloring) */
+        .naui-meas-col .ant-table-cell,
+        .naui-meas-col.ant-table-cell {
+          background: #fffaf0;
+        }
 
-      <div style={{ marginBottom: 8 }}>
-        <Button size="small" onClick={() => setViewMode("table")} type={viewMode === "table" ? "primary" : "default"}>
-          Table
-        </Button>
-        <Button size="small" onClick={() => setViewMode("chart")} type={viewMode === "chart" ? "primary" : "default"}>
-          Chart
-        </Button>
-      </div>
+        /* strong vertical separator after the last dimension column (header + body) */
+        .naui-dim-last .ant-table-cell,
+        th.naui-dim-last {
+          border-right: 3px solid #d9d9d9 !important;
+        }
 
+        /* Ensure fixed-left (dimension) columns render above scroll area so the divider stays visible */
+        .ant-table-fixed-left .naui-dim-col .ant-table-cell,
+        .naui-dim-col.ant-table-cell {
+          z-index: 3;
+        }
+
+        /* Prevent the table's default cell shadow from interfering with the divider */
+        .naui-dim-last .ant-table-cell {
+          box-shadow: none;
+        }
+      `}</style>
+      <Space style={{ marginBottom: 16 }}>
+        <Button type="primary" icon={<DownloadOutlined />} onClick={onDownload}>
+          Download CSV
+        </Button>
+        <Button type="default" icon={<EyeOutlined />} onClick={onView} disabled={selectedRowKeys.length === 0}>
+          View
+        </Button>
+        <Button type="default" icon={<FilterOutlined />} onClick={openFilter}>
+          Filter
+        </Button>
+        <Button
+          type="primary"
+          onClick={saveAllEdited}
+          loading={saveLoading}
+          disabled={editedKeys.length === 0}
+        >
+          Save Changes ({editedKeys.length})
+        </Button>
+        <Select
+          value={viewMode}
+          onChange={setViewMode}
+          options={[
+            { label: "Table View", value: "table" },
+            { label: "Chart View", value: "chart" },
+          ]}
+          style={{ width: 200 }}
+        />
+      </Space>
       {viewMode === "table" ? (
         <Table
-          rowKey="key"
-          columns={columns}
+          {...commonTableProps}
           dataSource={dataSource}
-          loading={loading}
-          rowSelection={rowSelection}
-          pagination={false}
-          scroll={{ x: "max-content", y: 420 }}
-          sticky
+          columns={columnsWithTitles}
         />
       ) : (
-        (() => {
-          const { categories, series, categoryKey } = chartFromData(dataSource, columns);
-          return (
-            <div style={{ height: 360 }}>
-              <ChartComponent categories={categories} series={series} xKey={categoryKey} data={dataSource} />
-            </div>
-          );
-        })()
+        <ChartComponent
+          data={dataSource}
+          dimensions={dimensions}
+          measures={measures}
+          treeData={treeData}
+          onDataChange={(newData) => {
+            setDataSource(newData);
+            setOriginalData(newData);
+          }}
+        />
       )}
-
       <Modal
         visible={viewVisible}
-        title={selectedRowKeys.length ? `Viewing ${selectedRowKeys.length} row(s)` : "Viewing row"}
-        footer={<Button onClick={() => setViewVisible(false)} size="small">Close</Button>}
+        title="View Rows"
         onCancel={() => setViewVisible(false)}
+        footer={null}
         width={800}
       >
-        {selectedRows.length ? (
-          <Table
-            size="small"
-            bordered
-            dataSource={selectedRows}
-            columns={columns.map((c) => ({ ...c, render: (t) => t }))
-            }
-            pagination={false}
-            rowKey="key"
-          />
-        ) : (
-          <div>No row selected</div>
-        )}
+        <Table
+          rowKey="key"
+          pagination={false}
+          size="small"
+          scroll={{ x: "max-content", y: 400 }}
+          dataSource={dataSource.filter((r) => selectedRowKeys.includes(r.key))}
+          columns={columnsWithTitles}
+        />
       </Modal>
-
       <Modal
         visible={filterVisible}
-        title="Filters"
+        title="Apply Filters"
         onCancel={() => setFilterVisible(false)}
-        footer={[
-          <Button key="reset" onClick={resetFilters} size="small">Reset</Button>,
-          <Button key="apply" type="primary" onClick={applyFilters} size="small">Apply</Button>,
-        ]}
+        footer={
+          <Space>
+            <Button onClick={resetFilters}>
+              Reset
+            </Button>
+            <Button type="primary" onClick={applyFilters}>
+              Apply
+            </Button>
+          </Space>
+        }
+        width={600}
       >
-        {columns.map((col) => (
-          <div key={col.dataIndex} style={{ marginBottom: 8 }}>
-            <div style={{ fontSize: 12, marginBottom: 4 }}>{col.title}</div>
+        {dimensions.map((dim) => (
+          <div key={dim.header} style={{ marginBottom: 16 }}>
+            <div style={{ fontWeight: "bold", marginBottom: 8 }}>{dim.header}</div>
             <Input
-              size="small"
-              placeholder="contains..."
-              value={filters[col.dataIndex] || ""}
-              onChange={(e) => {
-                const nf = { ...filters, [col.dataIndex]: e.target.value };
-                setFilters(nf);
-                const optionsMap = computeOptionsMap();
-                if (onFiltersChange) onFiltersChange({ activeFilters: nf, options: optionsMap });
-              }}
+              value={filters[dim.header]}
+              onChange={(e) => setFilters({ ...filters, [dim.header]: e.target.value })}
+              placeholder={`Filter ${dim.header}`}
             />
           </div>
         ))}

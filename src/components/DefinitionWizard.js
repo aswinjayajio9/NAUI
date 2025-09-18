@@ -3,9 +3,7 @@ import { Box, Container, Flex, Button } from "@chakra-ui/react";
 import NavigateDefinition from "./NavigateDefinition";
 import NetworkDefinitionPage from "./NetworkDefinitionPage";
 import ResourceDefinitionPage from "./ResourceDefinitionPage";
-import LocationDefinitionPage from "./LocatonDefinitionPage";
 import ParametersDefinitionPage from "./Parameters";
-import PreviewPage from "./Preview";
 
 
 export default function DefinitionWizard({
@@ -19,9 +17,9 @@ export default function DefinitionWizard({
   const steps = [
     "Planning Level Definition",
     "Resource Definition",
-    "Location Definition",
+
     "Parameters Definition",
-    "Preview",
+
   ];
 
   const [current, setCurrent] = React.useState(0);
@@ -91,37 +89,8 @@ export default function DefinitionWizard({
             isLast={current === steps.length - 1}
           />
         )}
-
         {current === 2 && (
-          <LocationDefinitionPage
-            srcPlan={srcPlan}
-            srcVersion={srcVersion}
-            tgtPlan={tgtPlan}
-            tgtVersion={tgtVersion}
-            filters={filters}
-            onBack={onBack}
-            onNext={goNext}
-            onPrev={goPrev}
-            isFirst={current === 0}
-            isLast={current === steps.length - 1}
-          />
-        )}
-        {current === 3 && (
           <ParametersDefinitionPage
-            srcPlan={srcPlan}
-            srcVersion={srcVersion}
-            tgtPlan={tgtPlan}
-            tgtVersion={tgtVersion}
-            filters={filters}
-            onBack={onBack}
-            onNext={goNext}
-            onPrev={goPrev}
-            isFirst={current === 0}
-            isLast={current === steps.length - 1}
-          />
-        )}
-        {current === 4 && (
-          <PreviewPage
             srcPlan={srcPlan}
             srcVersion={srcVersion}
             tgtPlan={tgtPlan}

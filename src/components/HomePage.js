@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ChakraProvider,
   Container,
@@ -23,7 +23,7 @@ import DashboardComponent from "./DashboardComponent";
 // replaced NetworkDefinitionPage with DefinitionWizard
 import DefinitionWizard from "./DefinitionWizard";
 import { data as sampleo9data } from "./sampleo9data";
-
+import { getPayloadFromUrl } from "./o9Interfacehelper";
 function NetworkAggHomePage() {
   const [firstSheetFilters, setFirstSheetFilters] = useState({});
   const [defineOpen, setDefineOpen] = useState(false);
@@ -34,12 +34,32 @@ function NetworkAggHomePage() {
   const [currentPage, setCurrentPage] = useState("home"); // "home" | "networkDefinition"
   const [networkDefPayload, setNetworkDefPayload] = useState(null);
 
+  // Add state for fetched data
+  const [networkSummaryData, setNetworkSummaryData] = useState(null);
+  const [networkSummaryLoading, setNetworkSummaryLoading] = useState(true);
+  const [networkSummaryError, setNetworkSummaryError] = useState(null);
+
   const getFirstOptions = (colName) => {
     const opts = firstSheetFilters?.options || {};
     if (!opts || Object.keys(opts).length === 0) return [];
     const foundKey = Object.keys(opts).find(k => k.toLowerCase() === colName.toLowerCase());
     return foundKey ? opts[foundKey] : [];
   };
+
+  // Effect: Fetch data on mount
+  useEffect(() => {
+    setNetworkSummaryLoading(true);
+    getPayloadFromUrl("http://127.0.0.1:8998/read_json/network_summary.json")
+      .then((data) => {
+        setNetworkSummaryData(data);
+      })
+      .catch((error) => {
+        setNetworkSummaryError(error.message);
+      })
+      .finally(() => {
+        setNetworkSummaryLoading(false);
+      });
+  }, []);  // Empty dependency array: run only once on mount
 
   if (currentPage === "networkDefinition" && networkDefPayload) {
     return (
@@ -73,8 +93,14 @@ function NetworkAggHomePage() {
             <Flex justify="flex-end" mb={2}>
               <Button size="sm" onClick={() => setDefineOpen(true)}>Define New Network</Button>
             </Flex>
-            {/* pass a callback so App can read filters from the first SheetComponent */}
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/network_summary.csv" onFiltersChange={setFirstSheetFilters} />
+            {/* Pass resolved data instead of the Promise */}
+            {networkSummaryLoading ? (
+              <div>Loading network summary...</div>
+            ) : networkSummaryError ? (
+              <div>Error: {networkSummaryError}</div>
+            ) : (
+              <SheetComponent data={networkSummaryData} onFiltersChange={setFirstSheetFilters} />
+            )}
           </Box>
           <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
             <SheetComponent dataUrl="http://127.0.0.1:8998/read/network_violations.csv" />

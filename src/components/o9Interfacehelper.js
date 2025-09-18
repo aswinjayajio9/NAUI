@@ -3,7 +3,7 @@ import o9Interface from "./o9Interface";
 // Helper: Parse Meta/Data payload into rows and columns
 
 export const parseMetaDataPayload = (payload) => {
-  if (!payload?.Meta || !payload?.Data) return { rows: [], cols: [] };
+  if (!payload?.Meta || !payload?.Data) return { rows: [], cols: [], dimensions: [], measures: [], treeData: [] };
 
   const metaByAlias = {};
   payload.Meta.forEach((m) => {
@@ -18,31 +18,92 @@ export const parseMetaDataPayload = (payload) => {
     aliasHeader[a] = m?.Translation || m?.Name || `col_${a}`;
   });
 
+  // Classify dimensions and measures
+  const dimensions = [];
+  const measures = [];
+  aliases.forEach((a) => {
+    const m = metaByAlias[a];
+    const header = aliasHeader[a];
+    if (m?.DimensionName) {
+      dimensions.push({ alias: a, header, meta: m });
+    } else {
+      measures.push({ alias: a, header, meta: m });
+    }
+  });
+
   const mapValue = (meta, raw) => {
     if (raw == null) return raw;
-    if (Array.isArray(raw) && raw.length > 0) raw = raw[0];
+    if (Array.isArray(raw) && raw.length > 0) raw = raw[0];  // Extract value from [value, metadata]
     if (meta?.DimensionValues) {
-      if (typeof raw === "number" && Number.isInteger(raw)) {
+      // First, try string-based search for Key or Name (more robust)
+      const found = meta.DimensionValues.find((dv) => String(dv.Key) === String(raw) || String(dv.Name) === String(raw));
+      if (found) return found?.DisplayName || found?.Name || found?.Key;
+      // Fallback: if raw is integer, use as index
+      if (typeof raw === "number" && Number.isInteger(raw) && raw >= 0 && raw < meta.DimensionValues.length) {
         return meta.DimensionValues[raw]?.DisplayName || meta.DimensionValues[raw]?.Name || raw;
       }
-      const found = meta.DimensionValues.find((dv) => String(dv.Key) === String(raw) || String(dv.Name) === String(raw));
-      return found?.DisplayName || found?.Name || found?.Key;
+      return raw;  // Default to raw if no match
     }
     return raw;
   };
 
-  const rows = payload.Data.map((r, idx) => {
-    const obj = {};
-    aliases.forEach((a) => {
-      obj[aliasHeader[a]] = mapValue(metaByAlias[a], r[a]);
+  const rows = payload.Data
+    .map((r, idx) => {
+      // Detect if r is an object or array
+      const isArray = Array.isArray(r);
+      const obj = {};
+      let hasNonNull = false;
+      aliases.forEach((a) => {
+        const raw = isArray ? r[a] : r[String(a)] || r[a];  // Handle both formats
+        const value = mapValue(metaByAlias[a], raw);
+        obj[aliasHeader[a]] = value;
+        if (value != null) hasNonNull = true;
+      });
+      obj.key = String(idx + 1);
+      return hasNonNull ? obj : null;  // Skip empty rows
+    })
+    .filter(Boolean);  // Remove nulls
+
+  // Build tree structure: Group rows by dimensions (simple hierarchy)
+  const treeData = [];
+  const grouped = {};
+  rows.forEach((row) => {
+    let current = grouped;
+    dimensions.forEach((dim) => {
+      const value = row[dim.header];
+      if (!current[value]) current[value] = {};
+      current = current[value];
     });
-    obj.key = String(idx + 1);
-    return obj;
+    if (!current.rows) current.rows = [];
+    current.rows.push(row);
   });
 
-  const cols = aliases.map((a) => ({ dataIndex: aliasHeader[a], title: aliasHeader[a], key: aliasHeader[a] }));
+  // Flatten tree for UI (e.g., Ant Design Tree)
+  const buildTree = (node, path = []) => {
+    const children = [];
+    Object.keys(node).forEach((key) => {
+      if (key === 'rows') {
+        node.rows.forEach((row) => children.push({ ...row, isLeaf: true }));
+      } else {
+        children.push({
+          title: key,
+          key: [...path, key].join('-'),
+          children: buildTree(node[key], [...path, key]),
+        });
+      }
+    });
+    return children;
+  };
+  const treeRoot = buildTree(grouped);
 
-  return { rows, cols };
+  const cols = aliases.map((a) => ({
+    dataIndex: aliasHeader[a],
+    title: aliasHeader[a],
+    key: aliasHeader[a],
+    isDimension: !!metaByAlias[a]?.DimensionName,  // Flag for UI
+  }));
+
+  return { rows, cols, dimensions, measures, treeData: treeRoot };
 };
 
 // Helper: Parse generic JSON into rows
@@ -219,7 +280,31 @@ export const createCellEditPayload = (updatedRow, measures = [], attributes = []
   };
 };
 
-// // In saveRow function, replace the CSV logic with:
-// const payload = createCellEditPayload(row, measures, attributes, filters);
-// await o9Interface.cellEdit(payload);
-// // Then update initialDataRef and editedKeys as before
+// Helper: Fetch payload from URL and return it via callback for parseMetaDataPayload
+export const getPayloadFromUrl = (url) => {
+  return fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();  // Read JSON once
+    })
+    // .then(payload => {
+    //   console.log('Fetched payload from URL:', payload);  // Log the actual JSON data
+    //   return payload;  // Return the payload for further use
+    // })
+    .catch(error => {
+      console.error('Error fetching payload:', error);
+      throw error;  // Re-throw to allow caller to handle
+    });
+};
+
+// Usage example:
+// getPayloadFromUrl('https://example.com/api/data', (payload, error) => {
+//   if (error) {
+//     console.error(error);
+//     return;
+//   }
+//   const { rows, cols } = parseMetaDataPayload(payload);
+//   // Use rows and cols
+// });

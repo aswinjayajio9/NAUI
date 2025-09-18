@@ -1,0 +1,2563 @@
+{
+    "Meta": [
+        {
+            "DimensionName": "Version",
+            "DimensionId": "0d40e77b-9527-489d-a3c9-f8275cd8b0dc",
+            "DimensionType": "Regular",
+            "Alias": "0",
+            "AttributeId": "211b33d5-d91f-40ec-9668-20e0da2ae7b3",
+            "AttributeName": "Version Name",
+            "ApiName": null,
+            "AttributeKey": "VersionKey",
+            "KeyDataType": "integer",
+            "Name": "Version Name",
+            "EdgeDirection": null,
+            "RelationshipType": null,
+            "DimensionValues": [
+                {
+                    "Key": "-3",
+                    "Name": "Operational Plan",
+                    "DisplayName": "Operational Plan",
+                    "DisplayAlias": null,
+                    "Image": "https://d1jup4wycac0oo.cloudfront.net/playdoh/22857.A3.whatif-version.png",
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Name$InActive",
+                            "PropertyName": "Version Name$InActive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Name$Partition",
+                            "PropertyName": "Version Name$Partition",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Name$DisplayAlias",
+                            "PropertyName": "Version Name$DisplayAlias",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Name$IsDummy",
+                            "PropertyName": "Version Name$IsDummy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "$ScopedScenarioMetadata",
+                            "PropertyName": "$ScopedScenarioMetadata",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Access Role",
+                            "PropertyName": "Access Role",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": 25,
+                            "TranslationName": "BgSaveCreationTimeStamp",
+                            "PropertyName": "BgSaveCreationTimeStamp",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Can Delete",
+                            "PropertyName": "Can Delete",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "Version Category List",
+                            "PropertyValue": "Default",
+                            "TranslationName": "Category",
+                            "PropertyName": "Category",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": "2025-08-19T05:46:46",
+                            "TranslationName": "Current Time For Version",
+                            "PropertyName": "Current Time For Version",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Data Alerts Play Id",
+                            "PropertyName": "Data Alerts Play Id",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "External Replace Parent Data",
+                            "PropertyName": "External Replace Parent Data",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": null,
+                            "TranslationName": "Input Data Refresh Date",
+                            "PropertyName": "Input Data Refresh Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "Is Archive",
+                            "PropertyName": "Is Archive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": "#,##0; (#,##0)",
+                            "ConversionFormatString": "#,##0; (#,##0)",
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "Is Frozen",
+                            "PropertyName": "Is Frozen",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": "#,##0;(#,##0)",
+                            "ConversionFormatString": "#,##0;(#,##0)",
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Is Latest",
+                            "PropertyName": "Is Latest",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Is Latest Published",
+                            "PropertyName": "Is Latest Published",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Is Official",
+                            "PropertyName": "Is Official",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Is Target",
+                            "PropertyName": "Is Target",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": true,
+                            "TranslationName": "Is Tuple Merged",
+                            "PropertyName": "Is Tuple Merged",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": true,
+                            "TranslationName": "Is Visible",
+                            "PropertyName": "Is Visible",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": 0,
+                            "TranslationName": "Parent Key",
+                            "PropertyName": "Parent Key",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": "CurrentWorkingView",
+                            "TranslationName": "Parent Name",
+                            "PropertyName": "Parent Name",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": null,
+                            "TranslationName": "Plan Run Date",
+                            "PropertyName": "Plan Run Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": 0,
+                            "TranslationName": "Proxy Time Stamp",
+                            "PropertyName": "Proxy Time Stamp",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Scenario Description",
+                            "PropertyName": "Scenario Description",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Scenario Status",
+                            "PropertyName": "Scenario Status",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "ScenarioType",
+                            "PropertyName": "ScenarioType",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": -3,
+                            "TranslationName": "Source Key",
+                            "PropertyName": "Source Key",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": "Operational Plan",
+                            "TranslationName": "Source Name",
+                            "PropertyName": "Source Name",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": "2025-11-17T05:46:46",
+                            "TranslationName": "Version Archival Date",
+                            "PropertyName": "Version Archival Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Archival Policy",
+                            "PropertyName": "Version Archival Policy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": "shubham.yadav@o9solutions.com",
+                            "TranslationName": "Version Created By",
+                            "PropertyName": "Version Created By",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Creation Date",
+                            "PropertyName": "Version Creation Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Creation Date Level",
+                            "PropertyName": "Version Creation Date Level",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": "2025-08-19T05:46:46",
+                            "TranslationName": "Version Creation Timestamp",
+                            "PropertyName": "Version Creation Timestamp",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Expiration Policy",
+                            "PropertyName": "Version Expiration Policy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": "2025-12-17T05:46:46",
+                            "TranslationName": "Version Expiry Date",
+                            "PropertyName": "Version Expiry Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "image",
+                            "PropertyValue": "https://d1jup4wycac0oo.cloudfront.net/playdoh/22857.A3.whatif-version.png",
+                            "TranslationName": "Version Image",
+                            "PropertyName": "Version Image",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        }
+                    ],
+                    "IsCalculatedMember": false
+                },
+                {
+                    "Key": "-1",
+                    "Name": "ABDMTest1",
+                    "DisplayName": "ABDMTest1",
+                    "DisplayAlias": null,
+                    "Image": "https://d1jup4wycac0oo.cloudfront.net/playdoh/22857.A3.whatif-version.png",
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Name$InActive",
+                            "PropertyName": "Version Name$InActive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Name$Partition",
+                            "PropertyName": "Version Name$Partition",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Name$DisplayAlias",
+                            "PropertyName": "Version Name$DisplayAlias",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Name$IsDummy",
+                            "PropertyName": "Version Name$IsDummy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "$ScopedScenarioMetadata",
+                            "PropertyName": "$ScopedScenarioMetadata",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Access Role",
+                            "PropertyName": "Access Role",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": 14,
+                            "TranslationName": "BgSaveCreationTimeStamp",
+                            "PropertyName": "BgSaveCreationTimeStamp",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": true,
+                            "TranslationName": "Can Delete",
+                            "PropertyName": "Can Delete",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "Version Category List",
+                            "PropertyValue": "Default",
+                            "TranslationName": "Category",
+                            "PropertyName": "Category",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": "2025-08-11T05:06:27",
+                            "TranslationName": "Current Time For Version",
+                            "PropertyName": "Current Time For Version",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Data Alerts Play Id",
+                            "PropertyName": "Data Alerts Play Id",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "External Replace Parent Data",
+                            "PropertyName": "External Replace Parent Data",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": null,
+                            "TranslationName": "Input Data Refresh Date",
+                            "PropertyName": "Input Data Refresh Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "Is Archive",
+                            "PropertyName": "Is Archive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": "#,##0; (#,##0)",
+                            "ConversionFormatString": "#,##0; (#,##0)",
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "Is Frozen",
+                            "PropertyName": "Is Frozen",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": "#,##0;(#,##0)",
+                            "ConversionFormatString": "#,##0;(#,##0)",
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Is Latest",
+                            "PropertyName": "Is Latest",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Is Latest Published",
+                            "PropertyName": "Is Latest Published",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Is Official",
+                            "PropertyName": "Is Official",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": false,
+                            "TranslationName": "Is Target",
+                            "PropertyName": "Is Target",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": true,
+                            "TranslationName": "Is Tuple Merged",
+                            "PropertyName": "Is Tuple Merged",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": true,
+                            "TranslationName": "Is Visible",
+                            "PropertyName": "Is Visible",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": 0,
+                            "TranslationName": "Parent Key",
+                            "PropertyName": "Parent Key",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": "CurrentWorkingView",
+                            "TranslationName": "Parent Name",
+                            "PropertyName": "Parent Name",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": null,
+                            "TranslationName": "Plan Run Date",
+                            "PropertyName": "Plan Run Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": 0,
+                            "TranslationName": "Proxy Time Stamp",
+                            "PropertyName": "Proxy Time Stamp",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Scenario Description",
+                            "PropertyName": "Scenario Description",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Scenario Status",
+                            "PropertyName": "Scenario Status",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "ScenarioType",
+                            "PropertyName": "ScenarioType",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": -1,
+                            "TranslationName": "Source Key",
+                            "PropertyName": "Source Key",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": "ABDMTest1",
+                            "TranslationName": "Source Name",
+                            "PropertyName": "Source Name",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": "2025-11-09T05:06:27",
+                            "TranslationName": "Version Archival Date",
+                            "PropertyName": "Version Archival Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Archival Policy",
+                            "PropertyName": "Version Archival Policy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": "shubham.yadav@o9solutions.com",
+                            "TranslationName": "Version Created By",
+                            "PropertyName": "Version Created By",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Creation Date",
+                            "PropertyName": "Version Creation Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Creation Date Level",
+                            "PropertyName": "Version Creation Date Level",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": "2025-08-11T05:06:27",
+                            "TranslationName": "Version Creation Timestamp",
+                            "PropertyName": "Version Creation Timestamp",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "Version Expiration Policy",
+                            "PropertyName": "Version Expiration Policy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "datetime",
+                            "PropertyValue": "2025-12-09T05:06:27",
+                            "TranslationName": "Version Expiry Date",
+                            "PropertyName": "Version Expiry Date",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "image",
+                            "PropertyValue": "https://d1jup4wycac0oo.cloudfront.net/playdoh/22857.A3.whatif-version.png",
+                            "TranslationName": "Version Image",
+                            "PropertyName": "Version Image",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        }
+                    ],
+                    "IsCalculatedMember": false
+                }
+            ],
+            "TopologicalSortOrder": 0,
+            "AncestorAttributeNames": [
+                "Version Type"
+            ],
+            "OrderBy": "Name",
+            "IsAnchorAttribute": false,
+            "ToolTip": "Version Name",
+            "DimensionTranslation": "Version",
+            "Translation": "Version Name",
+            "AttributeMemberProperties": [
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Name$DisplayName",
+                    "PropertyName": "Version Name$DisplayName",
+                    "KeyColumnDataType": "string",
+                    "Id": "2151ba89-d8ea-4354-9682-0da7905f7d7a",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Name$InActive",
+                    "PropertyName": "Version Name$InActive",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "c61ed3bb-914b-4087-aadf-08621f2a83e5",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Name$Partition",
+                    "PropertyName": "Version Name$Partition",
+                    "KeyColumnDataType": "integer",
+                    "Id": "70a44fe3-5cda-4b95-bb0c-a98bfb93b154",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Name$DisplayAlias",
+                    "PropertyName": "Version Name$DisplayAlias",
+                    "KeyColumnDataType": "string",
+                    "Id": "77f8e9ce-c3f6-4213-8722-e77c9e243be9",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Name$IsDummy",
+                    "PropertyName": "Version Name$IsDummy",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "dbfeb9ba-a7e9-4c26-ac9d-4f486a367cb3",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "$ScopedScenarioMetadata",
+                    "PropertyName": "$ScopedScenarioMetadata",
+                    "KeyColumnDataType": "string",
+                    "Id": "fc05a8c4-10ea-416a-d93a-8cf5e7802958",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Access Role",
+                    "PropertyName": "Access Role",
+                    "KeyColumnDataType": "string",
+                    "Id": "21b8f0ff-e8b7-7a25-a073-aa6954809b95",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "BgSaveCreationTimeStamp",
+                    "PropertyName": "BgSaveCreationTimeStamp",
+                    "KeyColumnDataType": "integer",
+                    "Id": "d9b82037-aa36-c7e1-0193-a62096696873",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Can Delete",
+                    "PropertyName": "Can Delete",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "29ae4d8f-c9d6-c2df-25d8-6ab0081857fc",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "Version Category List",
+                    "PropertyValue": null,
+                    "TranslationName": "Category",
+                    "PropertyName": "Category",
+                    "KeyColumnDataType": "picklist",
+                    "Id": "c9e76c30-e2d2-5648-7c9b-021dae9c9d9b",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "datetime",
+                    "PropertyValue": null,
+                    "TranslationName": "Current Time For Version",
+                    "PropertyName": "Current Time For Version",
+                    "KeyColumnDataType": "datetime",
+                    "Id": "6b907d97-279c-885e-bbda-6d61f4024c07",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Data Alerts Play Id",
+                    "PropertyName": "Data Alerts Play Id",
+                    "KeyColumnDataType": "string",
+                    "Id": "7bb1fc9f-f574-36f3-0c52-802d6c40e486",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "External Replace Parent Data",
+                    "PropertyName": "External Replace Parent Data",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "bf54026c-c622-ed29-d170-fe9e24d4c2a7",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "datetime",
+                    "PropertyValue": null,
+                    "TranslationName": "Input Data Refresh Date",
+                    "PropertyName": "Input Data Refresh Date",
+                    "KeyColumnDataType": "datetime",
+                    "Id": "8e89c43f-3181-4130-a407-756fdb172072",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "Is Archive",
+                    "PropertyName": "Is Archive",
+                    "KeyColumnDataType": "integer",
+                    "Id": "81ed4c68-14d5-4a20-8855-565a64b07fb4",
+                    "FormatString": "#,##0; (#,##0)",
+                    "ConversionFormatString": "#,##0; (#,##0)",
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Is Frozen",
+                    "PropertyName": "Is Frozen",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "edcae103-7dac-4651-994c-a775276d9b16",
+                    "FormatString": "#,##0;(#,##0)",
+                    "ConversionFormatString": "#,##0;(#,##0)",
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Is Latest",
+                    "PropertyName": "Is Latest",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "34f88da4-47cd-4ea9-a4d0-de8a07b699cc",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Is Latest Published",
+                    "PropertyName": "Is Latest Published",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "e466e576-319e-4df7-9ba6-8b39ff8b79c2",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Is Official",
+                    "PropertyName": "Is Official",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "de9e4db5-38ac-4a97-8a71-d23e161c85ab",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Is Target",
+                    "PropertyName": "Is Target",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "cd705791-36c9-4e5f-9557-3ccc83eec34e",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Is Tuple Merged",
+                    "PropertyName": "Is Tuple Merged",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "3208b4f5-86a2-8170-8140-d78fd553abc3",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "Is Visible",
+                    "PropertyName": "Is Visible",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "e9f85109-b178-47ba-ac35-a6333468b42c",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "Parent Key",
+                    "PropertyName": "Parent Key",
+                    "KeyColumnDataType": "integer",
+                    "Id": "27796418-544d-90fb-baab-21e395c2f524",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Parent Name",
+                    "PropertyName": "Parent Name",
+                    "KeyColumnDataType": "string",
+                    "Id": "e29f1fa0-ca39-c00e-1309-2f1e234ea6ed",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "datetime",
+                    "PropertyValue": null,
+                    "TranslationName": "Plan Run Date",
+                    "PropertyName": "Plan Run Date",
+                    "KeyColumnDataType": "datetime",
+                    "Id": "a89cd216-5a33-41ca-8c8c-d5abb9997794",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "Proxy Time Stamp",
+                    "PropertyName": "Proxy Time Stamp",
+                    "KeyColumnDataType": "integer",
+                    "Id": "2f44dd47-2cfe-0c60-c082-eb86a0db0968",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Scenario Description",
+                    "PropertyName": "Scenario Description",
+                    "KeyColumnDataType": "string",
+                    "Id": "dcf6efcf-4db7-0e63-8a83-5d29a2ca774c",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Scenario Status",
+                    "PropertyName": "Scenario Status",
+                    "KeyColumnDataType": "string",
+                    "Id": "36bfd8c0-1c40-4dcf-9321-e41702d04895",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "ScenarioType",
+                    "PropertyName": "ScenarioType",
+                    "KeyColumnDataType": "string",
+                    "Id": "3e98948c-0bd7-476e-a1e3-cf9dce492afa",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "Source Key",
+                    "PropertyName": "Source Key",
+                    "KeyColumnDataType": "integer",
+                    "Id": "dc7ebc9a-d309-14af-137c-65d5ab92843a",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Source Name",
+                    "PropertyName": "Source Name",
+                    "KeyColumnDataType": "string",
+                    "Id": "f462dfc7-ff3d-606a-1086-d76b96861286",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "datetime",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Archival Date",
+                    "PropertyName": "Version Archival Date",
+                    "KeyColumnDataType": "datetime",
+                    "Id": "d38be9cf-dfbf-4a44-98d6-a0549d9b12b9",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Archival Policy",
+                    "PropertyName": "Version Archival Policy",
+                    "KeyColumnDataType": "integer",
+                    "Id": "691bfbc4-9a92-42b6-951c-fe1a481b9a32",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Created By",
+                    "PropertyName": "Version Created By",
+                    "KeyColumnDataType": "string",
+                    "Id": "afe742f4-292c-fa36-96c9-26885cde6907",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "datetime",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Creation Date",
+                    "PropertyName": "Version Creation Date",
+                    "KeyColumnDataType": "datetime",
+                    "Id": "56432448-2101-48c2-82e4-9ac5f7bd7184",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Creation Date Level",
+                    "PropertyName": "Version Creation Date Level",
+                    "KeyColumnDataType": "string",
+                    "Id": "8527ad1d-b8af-492b-b544-065a03a01d58",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "datetime",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Creation Timestamp",
+                    "PropertyName": "Version Creation Timestamp",
+                    "KeyColumnDataType": "datetime",
+                    "Id": "f4e475ec-2ebd-4639-8d8f-d9c488f43495",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Expiration Policy",
+                    "PropertyName": "Version Expiration Policy",
+                    "KeyColumnDataType": "integer",
+                    "Id": "ce343414-271b-43c4-a635-dc4824a24a50",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "datetime",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Expiry Date",
+                    "PropertyName": "Version Expiry Date",
+                    "KeyColumnDataType": "datetime",
+                    "Id": "f8500c93-6c68-ebfb-f263-ccf3aeb0e3c8",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "image",
+                    "PropertyValue": null,
+                    "TranslationName": "Version Image",
+                    "PropertyName": "Version Image",
+                    "KeyColumnDataType": "image",
+                    "Id": "8f179aee-1af4-4304-8077-9a5c55924a3b",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                }
+            ]
+        },
+        {
+            "DimensionName": "o9NetworkAggregation Network Plan Type",
+            "DimensionId": "694f05e3-82c5-f134-4853-9a25f2884569",
+            "DimensionType": "Regular",
+            "Alias": "1",
+            "AttributeId": "76b53acc-f155-c829-ff34-2f931a6ff3b4",
+            "AttributeName": "o9NetworkAggregation Network Plan Type",
+            "ApiName": null,
+            "AttributeKey": "o9NetworkAggregationNetworkPlanTypeKey",
+            "KeyDataType": "integer",
+            "Name": "o9NetworkAggregation Network Plan Type",
+            "EdgeDirection": null,
+            "RelationshipType": null,
+            "DimensionValues": [
+                {
+                    "Key": "1",
+                    "Name": "OP",
+                    "DisplayName": "OP",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        }
+                    ],
+                    "IsCalculatedMember": false
+                },
+                {
+                    "Key": "2",
+                    "Name": "MP",
+                    "DisplayName": "MP",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        }
+                    ],
+                    "IsCalculatedMember": false
+                },
+                {
+                    "Key": "3",
+                    "Name": "IBP",
+                    "DisplayName": "IBP",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        }
+                    ],
+                    "IsCalculatedMember": false
+                },
+                {
+                    "Key": "4",
+                    "Name": "RCCP",
+                    "DisplayName": "RCCP",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        }
+                    ],
+                    "IsCalculatedMember": false
+                },
+                {
+                    "Key": "5",
+                    "Name": "S&OP",
+                    "DisplayName": "S&OP",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$InActive",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "integer",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$Partition",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "string",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        },
+                        {
+                            "ValueDataType": "boolean",
+                            "PropertyValue": null,
+                            "TranslationName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "PropertyName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                            "KeyColumnDataType": null,
+                            "Id": "00000000-0000-0000-0000-000000000000",
+                            "FormatString": null,
+                            "ConversionFormatString": null,
+                            "IsEditable": false,
+                            "IsMultiFileUpload": false,
+                            "IsMemberSpecific": false
+                        }
+                    ],
+                    "IsCalculatedMember": false
+                }
+            ],
+            "TopologicalSortOrder": 0,
+            "AncestorAttributeNames": [],
+            "OrderBy": "Name",
+            "IsAnchorAttribute": false,
+            "ToolTip": "Network Plan Type",
+            "DimensionTranslation": "o9NetworkAggregation Network Plan Type",
+            "Translation": "Network Plan Type",
+            "AttributeMemberProperties": [
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "o9NetworkAggregation Network Plan Type$DisplayName",
+                    "PropertyName": "o9NetworkAggregation Network Plan Type$DisplayName",
+                    "KeyColumnDataType": "string",
+                    "Id": "30567213-3d8b-4cdf-825f-1845cb6a81cc",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "o9NetworkAggregation Network Plan Type$InActive",
+                    "PropertyName": "o9NetworkAggregation Network Plan Type$InActive",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "45c8cad3-4f8e-4171-9779-da4620369e45",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "integer",
+                    "PropertyValue": null,
+                    "TranslationName": "o9NetworkAggregation Network Plan Type$Partition",
+                    "PropertyName": "o9NetworkAggregation Network Plan Type$Partition",
+                    "KeyColumnDataType": "integer",
+                    "Id": "78df95ad-d6e9-496a-ac63-29606bf26a6d",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "string",
+                    "PropertyValue": null,
+                    "TranslationName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                    "PropertyName": "o9NetworkAggregation Network Plan Type$DisplayAlias",
+                    "KeyColumnDataType": "string",
+                    "Id": "19faae07-4fc7-4477-a230-30907e6d900d",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                },
+                {
+                    "ValueDataType": "boolean",
+                    "PropertyValue": null,
+                    "TranslationName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                    "PropertyName": "o9NetworkAggregation Network Plan Type$IsDummy",
+                    "KeyColumnDataType": "boolean",
+                    "Id": "60ae0368-0232-47d2-9583-e5215639fb1e",
+                    "FormatString": null,
+                    "ConversionFormatString": null,
+                    "IsEditable": true,
+                    "IsMultiFileUpload": false,
+                    "IsMemberSpecific": false
+                }
+            ]
+        },
+        {
+            "MeasureId": "dd370f68-3089-ddb6-f8b7-5e3da4ad3df0",
+            "Name": "Network Aggregation BOM Count",
+            "Alias": "2",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "#,##0; (#,##0)",
+            "ConversionFormatString": "#,##0; (#,##0)",
+            "MeasureColumnName": "NetworkAggregationBOMCount",
+            "MeasureFormula": "",
+            "DataType": "number",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Network Aggregation BOM Count",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.003 Network Aggregation Parameters",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "5fb611b8-4c54-1bbe-17bc-49dad3915edb",
+            "Name": "Network Aggregation Base Plan Type",
+            "Alias": "3",
+            "ApiName": null,
+            "AllCellsReadOnly": false,
+            "IsEditable": true,
+            "FormatString": "",
+            "ConversionFormatString": "",
+            "MeasureColumnName": "NetworkAggregationBasePlanType",
+            "MeasureFormula": "",
+            "DataType": "string",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Network Aggregation Base Plan Type",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.003 Network Aggregation Parameters",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "a24b567c-eb38-0694-c614-1c08ae85d791",
+            "Name": "Network Aggregation Item Count",
+            "Alias": "4",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "#,##0; (#,##0)",
+            "ConversionFormatString": "#,##0; (#,##0)",
+            "MeasureColumnName": "NetworkAggregationItemCount",
+            "MeasureFormula": "",
+            "DataType": "number",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Network Aggregation Item Count",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.003 Network Aggregation Parameters",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "dea58817-02a4-e060-6f2d-a3179a251002",
+            "Name": "Network Aggregation Resource Count",
+            "Alias": "5",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "#,##0; (#,##0)",
+            "ConversionFormatString": "#,##0; (#,##0)",
+            "MeasureColumnName": "NetworkAggregationResourceCount",
+            "MeasureFormula": "",
+            "DataType": "number",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Network Aggregation Resource Count",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.003 Network Aggregation Parameters",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "3316f289-fcfd-e45e-2fa9-06159457cbaf",
+            "Name": "Network Aggregation Routing Count",
+            "Alias": "6",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "#,##0; (#,##0)",
+            "ConversionFormatString": "#,##0; (#,##0)",
+            "MeasureColumnName": "NetworkAggregationRoutingCount",
+            "MeasureFormula": "",
+            "DataType": "number",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Network Aggregation Routing Count",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.003 Network Aggregation Parameters",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "58b35621-2001-d49c-5c48-fed54d57e8d7",
+            "Name": "Network Aggregation Target Version",
+            "Alias": "7",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "#,##0;(#,##0)",
+            "ConversionFormatString": "#,##0;(#,##0)",
+            "MeasureColumnName": "NetworkAggregationTargetVersion",
+            "MeasureFormula": "",
+            "DataType": "string",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Network Aggregation Target Version",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.003 Network Aggregation Parameters",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        }
+    ],
+    "Data": [
+        [
+            0,
+            0,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "Base",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            1,
+            [
+                130,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "OP",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                50,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                60,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                70,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            2,
+            [
+                2,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "OP",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                60,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                61,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                62,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            3,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "OP",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            4,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "OP",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            1,
+            0,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "Base",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            1,
+            1,
+            [
+                2000,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "OP",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                234,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                399,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                382,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            1,
+            2,
+            [
+                199,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "OP",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                545,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                985,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                512,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            1,
+            3,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "OP",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            1,
+            4,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "OP",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ]
+    ],
+    "QueryGuid": "05875bb9-3848-4ecf-9013-f84f6e0163b4",
+    "ConversionCulture": "en-US",
+    "ResultId": "00000000-0000-0000-0000-000000000000",
+    "PicklistValues": "{}",
+    "CurrentTimeForVersion": []
+}

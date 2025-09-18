@@ -40,6 +40,21 @@ def read_csv(filename: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/read_json/{filename}")
+def read_json(filename: str):
+    import json
+    filepath = os.path.join(DATA_FOLDER, filename)
+
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return JSONResponse(content=data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 from fastapi import Request
 import io

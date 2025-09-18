@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Flex,
@@ -11,8 +10,10 @@ import {
 } from "@chakra-ui/react";
 // NavigateDefinition removed (parent will render it)
 import SheetComponent from "./SheetComponent";
-import NetworkGraph from "./NetworkGraph";
 
+import NetworkGraph from "./NetworkGraph";
+import { getPayloadFromUrl } from "./o9Interfacehelper";
+import React, { useState, useEffect } from "react";
 /*
   NetworkDefinitionPage
   - Dummy layout that matches the pasted image: step progress + several sheet-like boxes
@@ -31,17 +32,6 @@ export default function NetworkDefinitionPage({
   isFirst,   // injected by DefinitionWizard
   isLast,    // injected by DefinitionWizard
 }) {
-  const sampleSummaryRows = [
-    { network: "ERP", version: "CWV", base: "ERP", boms: 500, rfms: 600, resources: 2500 },
-    { network: "MP", version: "Version 2", base: "OP", boms: 325, rfms: 380, resources: 1960 },
-    { network: "LRP", version: "CWV", base: "MP", boms: 72, rfms: 86, resources: 575 },
-  ];
-
-  const sampleDetailsRows = [
-    { type: "Error", exception: "Manufacturing Hanging Node", network: "LRP", node: "PACK_KEG_1_BREWERY NORTH" },
-    { type: "Warning", exception: "Out of Range", network: "MP", node: "DILUTE_1_BREWERY NORTH" },
-  ];
-
   const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
@@ -58,7 +48,22 @@ export default function NetworkDefinitionPage({
       setAbdmRunning(false);
     }
   };
-
+  const [networkMaterialRulesData, setNetworkMaterialRulesData] = useState(null);
+  const [networkMaterialRulesDataLoading, setNetworkMaterialRulesDataLoading] = useState(true);
+  const [networkMaterialRulesDataError, setNetworkMaterialRulesDataSummaryError] = useState(null);
+  useEffect(() => {
+    setNetworkMaterialRulesDataLoading(true);
+    getPayloadFromUrl("http://127.0.0.1:8998/read_json/material_definition_rules.json")
+      .then((data) => {
+        setNetworkMaterialRulesData(data);
+      })
+      .catch((error) => {
+        setNetworkMaterialRulesDataLoading(error.message);
+      })
+      .finally(() => {
+        setNetworkMaterialRulesDataSummaryError(false);
+      });
+  }, []);
   return (
     <Box p={6}>
       <Flex mb={4} justify="space-between" align="center">
@@ -71,22 +76,6 @@ export default function NetworkDefinitionPage({
           <Text fontSize="sm" color="gray.600">Target: {tgtPlan} / {tgtVersion}</Text>
         </Stack>
       </Flex>
-
-      {/* Planning Level Definition Section */}
-      <Box w="100%" mb={6}>
-        <Heading size="sm" mb={3}>
-            Planning Level Definition
-        </Heading>
-
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/source_planning_definition.csv" />
-            </Box>
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/target_planning_definition.csv" />
-            </Box>
-        </SimpleGrid>
-      </Box>
 
       {/* Material Definition - Rules Section */}
       <Box w="100%" mb={6}>
@@ -105,7 +94,7 @@ export default function NetworkDefinitionPage({
 
         <SimpleGrid columns={1} spacing={6}>
           <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/material_definition_rules.csv" />
+            <SheetComponent dataUrl="http://127.0.0.1:8998/read/material_definition_rules.csv" data={networkMaterialRulesData} />
           </Box>
         </SimpleGrid>
       </Box>
@@ -153,7 +142,7 @@ export default function NetworkDefinitionPage({
         {detailsView === "table" ? (
           <SimpleGrid columns={1} spacing={6}>
             <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-              <SheetComponent dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv" />
+              <SheetComponent dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv"  />
             </Box>
           </SimpleGrid>
         ) : (
