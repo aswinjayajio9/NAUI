@@ -39,9 +39,12 @@ export default function NetworkDefinitionPage({
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
-      const res = await fetch("http://127.0.0.1:8998/run/abdm", { method: "POST" });
+      const res = await fetch("http://127.0.0.1:8998/docs", { method: "GET" });
       if (!res.ok) throw new Error(await res.text());
       toast({ title: "ABDM started", status: "success", duration: 3000 });
+
+      // Load Material Definition - Details after ABDM is started
+      await loadMaterialDetails();
     } catch (err) {
       toast({ title: "ABDM failed", description: err.message, status: "error", duration: 5000 });
     } finally {
@@ -51,6 +54,25 @@ export default function NetworkDefinitionPage({
   const [networkMaterialRulesData, setNetworkMaterialRulesData] = useState(null);
   const [networkMaterialRulesDataLoading, setNetworkMaterialRulesDataLoading] = useState(true);
   const [networkMaterialRulesDataError, setNetworkMaterialRulesDataSummaryError] = useState(null);
+
+  // New state for Material Definition - Details loaded after running ABDM
+  const [materialDetailsData, setMaterialDetailsData] = useState(null);
+  const [materialDetailsLoading, setMaterialDetailsLoading] = useState(false);
+  const [materialDetailsError, setMaterialDetailsError] = useState(null);
+
+  const loadMaterialDetails = async () => {
+    setMaterialDetailsLoading(true);
+    setMaterialDetailsError(null);
+    try {
+      const data = await getPayloadFromUrl("http://127.0.0.1:8998/read_json/material_definition_levels.json");
+      setMaterialDetailsData(data);
+    } catch (err) {
+      setMaterialDetailsError(err.message || String(err));
+    } finally {
+      setMaterialDetailsLoading(false);
+    }
+  };
+
   useEffect(() => {
     setNetworkMaterialRulesDataLoading(true);
     getPayloadFromUrl("http://127.0.0.1:8998/read_json/material_definition_rules.json")
@@ -142,12 +164,20 @@ export default function NetworkDefinitionPage({
         {detailsView === "table" ? (
           <SimpleGrid columns={1} spacing={6}>
             <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-              <SheetComponent dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv"  />
+              <SheetComponent
+      
+                data={materialDetailsData}
+                isLoading={materialDetailsLoading}
+                error={materialDetailsError}
+              />
             </Box>
           </SimpleGrid>
         ) : (
           <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <NetworkGraph dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv" />
+            <NetworkGraph
+              dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv"
+              data={materialDetailsData}
+            />
           </Box>
         )}
       </Box>

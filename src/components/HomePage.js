@@ -69,7 +69,9 @@ function NetworkAggHomePage() {
           onBack={() => {
             setCurrentPage("home");
             setNetworkDefPayload(null);
+          
           }}
+          previewUrl={'https://mygcppmm.o9solutions.com/kibo2?tn=CPGDev19#/EKG/Daily%20Network/Daily%20Network'}
         />
       </ChakraProvider>
     );
@@ -89,7 +91,7 @@ function NetworkAggHomePage() {
         </SimpleGrid>
 
         <SimpleGrid columns={1} spacing={6}>
-          <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+          <Box bg="white" p={4} borderRadius="lg" >
             <Flex justify="flex-end" mb={2}>
               <Button size="sm" onClick={() => setDefineOpen(true)}>Define New Network</Button>
             </Flex>
@@ -102,7 +104,7 @@ function NetworkAggHomePage() {
               <SheetComponent data={networkSummaryData} onFiltersChange={setFirstSheetFilters} />
             )}
           </Box>
-          <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+          <Box bg="white" p={4} borderRadius="lg" >
             <SheetComponent dataUrl="http://127.0.0.1:8998/read/network_violations.csv" />
           </Box>
         </SimpleGrid>

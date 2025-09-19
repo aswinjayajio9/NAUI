@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Table,
   Input,
@@ -60,6 +60,8 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
   const [dimensions, setDimensions] = useState([]); // New: Dimension columns
   const [measures, setMeasures] = useState([]); // New: Measure columns
   const [treeData, setTreeData] = useState([]); // New: Tree structure
+  // Map of { columnKey: { rowKey: rowSpanNumber | 0 } } used to merge repeated dimension cells vertically
+  const [rowSpanMap, setRowSpanMap] = useState(computeRowSpanMap(dataSource, dimensions));
 
   // Refs for cell inputs (for keyboard navigation)
   const cellRefs = useRef({});
@@ -205,8 +207,12 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         key: c.key,
         editable,
         isDimension,
-        // preserve render and onCell behavior
-        render: (text, record) => renderEditableCell(text, record, c.dataIndex, editable),
+        // preserve render and onCell behavior; return rowSpan-aware object for Ant Table
+        render: (text, record, rowIndex) => {
+          const children = renderEditableCell(text, record, c.dataIndex, editable);
+          const rowSpan = isDimension ? (rowSpanMap[c.dataIndex]?.[record.key] ?? 1) : 1;
+          return { children, props: { rowSpan } };
+        },
         onCell: (record) => ({
           onMouseEnter: () => setHoveredCell(`${record.key}-${c.dataIndex}`),
           onMouseLeave: () => setHoveredCell(null),
@@ -230,7 +236,11 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         key: k,
         editable: !isDimension, // dimensions non-editable
         isDimension,
-        render: (text, record) => renderEditableCell(text, record, k, !isDimension),
+        render: (text, record) => {
+          const children = renderEditableCell(text, record, k, !isDimension);
+          const rowSpan = isDimension ? (rowSpanMap[k]?.[record.key] ?? 1) : 1;
+          return { children, props: { rowSpan } };
+        },
         onCell: (record) => ({
           onMouseEnter: () => setHoveredCell(`${record.key}-${k}`),
           onMouseLeave: () => setHoveredCell(null),
@@ -623,26 +633,65 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
   };
 
   // Before rendering the table, build columns with dynamic header nodes so sort icons reflect current sortConfig
-  const columnsWithTitles = columns.map((c, idx) => {
-    // keep dimensions frozen on the left, but mark measures for reversed coloring
-    const isDim = !!c.isDimension;
-    const nextIsDim = !!columns[idx + 1]?.isDimension;
-    let className;
-    if (isDim) {
-      className = nextIsDim ? "naui-dim-col" : "naui-dim-col naui-dim-last";
-    } else {
-      // apply a class to measures so we can color them instead of dimensions
-      className = "naui-meas-col";
-    }
-    return {
-      ...c,
-      title: renderHeader(c.headerText ?? String(c.title ?? ""), c.dataIndex, isDim, idx),
-      className,
-      // freeze dimension columns to left; give them a fixed width so Ant Table can freeze them properly
-      fixed: isDim ? "left" : undefined,
-      width: isDim ? 180 : c.width,
-    };
-  });
+  const columnsWithTitles = useMemo(() => {
+    return columns.map((c, idx) => {
+      const isDim = !!c.isDimension;
+      const nextIsDim = !!columns[idx + 1]?.isDimension;
+      let className;
+      if (isDim) {
+        className = nextIsDim ? "naui-dim-col" : "naui-dim-col naui-dim-last";
+      } else {
+        className = "naui-meas-col";
+      }
+      return {
+        ...c,
+        title: renderHeader(c.headerText ?? String(c.title ?? ""), c.dataIndex, isDim, idx),
+        className,
+        fixed: isDim ? "left" : undefined,
+        width: isDim ? 180 : c.width,
+        // Update render to use latest rowSpanMap
+        render: (text, record, rowIndex) => {
+          const children = renderEditableCell(text, record, c.dataIndex, c.editable);
+          const rowSpan = isDim ? (rowSpanMap[c.dataIndex]?.[record.key] ?? 1) : 1;
+          return { children, props: { rowSpan } };
+        },
+      };
+    });
+  }, [columns, rowSpanMap, sortConfig, hoveredCell]);
+
+  // Recompute vertical rowSpan map for dimension columns whenever dataSource or dimensions change
+  useEffect(() => {
+    const map = {};
+    const dimHeaders = dimensions.map((d) => d.header);
+    dimHeaders.forEach((col) => {
+      map[col] = {};
+      let startKey = null;
+      let startVal = null;
+      let count = 0;
+      dataSource.forEach((row, idx) => {
+        const val = row[col] ?? "";
+        const sval = String(val);
+        if (idx === 0) {
+          startKey = row.key;
+          startVal = sval;
+          count = 1;
+          map[col][row.key] = 1;
+          return;
+        }
+        if (sval === startVal) {
+          count++;
+          map[col][row.key] = 0;
+          map[col][startKey] = count;
+        } else {
+          startKey = row.key;
+          startVal = sval;
+          count = 1;
+          map[col][row.key] = 1;
+        }
+      });
+    });
+    setRowSpanMap(map);
+  }, [dataSource, dimensions]);
 
   // Render section
   if (loading) return <Spin size="large" />;
@@ -783,4 +832,38 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
       </Modal>
     </div>
   );
+}
+
+// New: computeRowSpanMap function to calculate vertical rowSpan for dimension columns
+function computeRowSpanMap(dataSource, dimensions) {
+  const map = {};
+  const dimHeaders = dimensions.map((d) => d.header);
+  dimHeaders.forEach((col) => {
+    map[col] = {};
+    let startKey = null;
+    let startVal = null;
+    let count = 0;
+    dataSource.forEach((row, idx) => {
+      const val = row[col] ?? "";
+      const sval = String(val);
+      if (idx === 0) {
+        startKey = row.key;
+        startVal = sval;
+        count = 1;
+        map[col][row.key] = 1;
+        return;
+      }
+      if (sval === startVal) {
+        count++;
+        map[col][row.key] = 0;
+        map[col][startKey] = count;
+      } else {
+        startKey = row.key;
+        startVal = sval;
+        count = 1;
+        map[col][row.key] = 1;
+      }
+    });
+  });
+  return map;
 }

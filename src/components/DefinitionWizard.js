@@ -13,13 +13,13 @@ export default function DefinitionWizard({
   tgtVersion,
   filters,
   onBack,
+  previewUrl, // added prop: when provided, clicking the last step redirects here
 }) {
   const steps = [
     "Planning Level Definition",
     "Resource Definition",
-
     "Parameters Definition",
-
+    "Preview Network",
   ];
 
   const [current, setCurrent] = React.useState(0);
@@ -29,7 +29,22 @@ export default function DefinitionWizard({
     else console.log("DefinitionWizard finished");
   };
   const goPrev = () => setCurrent((c) => Math.max(0, c - 1));
-  const jumpTo = (idx) => setCurrent(idx);
+
+  // jumpTo now redirects when user clicks the final "Preview Network" step
+  const jumpTo = (idx) => {
+    if (idx === steps.length - 1) {
+      if (previewUrl) {
+        // open preview in a new tab without keeping a reference to this window
+        const newWin = window.open(previewUrl, "_blank");
+        if (newWin) newWin.opener = null;
+      } else {
+        // fallback: do nothing or log
+        console.warn("Preview URL not provided for Preview Network step");
+      }
+      return;
+    }
+    setCurrent(idx);
+  };
 
   return (
     <Container maxW="100%" p={4}>

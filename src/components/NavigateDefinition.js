@@ -6,6 +6,7 @@ export default function NavigateDefinition({
     "Planning Level Definition",
     "Resource Definition",
     "Parameters Definition",
+    "Preview Network",
   ],
   initialStep = 0,
   current,      // optional controlled prop (number)
