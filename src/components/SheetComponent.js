@@ -207,11 +207,11 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         key: c.key,
         editable,
         isDimension,
-        // preserve render and onCell behavior; return rowSpan-aware object for Ant Table
-        render: (text, record, rowIndex) => {
-          const children = renderEditableCell(text, record, c.dataIndex, editable);
-          const rowSpan = isDimension ? (rowSpanMap[c.dataIndex]?.[record.key] ?? 1) : 1;
-          return { children, props: { rowSpan } };
+        // preserve render and onCell behavior; render a fixed-height placeholder for duplicate dimension rows
+        render: (text, record) => {
+          const isDuplicate = isDimension && (rowSpanMap[c.dataIndex]?.[record.key] === 0);
+          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, c.dataIndex, editable);
+          return { children };
         },
         onCell: (record) => ({
           onMouseEnter: () => setHoveredCell(`${record.key}-${c.dataIndex}`),
@@ -237,9 +237,9 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         editable: !isDimension, // dimensions non-editable
         isDimension,
         render: (text, record) => {
-          const children = renderEditableCell(text, record, k, !isDimension);
-          const rowSpan = isDimension ? (rowSpanMap[k]?.[record.key] ?? 1) : 1;
-          return { children, props: { rowSpan } };
+          const isDuplicate = isDimension && (rowSpanMap[k]?.[record.key] === 0);
+          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, k, !isDimension);
+          return { children };
         },
         onCell: (record) => ({
           onMouseEnter: () => setHoveredCell(`${record.key}-${k}`),
@@ -343,6 +343,8 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     setDataSource(arr);
   };
 
+  const CELL_MIN_HEIGHT = 8; // normalize row cell height
+
   // Helper: Render editable cell (input or checkbox with edit highlighting and hover)
   const renderEditableCell = (text, record, dataIndex, editable = true) => {
     const value = text ?? "";
@@ -355,18 +357,25 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     const isHovered = hoveredCell === `${record.key}-${dataIndex}`;
     const commonStyle = {
       border: "none",
-      padding: 0,
-      backgroundColor: cellEdited ? "#fff6d6" : isHovered ? "#f0f0f0" : "transparent",  // Add hover highlight
+      padding: 6,
+      backgroundColor: cellEdited ? "#fff6d6" : isHovered ? "#f0f0f0" : "transparent",
       width: "100%",
       borderRadius: 2,
+      boxSizing: "border-box",
+      minHeight: CELL_MIN_HEIGHT,
+      height: "100%",
+      display: "flex",
+      alignItems: "center",
     };
     const id = `${record.key}:::${dataIndex}`;
 
-    // If not editable (dimension), render plain text
+    // If not editable (dimension), render plain text with same wrapper so height stays consistent
     if (!editable) {
       return (
-        <div style={{ ...commonStyle, padding: "4px", textAlign: isNum(value) ? "center" : "left" }}>
-          {String(value)}
+        <div style={commonStyle}>
+          <div style={{ paddingTop: 0, width: "100%", textAlign: isNum(value) ? "center" : "left" }}>
+            {String(value)}
+          </div>
         </div>
       );
     }
@@ -375,14 +384,14 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     if (isBool) {
       const checked = value === true || valueStr === "true";
       return (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div style={{ ...commonStyle, justifyContent: "center" }}>
           <Checkbox
             id={id}
             checked={checked}
             onChange={(e) => {
               handleCellChange(e.target.checked, record.key, dataIndex);
             }}
-            style={commonStyle}
+            style={{ margin: 0 }}
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -390,7 +399,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     }
 
     return (
-      <div style={{ display: "flex", justifyContent: isNum(value) ? "center" : "flex-start", alignItems: "center" }}>
+      <div style={commonStyle}>
         <Input
           ref={(el) => { cellRefs.current[id] = el; }}
           value={String(value)}
@@ -400,7 +409,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           onMouseDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           bordered={false}
-          style={{ ...commonStyle, textAlign: isNum(value) ? "center" : "left" }}
+          style={{ height: "100%", padding: "0 6px", textAlign: isNum(value) ? "center" : "left" }}
           size="small"
         />
       </div>
@@ -649,11 +658,11 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         className,
         fixed: isDim ? "left" : undefined,
         width: isDim ? 180 : c.width,
-        // Update render to use latest rowSpanMap
-        render: (text, record, rowIndex) => {
-          const children = renderEditableCell(text, record, c.dataIndex, c.editable);
-          const rowSpan = isDim ? (rowSpanMap[c.dataIndex]?.[record.key] ?? 1) : 1;
-          return { children, props: { rowSpan } };
+        // Render fixed-height placeholder for duplicate dimension rows instead of empty string
+        render: (text, record) => {
+          const isDuplicate = isDim && (rowSpanMap[c.dataIndex]?.[record.key] === 0);
+          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, c.dataIndex, c.editable);
+          return { children };
         },
       };
     });
