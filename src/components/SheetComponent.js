@@ -24,7 +24,7 @@ import ChartComponent from "./chartComponent";
 // Add import for parser functions from the helper
 import { parseMetaDataPayload, parseGenericJson, parseCsv, createCellEditPayload } from "./o9Interfacehelper";
 import o9Interface from "./o9Interface";
-
+  const CELL_MIN_HEIGHT = 5;
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
 export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
   // State for data and UI
@@ -65,9 +65,80 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
 
   // Refs for cell inputs (for keyboard navigation)
   const cellRefs = useRef({});
-
-  // Ref for column drag index (for reordering)
+  // Ref used for drag-and-drop column reordering
   const dragIndexRef = useRef(null);
+  // RAF throttle for mouse move updates (improves resize perf)
+  const rafRef = useRef(null);
+  // State & refs for column resizing
+  const [columnWidths, setColumnWidths] = useState({});
+  const resizingRef = useRef(null);
+  const columnsRef = useRef(columns);
+  useEffect(() => { columnsRef.current = columns; }, [columns]);
+  
+  // Initialize reasonable widths when columns change (preserve any manual widths)
+  useEffect(() => {
+    const next = { ...columnWidths };
+    const dimHeaders = dimensions.map((d) => d.header);
+    columns.forEach((c) => {
+      if (!next[c.dataIndex]) {
+        next[c.dataIndex] = c.width || (dimHeaders.includes(c.dataIndex) ? 180 : 140);
+      }
+    });
+    setColumnWidths(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columns, dimensions]);
+
+  // Mouse handlers for resizing
+  const startResize = (dataIndex, e) => {
+    e.preventDefault();
+    const curWidth = columnWidths[dataIndex] ?? (columnsRef.current.find(c => c.dataIndex === dataIndex)?.width) ?? 140;
+    resizingRef.current = { dataIndex, startX: e.clientX, startWidth: curWidth, pendingWidth: curWidth };
+    // show resize cursor globally for better UX
+    document.body.style.cursor = "col-resize";
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", stopResize);
+  };
+
+  const onMouseMove = (e) => {
+    const r = resizingRef.current;
+    if (!r) return;
+    const delta = e.clientX - r.startX;
+    const nextWidth = Math.max(40, Math.round(r.startWidth + delta));
+    // store pending width and schedule a RAF update (throttles state updates)
+    r.pendingWidth = nextWidth;
+    if (rafRef.current == null) {
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        const cur = resizingRef.current;
+        if (!cur) return;
+        setColumnWidths(prev => {
+          if (prev[cur.dataIndex] === cur.pendingWidth) return prev;
+          return { ...prev, [cur.dataIndex]: cur.pendingWidth };
+        });
+      });
+    }
+  };
+
+  const stopResize = () => {
+    resizingRef.current = null;
+    if (rafRef.current) {
+      window.cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    document.body.style.cursor = ""; // restore
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", stopResize);
+  };
+
+  useEffect(() => () => {
+    // cleanup on unmount
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", stopResize);
+    if (rafRef.current) {
+      window.cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
 
   // Helper: Load data (supports JSON, CSV, or pre-parsed objects) - now wrapped in useCallback
   const loadData = useCallback(async () => {
@@ -253,6 +324,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
   const renderHeader = (text, dataIndex, isDimension, idx) => {
     const activeAsc = sortConfig.col === dataIndex && sortConfig.order === "asc";
     const activeDesc = sortConfig.col === dataIndex && sortConfig.order === "desc";
+    const currentWidth = columnWidths[dataIndex];
 
     const onSort = (order, e) => {
       e?.stopPropagation();
@@ -263,7 +335,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     return (
       <div
         tabIndex={0}
-        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", userSelect: "none" }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", userSelect: "none", position: "relative" }}
         onKeyDown={(e) => {
           if (!isDimension) return;
           if (e.key === "ArrowUp") {
@@ -274,29 +346,23 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
             handleSort(dataIndex, "desc");
           }
         }}
-        // drag handlers only active when this column is a dimension
-        draggable={!!isDimension}
+        // allow dragging for all column types (improves UX); swapping happens on drop
+        draggable={true}
         onDragStart={(e) => {
-          if (!isDimension) return;
           dragIndexRef.current = idx;
           e.dataTransfer.effectAllowed = "move";
+          // use empty image to avoid dragging snapshot cost in some browsers
+          try { e.dataTransfer.setDragImage(new Image(), 0, 0); } catch {}
         }}
         onDragOver={(e) => {
-          if (!isDimension) return;
           e.preventDefault();
           e.dataTransfer.dropEffect = "move";
         }}
         onDrop={(e) => {
-          if (!isDimension) return;
           e.preventDefault();
           const from = dragIndexRef.current;
           const to = idx;
           if (from == null || from === to) return;
-          // Only allow moves where both source and target are dimensions
-          const prev = columns;
-          const fromIsDim = prev?.[from]?.isDimension;
-          const toIsDim = prev?.[to]?.isDimension;
-          if (!fromIsDim || !toIsDim) return;
           setColumns((prevCols) => {
             const next = [...prevCols];
             const [moved] = next.splice(from, 1);
@@ -320,6 +386,12 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
             />
           </div>
         ) : null}
+        {/* Resizer handle (visible on hover) */}
+        <div
+         className="naui-resizer"
+          onMouseDown={(e) => startResize(dataIndex, e)}
+          aria-hidden="true"
+        />
       </div>
     );
   };
@@ -343,7 +415,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     setDataSource(arr);
   };
 
-  const CELL_MIN_HEIGHT = 8; // normalize row cell height
+
 
   // Helper: Render editable cell (input or checkbox with edit highlighting and hover)
   const renderEditableCell = (text, record, dataIndex, editable = true) => {
@@ -657,16 +729,17 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         title: renderHeader(c.headerText ?? String(c.title ?? ""), c.dataIndex, isDim, idx),
         className,
         fixed: isDim ? "left" : undefined,
-        width: isDim ? 180 : c.width,
-        // Render fixed-height placeholder for duplicate dimension rows instead of empty string
-        render: (text, record) => {
-          const isDuplicate = isDim && (rowSpanMap[c.dataIndex]?.[record.key] === 0);
-          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, c.dataIndex, c.editable);
-          return { children };
-        },
-      };
-    });
-  }, [columns, rowSpanMap, sortConfig, hoveredCell]);
+        // drive width from the throttled state; updating this value is now throttled by RAF
+        width: columnWidths[c.dataIndex] || (isDim ? 180 : c.width),
+         // Render fixed-height placeholder for duplicate dimension rows instead of empty string
+         render: (text, record) => {
+           const isDuplicate = isDim && (rowSpanMap[c.dataIndex]?.[record.key] === 0);
+           const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, c.dataIndex, c.editable);
+           return { children };
+         },
+       };
+     });
+   }, [columns, rowSpanMap, sortConfig, hoveredCell, columnWidths]);
 
   // Recompute vertical rowSpan map for dimension columns whenever dataSource or dimensions change
   useEffect(() => {
@@ -733,21 +806,56 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           background: #fffaf0;
         }
 
-        /* strong vertical separator after the last dimension column (header + body) */
-        .naui-dim-last .ant-table-cell,
-        th.naui-dim-last {
+        /* strong vertical separator after the last dimension column (header + body)
+           place on the TH/TD that has the column class applied by antd */
+        .ant-table-thead > tr > th.naui-dim-last,
+        .ant-table-tbody > tr > td.naui-dim-last {
           border-right: 3px solid #d9d9d9 !important;
         }
 
         /* Ensure fixed-left (dimension) columns render above scroll area so the divider stays visible */
         .ant-table-fixed-left .naui-dim-col .ant-table-cell,
-        .naui-dim-col.ant-table-cell {
-          z-index: 3;
+        .naui-dim-col.ant-table-cell,
+        .ant-table-thead > tr > th.naui-dim-col {
+          z-index: 6;
+          position: relative;
+        }
+
+        /* Give the last dimension header slightly higher stacking so its divider is clear */
+        .ant-table-thead > tr > th.naui-dim-last {
+          z-index: 8;
+          position: relative;
         }
 
         /* Prevent the table's default cell shadow from interfering with the divider */
         .naui-dim-last .ant-table-cell {
           box-shadow: none;
+        }
+
+        /* Resizer handle: narrow vertical hit area centered on the column edge.
+           Right is negative so the handle sits exactly over the divider line for precise dragging. */
+        .naui-resizer {
+          position: absolute;
+          top: 0;
+          right: -4px; /* centers the 8px wide handle over the border at right:0 */
+          width: 8px;
+          height: 100%;
+          cursor: col-resize;
+          z-index: 12;
+          background: transparent;
+          transition: background .12s ease;
+          -webkit-user-select: none;
+          user-select: none;
+        }
+        /* subtle visible hover to show the user the shrink/expand area */
+        .ant-table-thead > tr > th:hover .naui-resizer,
+        .ant-table-thead > tr > th .naui-resizer:hover {
+          background: rgba(0,0,0,0.05);
+        }
+
+        /* when columns are fixed-left ensure the header resizer remains clickable above the body */
+        .ant-table-fixed-left .naui-resizer {
+          z-index: 20;
         }
       `}</style>
       <Space style={{ marginBottom: 16 }}>
