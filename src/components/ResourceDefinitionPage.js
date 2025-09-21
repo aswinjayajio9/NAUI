@@ -37,6 +37,7 @@ export default function ResourceDefinitionPage({
   const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
+  const [abdmCompleted, setAbdmCompleted] = React.useState(false); // New state to track if ABDM has completed
 
   // States for Resource Definition - Rules
   const [resourceRulesData, setResourceRulesData] = useState(null);
@@ -57,6 +58,7 @@ export default function ResourceDefinitionPage({
 
       // Load Resource Definition - Details after ABDM is started
       await loadResourceDetails();
+      setAbdmCompleted(true); // Set completed after successful ABDM and loading
     } catch (err) {
       toast({ title: "ABDM failed", description: err.message, status: "error", duration: 5000 });
     } finally {
@@ -145,49 +147,51 @@ export default function ResourceDefinitionPage({
         </SimpleGrid>
       </Box>
 
-      {/* Resource Definition - Details (toggle Table / Network) */}
-      <Box w="100%" mb={6}>
-        <Flex justify="space-between" align="center" mb={3}>
-          <Heading size="sm">Resource Definition - Details</Heading>
-          <Stack direction="row" spacing={2}>
-            <Button
-              size="sm"
-              variant={detailsView === "table" ? "solid" : "outline"}
-              colorScheme={detailsView === "table" ? "blue" : undefined}
-              onClick={() => setDetailsView("table")}
-            >
-              Table
-            </Button>
-            <Button
-              size="sm"
-              variant={detailsView === "network" ? "solid" : "outline"}
-              colorScheme={detailsView === "network" ? "blue" : undefined}
-              onClick={() => setDetailsView("network")}
-            >
-              Network
-            </Button>
-          </Stack>
-        </Flex>
+      {/* Resource Definition - Details (toggle Table / Network) - Only visible after ABDM */}
+      {abdmCompleted && (
+        <Box w="100%" mb={6}>
+          <Flex justify="space-between" align="center" mb={3}>
+            <Heading size="sm">Resource Definition - Details</Heading>
+            <Stack direction="row" spacing={2}>
+              <Button
+                size="sm"
+                variant={detailsView === "table" ? "solid" : "outline"}
+                colorScheme={detailsView === "table" ? "blue" : undefined}
+                onClick={() => setDetailsView("table")}
+              >
+                Table
+              </Button>
+              <Button
+                size="sm"
+                variant={detailsView === "network" ? "solid" : "outline"}
+                colorScheme={detailsView === "network" ? "blue" : undefined}
+                onClick={() => setDetailsView("network")}
+              >
+                Network
+              </Button>
+            </Stack>
+          </Flex>
 
-        {detailsView === "table" ? (
-          <SimpleGrid columns={1} spacing={6}>
+          {detailsView === "table" ? (
+            <SimpleGrid columns={1} spacing={6}>
+              <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+                <SheetComponent
+                  data={resourceDetailsData}
+                  isLoading={resourceDetailsLoading}
+                  error={resourceDetailsError}
+                  config={{ enabled: true, levelDimension: 'Level', targetDimension: 'Item' }} // Adjust config as needed
+                />
+              </Box>
+            </SimpleGrid>
+          ) : (
             <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-              <SheetComponent
-                data={resourceDetailsData}
-                isLoading={resourceDetailsLoading}
-                error={resourceDetailsError}
-                config={{ enabled: true, levelDimension: 'Level', targetDimension: 'Item' }} // Adjust config as needed
+              <NetworkGraph 
+                data={resourceDetailsData} 
               />
             </Box>
-          </SimpleGrid>
-        ) : (
-          <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <NetworkGraph 
-              data={resourceDetailsData} 
-            />
-          </Box>
-        )}
-      </Box>
+          )}
+        </Box>
+      )}
 
       {/* Page-level navigation (restores Next/Previous buttons on the page) */}
       <Flex mt={4} gap={2} justify="flex-end">

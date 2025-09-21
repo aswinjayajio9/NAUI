@@ -36,6 +36,7 @@ export default function NetworkDefinitionPage({
   const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
+  const [abdmCompleted, setAbdmCompleted] = React.useState(false); // New state to track if ABDM has completed
 
   const runAbdm = async () => {
     setAbdmRunning(true);
@@ -46,6 +47,7 @@ export default function NetworkDefinitionPage({
 
       // Load Material Definition - Details after ABDM is started
       await loadMaterialDetails();
+      setAbdmCompleted(true); // Set completed after successful ABDM and loading
     } catch (err) {
       toast({ title: "ABDM failed", description: err.message, status: "error", duration: 5000 });
     } finally {
@@ -139,51 +141,53 @@ export default function NetworkDefinitionPage({
         </SimpleGrid>
       </Box>
 
-      {/* Material Definition - Details (toggle Table / Network) */}
-      <Box w="100%" mb={6}>
-        <Flex justify="space-between" align="center" mb={3}>
-          <Heading size="sm">Material Definition - Details</Heading>
-          <Stack direction="row" spacing={2}>
-            <Button
-              size="sm"
-              variant={detailsView === "table" ? "solid" : "outline"}
-              colorScheme={detailsView === "table" ? "blue" : undefined}
-              onClick={() => setDetailsView("table")}
-            >
-              Table
-            </Button>
-            <Button
-              size="sm"
-              variant={detailsView === "network" ? "solid" : "outline"}
-              colorScheme={detailsView === "network" ? "blue" : undefined}
-              onClick={() => setDetailsView("network")}
-            >
-              Network
-            </Button>
-          </Stack>
-        </Flex>
+      {/* Material Definition - Details (toggle Table / Network) - Only visible after ABDM */}
+      {abdmCompleted && (
+        <Box w="100%" mb={6}>
+          <Flex justify="space-between" align="center" mb={3}>
+            <Heading size="sm">Material Definition - Details</Heading>
+            <Stack direction="row" spacing={2}>
+              <Button
+                size="sm"
+                variant={detailsView === "table" ? "solid" : "outline"}
+                colorScheme={detailsView === "table" ? "blue" : undefined}
+                onClick={() => setDetailsView("table")}
+              >
+                Table
+              </Button>
+              <Button
+                size="sm"
+                variant={detailsView === "network" ? "solid" : "outline"}
+                colorScheme={detailsView === "network" ? "blue" : undefined}
+                onClick={() => setDetailsView("network")}
+              >
+                Network
+              </Button>
+            </Stack>
+          </Flex>
 
-        {detailsView === "table" ? (
-          <SimpleGrid columns={1} spacing={6}>
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-              <SheetComponent
+          {detailsView === "table" ? (
+            <SimpleGrid columns={1} spacing={6}>
+              <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+                <SheetComponent
       
+                  data={materialDetailsData}
+                  isLoading={materialDetailsLoading}
+                  error={materialDetailsError}
+                  config = {{ enabled: true, levelDimension: 'Level', targetDimension: 'Item' }}
+                />
+              </Box>
+            </SimpleGrid>
+          ) : (
+            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
+              <NetworkGraph
+                dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv"
                 data={materialDetailsData}
-                isLoading={materialDetailsLoading}
-                error={materialDetailsError}
-                config = {{ enabled: true, levelDimension: 'Level', targetDimension: 'Item' }}
               />
             </Box>
-          </SimpleGrid>
-        ) : (
-          <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <NetworkGraph
-              dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv"
-              data={materialDetailsData}
-            />
-          </Box>
-        )}
-      </Box>
+          )}
+        </Box>
+      )}
 
       {/* Page-level navigation */}
       <Flex mt={4} gap={2} justify="flex-end">
