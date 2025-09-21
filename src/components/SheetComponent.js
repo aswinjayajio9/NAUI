@@ -248,6 +248,10 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
       editedKeysRef.current.clear();
       setEditedKeys([]);
 
+      // Set row counter for new row keys
+      const maxKey = rows.length > 0 ? Math.max(...rows.map(r => parseInt(r.key) || 0)) : 0;
+      setRowCounter(maxKey);
+
       // Notify parent of initial filters (only dimensions)
       const optionsMap = computeOptionsMap(rows, dims);
       if (onFiltersChange) onFiltersChange({ activeFilters: {}, options: optionsMap });
@@ -267,6 +271,9 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
 
   // Add state for hovered cell
   const [hoveredCell, setHoveredCell] = useState(null);
+
+  // Add state for row counter to generate unique keys for new rows
+  const [rowCounter, setRowCounter] = useState(0);
 
   // Helper: Build columns from payload (editable with highlighting and sticky dimensions)
   const buildColumnsFromPayload = (colsFromPayload, dims) => {
@@ -719,6 +726,37 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
     }
   };
 
+  // Handler: Add a new row
+  const addRow = () => {
+    const newKey = rowCounter + 1;
+    setRowCounter(newKey);
+    const newRow = { key: newKey };
+    columns.forEach((col) => {
+      newRow[col.dataIndex] = ""; // Default empty value
+    });
+    setDataSource((prev) => [...prev, newRow]);
+    setOriginalData((prev) => [...prev, newRow]);
+    // Add to initial snapshot
+    initialDataRef.current.push({ ...newRow });
+  };
+
+  // Handler: Delete selected rows
+  const deleteRows = () => {
+    if (selectedRowKeys.length === 0) {
+      message.info("No rows selected to delete");
+      return;
+    }
+    setDataSource((prev) => prev.filter((r) => !selectedRowKeys.includes(r.key)));
+    setOriginalData((prev) => prev.filter((r) => !selectedRowKeys.includes(r.key)));
+    // Remove from edited keys
+    editedKeysRef.current = new Set(Array.from(editedKeysRef.current).filter((k) => !selectedRowKeys.includes(k)));
+    setEditedKeys(Array.from(editedKeysRef.current));
+    // Remove from initial snapshot
+    initialDataRef.current = initialDataRef.current.filter((r) => !selectedRowKeys.includes(r.key));
+    setSelectedRowKeys([]);
+    message.success(`${selectedRowKeys.length} row(s) deleted`);
+  };
+
   // Build / refresh dimension group metadata whenever dimensions or dataSource change
   useEffect(() => {
     if (!dimensions.length || !dataSource.length) {
@@ -1061,6 +1099,12 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
         </Button>
         <Button type="default" icon={<FilterOutlined />} onClick={openFilter}>
           Filter
+        </Button>
+        <Button type="default" onClick={addRow}>
+          Add Row
+        </Button>
+        <Button type="default" onClick={deleteRows} disabled={selectedRowKeys.length === 0}>
+          Delete Row
         </Button>
         <Button
           type="primary"
