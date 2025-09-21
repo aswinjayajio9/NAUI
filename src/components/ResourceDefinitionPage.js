@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Flex,
@@ -7,10 +7,14 @@ import {
   SimpleGrid,
   Text,
   Stack,
+  useToast,
 } from "@chakra-ui/react";
 // NavigateDefinition removed from this page (parent will render it)
 import SheetComponent from "./SheetComponent";
 import NetworkGraph from "./NetworkGraph";
+import { getPayloadFromUrl } from "./o9Interfacehelper";
+
+// import { resourceRulesPayload, resourceDetailsPayload } from "./payloads";
 
 /*
   ResourceDefinitionPage
@@ -31,6 +35,61 @@ export default function ResourceDefinitionPage({
 }) {
 
   const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
+  const toast = useToast();
+  const [abdmRunning, setAbdmRunning] = React.useState(false);
+
+  // States for Resource Definition - Rules
+  const [resourceRulesData, setResourceRulesData] = useState(null);
+  const [resourceRulesLoading, setResourceRulesLoading] = useState(true);
+  const [resourceRulesError, setResourceRulesError] = useState(null);
+
+  // States for Resource Definition - Details (loaded after ABDM)
+  const [resourceDetailsData, setResourceDetailsData] = useState(null);
+  const [resourceDetailsLoading, setResourceDetailsLoading] = useState(false);
+  const [resourceDetailsError, setResourceDetailsError] = useState(null);
+
+  const runAbdm = async () => {
+    setAbdmRunning(true);
+    try {
+      const res = await fetch("http://127.0.0.1:8998/docs", { method: "GET" });
+      if (!res.ok) throw new Error(await res.text());
+      toast({ title: "ABDM started", status: "success", duration: 3000 });
+
+      // Load Resource Definition - Details after ABDM is started
+      await loadResourceDetails();
+    } catch (err) {
+      toast({ title: "ABDM failed", description: err.message, status: "error", duration: 5000 });
+    } finally {
+      setAbdmRunning(false);
+    }
+  };
+
+  const loadResourceDetails = async () => {
+    setResourceDetailsLoading(true);
+    setResourceDetailsError(null);
+    try {
+      const data = await getPayloadFromUrl({ url:"http://127.0.0.1:8998/read_json/resource_definition_details.json"});
+      setResourceDetailsData(data);
+    } catch (err) {
+      setResourceDetailsError(err.message || String(err));
+    } finally {
+      setResourceDetailsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setResourceRulesLoading(true);
+    getPayloadFromUrl({ url:"http://127.0.0.1:8998/read_json/resource_definition_rules.json"})
+      .then((data) => {
+        setResourceRulesData(data);
+      })
+      .catch((error) => {
+        setResourceRulesError(error.message);
+      })
+      .finally(() => {
+        setResourceRulesLoading(false);
+      });
+  }, []);
 
   return (
     <Box p={6}>
@@ -47,12 +106,25 @@ export default function ResourceDefinitionPage({
 
       {/* Resource Definition - Rules Section */}
       <Box w="100%" mb={6}>
-        <Heading size="sm" mb={3}>
-            Resource Definition - Rules
-        </Heading>
+        <Flex justify="space-between" align="center" mb={3}>
+          <Heading size="sm">Resource Definition - Rules</Heading>
+          <Button
+            size="sm"
+            colorScheme="teal"
+            onClick={runAbdm}
+            isLoading={abdmRunning}
+            aria-label="Run ABDM"
+          >
+            Run ABDM
+          </Button>
+        </Flex>
         <SimpleGrid columns={1} spacing={6}>
             <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-                <SheetComponent dataUrl="http://127.0.0.1:8998/read/resource_definition_rules.csv" />
+                <SheetComponent 
+                  data={resourceRulesData} 
+                  isLoading={resourceRulesLoading} 
+                  error={resourceRulesError} 
+                />
             </Box>
         </SimpleGrid>
       </Box>
@@ -100,12 +172,19 @@ export default function ResourceDefinitionPage({
         {detailsView === "table" ? (
           <SimpleGrid columns={1} spacing={6}>
             <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-              <SheetComponent dataUrl="http://127.0.0.1:8998/read/target_resource_details.csv" />
+              <SheetComponent
+                data={resourceDetailsData}
+                isLoading={resourceDetailsLoading}
+                error={resourceDetailsError}
+                config={{ enabled: true, levelDimension: 'Level', targetDimension: 'Item' }} // Adjust config as needed
+              />
             </Box>
           </SimpleGrid>
         ) : (
           <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <NetworkGraph dataUrl="http://127.0.0.1:8998/read/target_resource_details.csv" />
+            <NetworkGraph 
+              data={resourceDetailsData} 
+            />
           </Box>
         )}
       </Box>

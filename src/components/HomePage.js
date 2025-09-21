@@ -22,8 +22,9 @@ import SheetComponent from "./SheetComponent";
 import DashboardComponent from "./DashboardComponent";
 // replaced NetworkDefinitionPage with DefinitionWizard
 import DefinitionWizard from "./DefinitionWizard";
-import { data as sampleo9data } from "./sampleo9data";
+
 import { getPayloadFromUrl } from "./o9Interfacehelper";
+import { networkSummaryPayload } from "./payloads";
 function NetworkAggHomePage() {
   const [firstSheetFilters, setFirstSheetFilters] = useState({});
   const [defineOpen, setDefineOpen] = useState(false);
@@ -35,6 +36,7 @@ function NetworkAggHomePage() {
   const [networkDefPayload, setNetworkDefPayload] = useState(null);
 
   // Add state for fetched data
+// Placeholder payload identifier
   const [networkSummaryData, setNetworkSummaryData] = useState(null);
   const [networkSummaryLoading, setNetworkSummaryLoading] = useState(true);
   const [networkSummaryError, setNetworkSummaryError] = useState(null);
@@ -49,7 +51,7 @@ function NetworkAggHomePage() {
   // Effect: Fetch data on mount
   useEffect(() => {
     setNetworkSummaryLoading(true);
-    getPayloadFromUrl("http://127.0.0.1:8998/read_json/network_summary.json")
+    getPayloadFromUrl({url:"http://127.0.0.1:8998/read_json/network_summary.json"})
       .then((data) => {
         setNetworkSummaryData(data);
       })

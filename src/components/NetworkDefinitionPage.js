@@ -14,6 +14,7 @@ import SheetComponent from "./SheetComponent";
 import NetworkGraph from "./NetworkGraph";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import React, { useState, useEffect } from "react";
+import { materialDetailsDataPayload } from "./payloads"
 /*
   NetworkDefinitionPage
   - Dummy layout that matches the pasted image: step progress + several sheet-like boxes
@@ -64,7 +65,8 @@ export default function NetworkDefinitionPage({
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);
     try {
-      const data = await getPayloadFromUrl("http://127.0.0.1:8998/read_json/material_definition_multilevels.json");
+      // const data = await getPayloadFromUrl("http://127.0.0.1:8998/read_json/material_definition_multilevels.json");
+      const data = await getPayloadFromUrl({ payload : materialDetailsDataPayload});
       setMaterialDetailsData(data);
     } catch (err) {
       setMaterialDetailsError(err.message || String(err));
@@ -75,7 +77,7 @@ export default function NetworkDefinitionPage({
 
   useEffect(() => {
     setNetworkMaterialRulesDataLoading(true);
-    getPayloadFromUrl("http://127.0.0.1:8998/read_json/material_definition_rules.json")
+    getPayloadFromUrl({url:"http://127.0.0.1:8998/read_json/material_definition_rules.json"})
       .then((data) => {
         setNetworkMaterialRulesData(data);
       })

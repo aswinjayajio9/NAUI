@@ -1,0 +1,280 @@
+{
+    "Meta": [
+        {
+            "DimensionName": "DM Rule",
+            "DimensionId": "696ff7dc-e272-4bf7-a646-c57732dfa027",
+            "DimensionType": "Regular",
+            "Alias": "0",
+            "AttributeId": "27c0b6a9-ae8f-4c11-94b8-5cb850c76af4",
+            "AttributeName": "Rule",
+            "ApiName": null,
+            "AttributeKey": "RuleKey",
+            "KeyDataType": "integer",
+            "Name": "Rule",
+            "EdgeDirection": null,
+            "RelationshipType": null,
+            "DimensionValues": [
+                {
+                    "Key": "2",
+                    "Name": "Rule_02",
+                    "DisplayName": "Rule_02",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [],
+                    "IsCalculatedMember": false
+                }
+            ],
+            "TopologicalSortOrder": 0,
+            "AncestorAttributeNames": [],
+            "OrderBy": "Name",
+            "IsAnchorAttribute": false,
+            "ToolTip": "Rule",
+            "DimensionTranslation": "DM Rule",
+            "Translation": "Rule",
+            "AttributeMemberProperties": []
+        },
+        {
+            "DimensionName": "o9NetworkAggregation Network Plan Type",
+            "DimensionId": "694f05e3-82c5-f134-4853-9a25f2884569",
+            "DimensionType": "Regular",
+            "Alias": "1",
+            "AttributeId": "76b53acc-f155-c829-ff34-2f931a6ff3b4",
+            "AttributeName": "o9NetworkAggregation Network Plan Type",
+            "ApiName": null,
+            "AttributeKey": "o9NetworkAggregationNetworkPlanTypeKey",
+            "KeyDataType": "integer",
+            "Name": "o9NetworkAggregation Network Plan Type",
+            "EdgeDirection": null,
+            "RelationshipType": null,
+            "DimensionValues": [
+                {
+                    "Key": "1",
+                    "Name": "OP",
+                    "DisplayName": "OP",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [],
+                    "IsCalculatedMember": false
+                }
+            ],
+            "TopologicalSortOrder": 0,
+            "AncestorAttributeNames": [],
+            "OrderBy": "Name",
+            "IsAnchorAttribute": false,
+            "ToolTip": "Network Plan Type",
+            "DimensionTranslation": "o9NetworkAggregation Network Plan Type",
+            "Translation": "Network Plan Type",
+            "AttributeMemberProperties": []
+        },
+        {
+            "MeasureId": "0cb9d5f9-9658-bdd4-bb54-03906755206d",
+            "Name": "Network Aggregation Resource",
+            "Alias": "2",
+            "ApiName": null,
+            "AllCellsReadOnly": false,
+            "IsEditable": true,
+            "FormatString": "#,##0;(#,##0)",
+            "ConversionFormatString": "#,##0;(#,##0)",
+            "MeasureColumnName": "NetworkAggregationResource",
+            "MeasureFormula": "",
+            "DataType": "string",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Resource",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "002.001 Network Aggregation ABDM Rule",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "Translation": "Resource",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "46a9360d-17a5-7362-0317-94323d17309f",
+            "Name": "Network Aggregation Resource Type",
+            "Alias": "3",
+            "ApiName": null,
+            "AllCellsReadOnly": false,
+            "IsEditable": true,
+            "FormatString": "#,##0;(#,##0)",
+            "ConversionFormatString": "#,##0;(#,##0)",
+            "MeasureColumnName": "NetworkAggregationResourceType",
+            "MeasureFormula": "",
+            "DataType": "string",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Resource Type",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "002.001 Network Aggregation ABDM Rule",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "Translation": "Resource Type",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "4861ada2-56b4-3956-4625-17e168df5f1c",
+            "Name": "Network Aggregation Location",
+            "Alias": "4",
+            "ApiName": null,
+            "AllCellsReadOnly": false,
+            "IsEditable": true,
+            "FormatString": "#,##0;(#,##0)",
+            "ConversionFormatString": "#,##0;(#,##0)",
+            "MeasureColumnName": "NetworkAggregationLocation",
+            "MeasureFormula": "",
+            "DataType": "string",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Location",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "002.001 Network Aggregation ABDM Rule",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "Translation": "Location",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "ea3a9d13-22f2-11b8-d0bc-42d6aebd6ae3",
+            "Name": "Network Aggregation Location Region",
+            "Alias": "5",
+            "ApiName": null,
+            "AllCellsReadOnly": false,
+            "IsEditable": true,
+            "FormatString": "#,##0;(#,##0)",
+            "ConversionFormatString": "#,##0;(#,##0)",
+            "MeasureColumnName": "NetworkAggregationLocationRegion",
+            "MeasureFormula": "",
+            "DataType": "string",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Location Region",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "002.001 Network Aggregation ABDM Rule",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "Translation": "Location Region",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "ec5c937c-3f4f-b84f-6517-50dfeceba4b3",
+            "Name": "Network Aggregation Location Type",
+            "Alias": "6",
+            "ApiName": null,
+            "AllCellsReadOnly": false,
+            "IsEditable": true,
+            "FormatString": "#,##0;(#,##0)",
+            "ConversionFormatString": "#,##0;(#,##0)",
+            "MeasureColumnName": "NetworkAggregationLocationType",
+            "MeasureFormula": "",
+            "DataType": "string",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Location Type",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "002.001 Network Aggregation ABDM Rule",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "Translation": "Location Type",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "b1d95128-4e10-7694-ef46-cb433b48d4ca",
+            "Name": "Network Aggregation Include Resource Node",
+            "Alias": "7",
+            "ApiName": null,
+            "AllCellsReadOnly": false,
+            "IsEditable": true,
+            "FormatString": "",
+            "ConversionFormatString": "",
+            "MeasureColumnName": "NetworkAggregationIncludeResourceNode",
+            "MeasureFormula": "",
+            "DataType": "ResSkipType",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Include Resource Node",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "002.001 Network Aggregation ABDM Rule",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "IsPickList": true,
+            "Translation": "Include Resource Node",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        }
+    ],
+    "Data": [
+        [
+            0,
+            0,
+            [
+                "C2b",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                "Central US",
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                "No",
+                {
+                    "rw": 2
+                }
+            ]
+        ]
+    ],
+    "QueryGuid": "f6372806-cbac-4a52-9f8a-c2e7beec7345",
+    "ConversionCulture": "en-US",
+    "ResultId": "00000000-0000-0000-0000-000000000000",
+    "PicklistValues": "{}",
+    "CurrentTimeForVersion": []
+}

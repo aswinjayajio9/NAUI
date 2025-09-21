@@ -1,6 +1,7 @@
 {
   "name": "NAUI",
   "version": "0.1.0",
+  "proxy": "https://mygcppmm.o9solutions.com",
   "private": true,
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
@@ -30,7 +31,7 @@
     "elkjs": "^0.8.2",
     "highcharts-react-official": "^3.2.1",
     "html-react-parser": "^4.2.10",
-    "http-proxy-middleware": "^2.0.6",
+    "http-proxy-middleware": "^2.0.9",
     "jodit-react": "^1.3.39",
     "jquery": "^3.7.1",
     "leaflet": "^1.9.4",
@@ -105,11 +106,11 @@
     "nth-check": "^3.0.1"
   },
   "scripts": {
-  "start": "react-scripts start",
-  "build": "react-scripts build",
-  "test": "react-scripts test",
-  "eject": "react-scripts eject"
-},
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "eslintConfig": {
     "extends": [
       "react-app"

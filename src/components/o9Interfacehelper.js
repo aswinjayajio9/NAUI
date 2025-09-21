@@ -1,16 +1,33 @@
 import o9Interface from "./o9Interface";
-
+// Load API key from environment variable
+const API_KEY = process.env.API_KEYGEN || "hkj7ja11.v37hrv9jxv6g38n7sp297gz";
 // Helper: Parse Meta/Data payload into rows and columns
 
-export const parseMetaDataPayload = (payload ,levelConfig = { enabled: true, levelDimension: 'Level', targetDimension: 'Item' }) => {
-  if (!payload?.Meta || !payload?.Data) return { rows: [], cols: [], dimensions: [], measures: [], nestedData: 'item' };
+export const parseMetaDataPayload = (
+  payload,
+  levelConfig = {
+    enabled: true,
+    levelDimension: "Level",
+    targetDimension: "Item",
+  }
+) => {
+  if (!payload?.Meta || !payload?.Data)
+    return {
+      rows: [],
+      cols: [],
+      dimensions: [],
+      measures: [],
+      nestedData: "item",
+    };
 
   const metaByAlias = {};
   payload.Meta.forEach((m) => {
     metaByAlias[Number(m.Alias)] = m;
   });
 
-  const aliases = Object.keys(metaByAlias).map(Number).sort((a, b) => a - b);
+  const aliases = Object.keys(metaByAlias)
+    .map(Number)
+    .sort((a, b) => a - b);
 
   const aliasHeader = {};
   aliases.forEach((a) => {
@@ -33,45 +50,55 @@ export const parseMetaDataPayload = (payload ,levelConfig = { enabled: true, lev
 
   const mapValue = (meta, raw) => {
     if (raw == null) return raw;
-    if (Array.isArray(raw) && raw.length > 0) raw = raw[0];  // Extract value from [value, metadata]
+    if (Array.isArray(raw) && raw.length > 0) raw = raw[0]; // Extract value from [value, metadata]
     if (meta?.DimensionValues) {
       // First, try string-based search for Key or Name (more robust)
-      const found = meta.DimensionValues.find((dv) => String(dv.Key) === String(raw) || String(dv.Name) === String(raw));
+      const found = meta.DimensionValues.find(
+        (dv) =>
+          String(dv.Key) === String(raw) || String(dv.Name) === String(raw)
+      );
       if (found) return found?.DisplayName || found?.Name || found?.Key;
       // Fallback: if raw is integer, use as index
-      if (typeof raw === "number" && Number.isInteger(raw) && raw >= 0 && raw < meta.DimensionValues.length) {
-        return meta.DimensionValues[raw]?.DisplayName || meta.DimensionValues[raw]?.Name || raw;
+      if (
+        typeof raw === "number" &&
+        Number.isInteger(raw) &&
+        raw >= 0 &&
+        raw < meta.DimensionValues.length
+      ) {
+        return (
+          meta.DimensionValues[raw]?.DisplayName ||
+          meta.DimensionValues[raw]?.Name ||
+          raw
+        );
       }
-      return raw;  // Default to raw if no match
+      return raw; // Default to raw if no match
     }
     return raw;
   };
 
-  const rows = payload.Data
-    .map((r, idx) => {
-      // Detect if r is an object or array
-      const isArray = Array.isArray(r);
-      const obj = {};
-      let hasNonNull = false;
-      aliases.forEach((a) => {
-        const raw = isArray ? r[a] : r[String(a)] || r[a];  // Handle both formats
-        const value = mapValue(metaByAlias[a], raw);
-        obj[aliasHeader[a]] = value;
-        if (value != null) hasNonNull = true;
-      });
-      obj.key = String(idx + 1);
-      return hasNonNull ? obj : null;  // Skip empty rows
-    })
-    .filter(Boolean);  // Remove nulls
+  const rows = payload.Data.map((r, idx) => {
+    // Detect if r is an object or array
+    const isArray = Array.isArray(r);
+    const obj = {};
+    let hasNonNull = false;
+    aliases.forEach((a) => {
+      const raw = isArray ? r[a] : r[String(a)] || r[a]; // Handle both formats
+      const value = mapValue(metaByAlias[a], raw);
+      obj[aliasHeader[a]] = value;
+      if (value != null) hasNonNull = true;
+    });
+    obj.key = String(idx + 1);
+    return hasNonNull ? obj : null; // Skip empty rows
+  }).filter(Boolean); // Remove nulls
 
   const cols = aliases.map((a) => ({
     dataIndex: aliasHeader[a],
     title: aliasHeader[a],
     key: aliasHeader[a],
-    isDimension: !!metaByAlias[a]?.DimensionName,  // Flag for UI
+    isDimension: !!metaByAlias[a]?.DimensionName, // Flag for UI
   }));
-  console.log('Parsed rows:', rows);
-  return { rows, cols, dimensions, measures, nestedData: 'Item' };
+  console.log("Parsed rows:", rows);
+  return { rows, cols, dimensions, measures, nestedData: "Item" };
 };
 
 // Helper: Parse generic JSON into rows
@@ -80,7 +107,10 @@ export const parseGenericJson = (json) => {
     return json.map((r, i) => ({ key: r.key || r.id || String(i + 1), ...r }));
   }
   if (json?.data) {
-    return json.data.map((r, i) => ({ key: r.key || r.id || String(i + 1), ...r }));
+    return json.data.map((r, i) => ({
+      key: r.key || r.id || String(i + 1),
+      ...r,
+    }));
   }
   const arr = Array.isArray(Object.values(json)) ? Object.values(json) : [];
   return arr.map((r, i) => ({ key: r.key || r.id || String(i + 1), ...r }));
@@ -102,7 +132,11 @@ export const parseCsv = async (res) => {
 };
 
 // Helper: Create a payload object for O9 queries
-export const createPayload = (regularMeasures = [], levelAttributes = [], dataProperties = {}) => {
+export const createPayload = (
+  regularMeasures = [],
+  levelAttributes = [],
+  dataProperties = {}
+) => {
   // Default data properties if not provided
   const defaultDataProperties = {
     IncludeInactiveMembers: false,
@@ -146,7 +180,7 @@ export const createPayload = (regularMeasures = [], levelAttributes = [], dataPr
  * @param {object[]} filters - Array of filter objects with Name, DimensionName, SelectedMembers, etc.
  * @param {number} rowIndex - The index of the row being updated (default: 0).
  * @returns {object} The constructed cell edit payload.
- * 
+ *
  * @example
  * const payload = createCellEditPayload(
  *   { ProductLine: "PG_1000", Item: "P_1000_1", Location: "ShipTo_1", FiscalQuarter: "Q2-2019", FiscalMonth: "M05-2019", SCPBaseForecastQty: 1000 },
@@ -165,7 +199,13 @@ export const createPayload = (regularMeasures = [], levelAttributes = [], dataPr
  *   0
  * );
  */
-export const createCellEditPayload = (updatedRow, measures = [], attributes = [], filters = [], rowIndex = 0) => {
+export const createCellEditPayload = (
+  updatedRow,
+  measures = [],
+  attributes = [],
+  filters = [],
+  rowIndex = 0
+) => {
   const meta = [];
   let aliasCounter = 0;
 
@@ -196,7 +236,9 @@ export const createCellEditPayload = (updatedRow, measures = [], attributes = []
   attributes.forEach((attr, idx) => {
     const value = updatedRow[attr.Name];
     if (value != null) {
-      const dimensionValue = attr.DimensionValues?.find((dv) => dv.Name === value);
+      const dimensionValue = attr.DimensionValues?.find(
+        (dv) => dv.Name === value
+      );
       const memberIndex = dimensionValue?.MemberIndex ?? 0; // Default to 0 if not found
       memberCells.push({
         Alias: String(idx),
@@ -224,11 +266,15 @@ export const createCellEditPayload = (updatedRow, measures = [], attributes = []
   ];
 
   // Build ModelDefinition using createPayload logic
-  const modelDefinition = createPayload(measures, attributes.map((attr) => ({
-    Name: attr.Name,
-    DimensionName: attr.DimensionName,
-    Axis: attr.Axis || "row", // Default axis
-  })), {});
+  const modelDefinition = createPayload(
+    measures,
+    attributes.map((attr) => ({
+      Name: attr.Name,
+      DimensionName: attr.DimensionName,
+      Axis: attr.Axis || "row", // Default axis
+    })),
+    {}
+  );
 
   // Build Filters
   const filtersArray = filters.map((filter) => ({
@@ -249,16 +295,74 @@ export const createCellEditPayload = (updatedRow, measures = [], attributes = []
 };
 
 // Helper: Fetch payload from URL and return JSON
-export const getPayloadFromUrl = (url) => {
-  return fetch(url)
-    .then(response => {
+export const getPayloadFromUrl = (
+  params = {
+    url: "/api/v2/widget/getdata",
+    payload: {},
+    apiKey: API_KEY
+  }
+) => {
+  const url = params.url || "/api/v2/widget/getdata";
+  const payload = params.payload || {};
+  const apiKey = params.apiKey || API_KEY;
+  const headers = {
+    "accept": "application/json",
+    "content-type": "application/json",
+    // "o9-request-ttid": "6760",
+    // "sec-fetch-mode": "cors",
+    // "sec-fetch-site": "same-origin",
+  };
+  try {
+    const data = o9Interface.getData(payload, undefined);
+    console.log("Fetched data from O9 interface:", data);
+    if (data?.Meta && data?.Data) {
+      return Promise.resolve(data);
+    }
+  } catch (error) {
+    console.error("Error fetching data from O9 interface:", error);
+  }
+  if (apiKey) {
+    headers["Authorization"] = `ApiKey ${apiKey}`; // Adjust header name/format if needed for O9 API
+  }
+  console.log("API Key and payload used:", apiKey,payload);
+  if (payload && Object.keys(payload).length > 0) {
+    const total_payload = {
+      method: "POST", // Assuming POST for fetching data
+      headers: headers,
+      body: JSON.stringify(payload),
+    };
+    console.log(
+      "Fetching response from URL with payload:",
+      url,
+      payload,
+      apiKey
+    );
+
+    return fetch(url, total_payload)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .catch((error) => {
+        console.error("Error fetching payload:", error);
+        throw error;
+      });
+  }
+  console.log("Fetching response from local:", url);
+  return fetch(url, {
+    method: "GET", // Assuming GET for fetching data
+    headers: headers,
+  })
+    .then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
-    .catch(error => {
-      console.error('Error fetching payload:', error);
+    .catch((error) => {
+      console.error("Error fetching payload:", error);
       throw error;
     });
 };

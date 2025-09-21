@@ -1,0 +1,525 @@
+{
+    "Meta": [
+        {
+            "DimensionName": "o9NetworkAggregation Network Plan Type",
+            "DimensionId": "694f05e3-82c5-f134-4853-9a25f2884569",
+            "DimensionType": "Regular",
+            "Alias": "0",
+            "AttributeId": "76b53acc-f155-c829-ff34-2f931a6ff3b4",
+            "AttributeName": "o9NetworkAggregation Network Plan Type",
+            "ApiName": null,
+            "AttributeKey": "o9NetworkAggregationNetworkPlanTypeKey",
+            "KeyDataType": "integer",
+            "Name": "o9NetworkAggregation Network Plan Type",
+            "EdgeDirection": null,
+            "RelationshipType": null,
+            "DimensionValues": [
+                {
+                    "Key": "1",
+                    "Name": "OP",
+                    "DisplayName": "OP",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [],
+                    "IsCalculatedMember": false
+                }
+            ],
+            "TopologicalSortOrder": 0,
+            "AncestorAttributeNames": [],
+            "OrderBy": "Name",
+            "IsAnchorAttribute": false,
+            "ToolTip": "Network Plan Type",
+            "DimensionTranslation": "o9NetworkAggregation Network Plan Type",
+            "Translation": "Network Plan Type",
+            "AttributeMemberProperties": []
+        },
+        {
+            "DimensionName": "Resource",
+            "DimensionId": "3839d88e-3da2-4f3f-a459-1a94f66256e1",
+            "DimensionType": "Regular",
+            "Alias": "1",
+            "AttributeId": "451d4d1d-cb43-4f0a-9678-69d46b042b86",
+            "AttributeName": "Resource",
+            "ApiName": null,
+            "AttributeKey": "ResourceKey",
+            "KeyDataType": "integer",
+            "Name": "Resource",
+            "EdgeDirection": null,
+            "RelationshipType": null,
+            "DimensionValues": [
+                {
+                    "Key": "20",
+                    "Name": "C1b",
+                    "DisplayName": "C1b",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [],
+                    "IsCalculatedMember": false
+                },
+                {
+                    "Key": "21",
+                    "Name": "C1c",
+                    "DisplayName": "C1c",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [],
+                    "IsCalculatedMember": false
+                },
+                {
+                    "Key": "24",
+                    "Name": "C2b",
+                    "DisplayName": "C2b",
+                    "DisplayAlias": null,
+                    "Image": null,
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [],
+                    "IsCalculatedMember": false
+                }
+            ],
+            "TopologicalSortOrder": 0,
+            "AncestorAttributeNames": [
+                "Resource All",
+                "Resource Alternate Group2",
+                "Resource Type",
+                "Resource UOM",
+                "Resource Alternate Group1"
+            ],
+            "OrderBy": "Key",
+            "IsAnchorAttribute": false,
+            "ToolTip": "Resource",
+            "DimensionTranslation": "Resource",
+            "Translation": "Resource",
+            "AttributeMemberProperties": []
+        },
+        {
+            "DimensionName": "Location",
+            "DimensionId": "80d37b05-ca9a-4f9a-9f08-d13d11fe035b",
+            "DimensionType": "Regular",
+            "Alias": "2",
+            "AttributeId": "9c3b45ac-e578-4b7d-8bba-9b631bdb0b79",
+            "AttributeName": "Location",
+            "ApiName": null,
+            "AttributeKey": "LocationKey",
+            "KeyDataType": "integer",
+            "Name": "Location",
+            "EdgeDirection": null,
+            "RelationshipType": null,
+            "DimensionValues": [
+                {
+                    "Key": "1",
+                    "Name": "Plant1",
+                    "DisplayName": "Plant1",
+                    "DisplayAlias": null,
+                    "Image": "",
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [],
+                    "IsCalculatedMember": false
+                },
+                {
+                    "Key": "2",
+                    "Name": "Plant2",
+                    "DisplayName": "Plant2",
+                    "DisplayAlias": null,
+                    "Image": "",
+                    "IsEditable": true,
+                    "BgColor": null,
+                    "FgColor": null,
+                    "MemberProperties": [],
+                    "IsCalculatedMember": false
+                }
+            ],
+            "TopologicalSortOrder": 0,
+            "AncestorAttributeNames": [
+                "LA5",
+                "Location Region",
+                "NPI Location",
+                "Location Country",
+                "Location City",
+                "LA3",
+                "Location Type",
+                "Planning Location",
+                "All Location",
+                "Reporting Location",
+                "LA2",
+                "LA6",
+                "Stat Location Group",
+                "Location Zip",
+                "LA4",
+                "LA8",
+                "Stat Location",
+                "LA7",
+                "FN Location",
+                "LA1"
+            ],
+            "OrderBy": "Key",
+            "IsAnchorAttribute": false,
+            "ToolTip": "Constraint Location",
+            "DimensionTranslation": "Location",
+            "Translation": "Location",
+            "AttributeMemberProperties": []
+        },
+        {
+            "MeasureId": "c7528ed5-7703-5683-140c-0b00ea2b85dd",
+            "Name": "Include Resource Node",
+            "Alias": "3",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "",
+            "ConversionFormatString": "",
+            "MeasureColumnName": "IncludeResourceNode",
+            "MeasureFormula": "",
+            "DataType": "ResSkipType",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Include Resource Node",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.002 Resource Definition",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "IsPickList": true,
+            "Translation": "Include Resource Node",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "b30b5a9a-f0c1-1ba2-aa29-4dce493af74b",
+            "Name": "Include Resource Node Override",
+            "Alias": "4",
+            "ApiName": null,
+            "AllCellsReadOnly": false,
+            "IsEditable": true,
+            "FormatString": "",
+            "ConversionFormatString": "",
+            "MeasureColumnName": "IncludeResourceNodeOverride",
+            "MeasureFormula": "",
+            "DataType": "ResSkipType",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Include Resource Node Override",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.002 Resource Definition",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "IsPickList": true,
+            "Translation": "Include Resource Node Override",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "4f5b2fae-08dc-bfde-7653-b61dc9564a27",
+            "Name": "Include Resource Node Final",
+            "Alias": "5",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "",
+            "ConversionFormatString": "",
+            "MeasureColumnName": "IncludeResourceNodeFinal",
+            "MeasureFormula": "",
+            "DataType": "ResSkipType",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Include Resource Node Final",
+            "IsComputedByPlanningService": true,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.002 Resource Definition",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "IsPickList": true,
+            "Translation": "Include Resource Node Final",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "8127815d-f389-1d13-ee9f-49c298fc8edb",
+            "Name": "Aggregation Simultaneous Resource",
+            "Alias": "6",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "#,##0;(#,##0)",
+            "ConversionFormatString": "#,##0;(#,##0)",
+            "MeasureColumnName": "AggregationSimultaneousResource",
+            "MeasureFormula": "",
+            "DataType": "boolean",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Simultaneous Resource",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.002 Resource Definition",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "Translation": "Simultaneous Resource",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        },
+        {
+            "MeasureId": "1f9bd7c0-6554-9e6b-a651-20a163120741",
+            "Name": "Applied Resource ABDM Rule",
+            "Alias": "7",
+            "ApiName": null,
+            "AllCellsReadOnly": true,
+            "IsEditable": false,
+            "FormatString": "",
+            "ConversionFormatString": "",
+            "MeasureColumnName": "AppliedResourceABDMRule",
+            "MeasureFormula": "",
+            "DataType": "string",
+            "AggregateFunction": "Sum",
+            "AggregationType": 0,
+            "ToolTip": "Applied Rule",
+            "IsComputedByPlanningService": false,
+            "HasEditableCellsInPast": false,
+            "MeasureGroupName": "003.002 Resource Definition",
+            "MeasureType": "Regular",
+            "ConversionFormula": "",
+            "UomAttributeId": "00000000-0000-0000-0000-000000000000",
+            "M2MRelationship": null,
+            "Translation": "Applied Rule",
+            "ValidationToolTip": null,
+            "MeasureStaticProperties": []
+        }
+    ],
+    "Data": [
+        [
+            0,
+            0,
+            0,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                "No",
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                true,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            0,
+            1,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                "No",
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            1,
+            0,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                "No",
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                true,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            1,
+            1,
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                "No",
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            2,
+            0,
+            [
+                "No",
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                "No",
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "Rule_02",
+                {
+                    "rw": 1
+                }
+            ]
+        ],
+        [
+            0,
+            2,
+            1,
+            [
+                "No",
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 2
+                }
+            ],
+            [
+                "No",
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                null,
+                {
+                    "rw": 1
+                }
+            ],
+            [
+                "Rule_02",
+                {
+                    "rw": 1
+                }
+            ]
+        ]
+    ],
+    "QueryGuid": "49e4c402-88fe-47f6-bccb-4d4f1137d442",
+    "ConversionCulture": "en-US",
+    "ResultId": "00000000-0000-0000-0000-000000000000",
+    "PicklistValues": "{}",
+    "CurrentTimeForVersion": []
+}
