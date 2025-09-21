@@ -1146,8 +1146,8 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
             { label: "Chart View", value: "chart" },
             { label: "Nested View", value: "nested" },
           ] : [
+            { label: "Table View", value: "table" },
             { label: "Chart View", value: "chart" },
-            { label: "Nested View", value: "nested" },
           ]}
           style={{ width: 200 }}
         />

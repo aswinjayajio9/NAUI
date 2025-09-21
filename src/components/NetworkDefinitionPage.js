@@ -133,10 +133,10 @@ export default function NetworkDefinitionPage({
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
             <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/summary_definition1.csv" />
+            <SheetComponent dataUrl="http://127.0.0.1:8998/read/summary_definition1.csv" enableEdit={false} />
             </Box>
             <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/summary_definition2.csv" />
+            <SheetComponent dataUrl="http://127.0.0.1:8998/read/summary_definition2.csv" enableEdit={false} />
             </Box>
         </SimpleGrid>
       </Box>

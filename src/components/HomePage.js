@@ -138,7 +138,7 @@ function NetworkAggHomePage() {
                     <FormLabel fontSize="xs">Plan Type</FormLabel>
                     <Select value={srcPlan} onChange={(e) => setSrcPlan(e.target.value)}>
                       {getFirstOptions("Plan Type").map(v => <option key={v}>{v}</option>)}
-                      <option>Other</option>
+                      <option>MP</option>
                     </Select>
                   </FormControl>
                   <FormControl>
@@ -158,7 +158,7 @@ function NetworkAggHomePage() {
                     <FormLabel fontSize="xs">Plan Type</FormLabel>
                     <Select value={tgtPlan} onChange={(e) => setTgtPlan(e.target.value)}>
                       {getFirstOptions("Plan Type").map(v => <option key={v}>{v}</option>)}
-                      <option>Other</option>
+                      <option>OP</option>
                     </Select>
                   </FormControl>
                   <FormControl>
