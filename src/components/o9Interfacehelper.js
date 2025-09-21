@@ -2,7 +2,7 @@ import o9Interface from "./o9Interface";
 
 // Helper: Parse Meta/Data payload into rows and columns
 
-export const parseMetaDataPayload = (payload) => {
+export const parseMetaDataPayload = (payload ,levelConfig = { enabled: true, levelDimension: 'Level', targetDimension: 'Item' }) => {
   if (!payload?.Meta || !payload?.Data) return { rows: [], cols: [], dimensions: [], measures: [], nestedData: 'item' };
 
   const metaByAlias = {};
