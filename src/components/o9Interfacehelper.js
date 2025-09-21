@@ -70,8 +70,7 @@ export const parseMetaDataPayload = (payload ,levelConfig = { enabled: true, lev
     key: aliasHeader[a],
     isDimension: !!metaByAlias[a]?.DimensionName,  // Flag for UI
   }));
-
-  // NOTE: 'treeData' has been removed. Add 'nestedData' (hard-coded to "item" for now)
+  console.log('Parsed rows:', rows);
   return { rows, cols, dimensions, measures, nestedData: 'Item' };
 };
 
@@ -249,31 +248,17 @@ export const createCellEditPayload = (updatedRow, measures = [], attributes = []
   };
 };
 
-// Helper: Fetch payload from URL and return it via callback for parseMetaDataPayload
+// Helper: Fetch payload from URL and return JSON
 export const getPayloadFromUrl = (url) => {
   return fetch(url)
     .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return response.json();  // Read JSON once
+      return response.json();
     })
-    // .then(payload => {
-    //   console.log('Fetched payload from URL:', payload);  // Log the actual JSON data
-    //   return payload;  // Return the payload for further use
-    // })
     .catch(error => {
       console.error('Error fetching payload:', error);
-      throw error;  // Re-throw to allow caller to handle
+      throw error;
     });
 };
-
-// Usage example:
-// getPayloadFromUrl('https://example.com/api/data', (payload, error) => {
-//   if (error) {
-//     console.error(error);
-//     return;
-//   }
-//   const { rows, cols } = parseMetaDataPayload(payload);
-//   // Use rows and cols
-// });
