@@ -146,31 +146,12 @@ export default function NetworkDefinitionPage({
         <Box w="100%" mb={6}>
           <Flex justify="space-between" align="center" mb={3}>
             <Heading size="sm">Material Definition - Details</Heading>
-            <Stack direction="row" spacing={2}>
-              <Button
-                size="sm"
-                variant={detailsView === "table" ? "solid" : "outline"}
-                colorScheme={detailsView === "table" ? "blue" : undefined}
-                onClick={() => setDetailsView("table")}
-              >
-                Table
-              </Button>
-              <Button
-                size="sm"
-                variant={detailsView === "network" ? "solid" : "outline"}
-                colorScheme={detailsView === "network" ? "blue" : undefined}
-                onClick={() => setDetailsView("network")}
-              >
-                Network
-              </Button>
-            </Stack>
           </Flex>
 
-          {detailsView === "table" ? (
+         
             <SimpleGrid columns={1} spacing={6}>
               <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
                 <SheetComponent
-      
                   data={materialDetailsData}
                   isLoading={materialDetailsLoading}
                   error={materialDetailsError}
@@ -178,14 +159,6 @@ export default function NetworkDefinitionPage({
                 />
               </Box>
             </SimpleGrid>
-          ) : (
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-              <NetworkGraph
-                dataUrl="http://127.0.0.1:8998/read/material_definition_details.csv"
-                data={materialDetailsData}
-              />
-            </Box>
-          )}
         </Box>
       )}
 

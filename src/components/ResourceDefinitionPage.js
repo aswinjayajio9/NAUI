@@ -152,27 +152,8 @@ export default function ResourceDefinitionPage({
         <Box w="100%" mb={6}>
           <Flex justify="space-between" align="center" mb={3}>
             <Heading size="sm">Resource Definition - Details</Heading>
-            <Stack direction="row" spacing={2}>
-              <Button
-                size="sm"
-                variant={detailsView === "table" ? "solid" : "outline"}
-                colorScheme={detailsView === "table" ? "blue" : undefined}
-                onClick={() => setDetailsView("table")}
-              >
-                Table
-              </Button>
-              <Button
-                size="sm"
-                variant={detailsView === "network" ? "solid" : "outline"}
-                colorScheme={detailsView === "network" ? "blue" : undefined}
-                onClick={() => setDetailsView("network")}
-              >
-                Network
-              </Button>
-            </Stack>
           </Flex>
 
-          {detailsView === "table" ? (
             <SimpleGrid columns={1} spacing={6}>
               <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
                 <SheetComponent
@@ -183,13 +164,6 @@ export default function ResourceDefinitionPage({
                 />
               </Box>
             </SimpleGrid>
-          ) : (
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-              <NetworkGraph 
-                data={resourceDetailsData} 
-              />
-            </Box>
-          )}
         </Box>
       )}
 
