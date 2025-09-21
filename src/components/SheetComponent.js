@@ -665,9 +665,13 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
     const activeFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v?.trim()));
     const optionsMap = computeOptionsMap(filtered);  // Use filtered data for options
     setFilterOptions(optionsMap);  // Update filter options
-    if (onFiltersChange) onFiltersChange({ activeFilters, options: optionsMap });
+    // only expose dimension options as above
+    const dimHeaders = (dimensions && dimensions.length) ? dimensions.map(d => d.header) : Object.keys(optionsMap);
+    const dimOptions = {};
+    dimHeaders.forEach(h => { if (optionsMap[h]) dimOptions[h] = optionsMap[h]; });
+    if (onFiltersChange) onFiltersChange({ activeFilters, options: dimOptions });
   };
-
+  
   // Handler: Reset filters
   const resetFilters = () => {
     setFilters({});
@@ -675,7 +679,10 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
     setFilterVisible(false);
     const optionsMap = computeOptionsMap();
     setFilterOptions(optionsMap);  // Update filter options
-    if (onFiltersChange) onFiltersChange({ activeFilters: {}, options: optionsMap });
+    const dimHeaders = (dimensions && dimensions.length) ? dimensions.map(d => d.header) : Object.keys(optionsMap);
+    const dimOptions = {};
+    dimHeaders.forEach(h => { if (optionsMap[h]) dimOptions[h] = optionsMap[h]; });
+    if (onFiltersChange) onFiltersChange({ activeFilters: {}, options: dimOptions });
   };
 
   // Helper: Build CSV string
@@ -1148,6 +1155,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           ] : [
             { label: "Table View", value: "table" },
             { label: "Chart View", value: "chart" },
+            { label: "Nested View", value: "nested" },
           ]}
           style={{ width: 200 }}
         />
