@@ -802,6 +802,22 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     return meta;
   }, [dimGroupsMap]);
 
+  // NEW: Compute set of row keys that belong to any expanded (maximized) group in nested view
+  const expandedRowKeySet = useMemo(() => {
+    if (viewMode !== "nested") return new Set();
+    const set = new Set();
+    Object.entries(dimGroupsMap).forEach(([dim, groups]) => {
+      const collapsed = collapsedGroups[dim] || new Set();
+      groups.forEach(g => {
+        const isCollapsed = collapsed.has(g.id);
+        if (!isCollapsed && g.rowKeys.length > 1) {
+          g.rowKeys.forEach(rk => set.add(rk));
+        }
+      });
+    });
+    return set;
+  }, [viewMode, dimGroupsMap, collapsedGroups]);
+
   // Before rendering the table, build columns with dynamic header nodes so sort icons reflect current sortConfig
   const columnsWithTitles = useMemo(() => {
     return columns.map((c, idx) => {
@@ -978,9 +994,11 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         .naui-meas-col.ant-table-cell {
           background: #fffaf0;
         }
-
-        /* strong vertical separator after the last dimension column (header + body)
-           place on the TH/TD that has the column class applied by antd */
+        /* NEW: highlight for maximized (expanded group) rows in Nested View */
+        .naui-expanded-row > td {
+          background: #e6f7ff !important;
+        }
+        /* strong vertical separator after the last dimension column (header + body) */
         .ant-table-thead > tr > th.naui-dim-last,
         .ant-table-tbody > tr > td.naui-dim-last {
           border-right: 3px solid #d9d9d9 !important;
@@ -1083,6 +1101,9 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           dataSource={nestedViewRows}
           columns={columnsWithTitles}
           pagination={false}
+          rowClassName={(record) =>
+            expandedRowKeySet.has(record.key) ? "naui-expanded-row" : ""
+          }
           // no default expand icon; we handle +/- per cell
           expandable={undefined}
         />
