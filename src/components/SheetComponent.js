@@ -26,7 +26,7 @@ import { parseMetaDataPayload, parseGenericJson, parseCsv, createCellEditPayload
 import o9Interface from "./o9Interface";
   const CELL_MIN_HEIGHT = 5;
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
-export default function SheetComponent({ dataUrl, data, onFiltersChange, config }) {
+export default function SheetComponent({ dataUrl, data, onFiltersChange, config, enableEdit = true }) {
   // State for data and UI
   const [originalData, setOriginalData] = useState([]); // Master copy for filtering
   const [dataSource, setDataSource] = useState([]);
@@ -46,7 +46,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
   const [viewVisible, setViewVisible] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
   const [filters, setFilters] = useState({}); // Active filters per column
-  const [viewMode, setViewMode] = useState("table"); // "table" | "chart" | "nested"
+  const [viewMode, setViewMode] = useState(enableEdit ? "table" : "chart"); // "table" | "chart" | "nested"; default to "chart" if !enableEdit
   // NEW: dimension group collapse state for Nested View
   const [dimGroupsMap, setDimGroupsMap] = useState({});      // { dimHeader: [{ id, value, rowKeys, firstKey }] }
   const [collapsedGroups, setCollapsedGroups] = useState({}); // { dimHeader: Set(groupId) }
@@ -241,7 +241,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
 
       setOriginalData(rows);
       setDataSource(rows);
-      setColumns(colsFromPayload ? buildColumnsFromPayload(colsFromPayload, dims) : buildEditableColumns(rows));
+      setColumns(colsFromPayload ? buildColumnsFromPayload(colsFromPayload, dims, enableEdit) : buildEditableColumns(rows, enableEdit));
 
       // Store snapshot for edit detection
       initialDataRef.current = rows.map((r) => ({ ...r }));
@@ -262,7 +262,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
     }
 
     return () => { mounted = false; };
-  }, [dataUrl, data, onFiltersChange, config]);  // Add dependencies: re-create loadData only when these change
+  }, [dataUrl, data, onFiltersChange, config, enableEdit]);  // Add dependencies: re-create loadData only when these change
 
   // Effect: Load and parse data from dataUrl or data prop
   useEffect(() => {
@@ -276,13 +276,13 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
   const [rowCounter, setRowCounter] = useState(0);
 
   // Helper: Build columns from payload (editable with highlighting and sticky dimensions)
-  const buildColumnsFromPayload = (colsFromPayload, dims) => {
+  const buildColumnsFromPayload = (colsFromPayload, dims, enableEdit) => {
     const dimHeaders = dims.map(d => d.header); // Extract dimension headers
     const measureHeaders = measures.map(m => m.header); // Extract measure headers
 
     return colsFromPayload.map((c, idx) => {
       const isDimension = dimHeaders.includes(c.dataIndex);
-      const editable = measureHeaders.includes(c.dataIndex); // Only measures editable/draggable
+      const editable = measureHeaders.includes(c.dataIndex) && enableEdit; // Only measures editable/draggable if enableEdit
 
       // store header text and flags; actual title node will be rendered at render-time so it can reflect current sort state
       return {
@@ -306,7 +306,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
   };
 
   // Helper: Build editable columns from data keys (assume all are measures for non-O9 data)
-  const buildEditableColumns = (rows) => {
+  const buildEditableColumns = (rows, enableEdit) => {
     const first = rows?.[0] || {};
     const keys = Object.keys(first).filter((k) => k !== "key");
     const dimHeaders = dimensions.map(d => d.header);
@@ -318,11 +318,11 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
         headerText: String(k).toUpperCase(),
         dataIndex: k,
         key: k,
-        editable: !isDimension, // dimensions non-editable
+        editable: !isDimension && enableEdit, // dimensions non-editable; only if enableEdit
         isDimension,
         render: (text, record) => {
           const isDuplicate = isDimension && (rowSpanMap[k]?.[record.key] === 0);
-          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, k, !isDimension);
+          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, k, !isDimension && enableEdit);
           return { children };
         },
         onCell: (record) => ({
@@ -454,7 +454,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
     };
     const id = `${record.key}:::${dataIndex}`;
 
-    // If not editable (dimension), render plain text with same wrapper so height stays consistent
+    // If not editable (dimension or !enableEdit), render plain text with same wrapper so height stays consistent
     if (!editable) {
       return (
         <div style={commonStyle}>
@@ -503,6 +503,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
 
   // Handler: Update cell value and trigger autosave
   const handleCellChange = (value, key, dataIndex) => {
+    if (!enableEdit) return; // Prevent changes if editing disabled
     const updateData = (prev) => prev.map((row) => (row.key === key ? { ...row, [dataIndex]: value } : row));
     setOriginalData(updateData);
     setDataSource(updateData);
@@ -540,6 +541,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
 
   // Handler: Keyboard navigation and escape to revert
   const handleKeyDown = (e, recordKey, dataIndex) => {
+    if (!enableEdit) return; // Prevent navigation if editing disabled
     const colIndex = columns.findIndex((c) => c.dataIndex === dataIndex);
     const rowIndex = dataSource.findIndex((r) => r.key === recordKey);
     const makeId = (rKey, dIdx) => `${rKey}:::${dIdx}`;
@@ -728,6 +730,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
 
   // Handler: Add a new row
   const addRow = () => {
+    if (!enableEdit) return; // Prevent adding if editing disabled
     const newKey = rowCounter + 1;
     setRowCounter(newKey);
     const newRow = { key: newKey };
@@ -742,6 +745,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
 
   // Handler: Delete selected rows
   const deleteRows = () => {
+    if (!enableEdit) return; // Prevent deleting if editing disabled
     if (selectedRowKeys.length === 0) {
       message.info("No rows selected to delete");
       return;
@@ -1018,12 +1022,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
       selectedRowKeys,
       onChange: (keys) => setSelectedRowKeys(keys),
     },
-    onRow: (record) => ({
-      onClick: () => {
-        const isSelected = selectedRowKeys.includes(record.key);
-        setSelectedRowKeys(isSelected ? selectedRowKeys.filter((k) => k !== record.key) : [...selectedRowKeys, record.key]);
-      },
-    }),
+    // Removed onRow to prevent row click selection; only checkbox selects
   };
 
   return (
@@ -1100,25 +1099,34 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config 
         <Button type="default" icon={<FilterOutlined />} onClick={openFilter}>
           Filter
         </Button>
-        <Button type="default" onClick={addRow}>
-          Add Row
-        </Button>
-        <Button type="default" onClick={deleteRows} disabled={selectedRowKeys.length === 0}>
-          Delete Row
-        </Button>
-        <Button
-          type="primary"
-          onClick={saveAllEdited}
-          loading={saveLoading}
-          disabled={editedKeys.length === 0}
-        >
-          Save Changes ({editedKeys.length})
-        </Button>
+        {enableEdit && (
+          <Button type="default" onClick={addRow}>
+            Add Row
+          </Button>
+        )}
+        {enableEdit && (
+          <Button type="default" onClick={deleteRows} disabled={selectedRowKeys.length === 0}>
+            Delete Row
+          </Button>
+        )}
+        {enableEdit && (
+          <Button
+            type="primary"
+            onClick={saveAllEdited}
+            loading={saveLoading}
+            disabled={editedKeys.length === 0}
+          >
+            Save Changes ({editedKeys.length})
+          </Button>
+        )}
         <Select
           value={viewMode}
           onChange={setViewMode}
-          options={[
+          options={enableEdit ? [
             { label: "Table View", value: "table" },
+            { label: "Chart View", value: "chart" },
+            { label: "Nested View", value: "nested" },
+          ] : [
             { label: "Chart View", value: "chart" },
             { label: "Nested View", value: "nested" },
           ]}
