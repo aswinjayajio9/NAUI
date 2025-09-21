@@ -26,7 +26,7 @@ import { parseMetaDataPayload, parseGenericJson, parseCsv, createCellEditPayload
 import o9Interface from "./o9Interface";
   const CELL_MIN_HEIGHT = 5;
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
-export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
+export default function SheetComponent({ dataUrl, data, onFiltersChange, config }) {
   // State for data and UI
   const [originalData, setOriginalData] = useState([]); // Master copy for filtering
   const [dataSource, setDataSource] = useState([]);
@@ -157,10 +157,13 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
       let meas = [];
       let tree = [];
 
+      // Default config if not provided
+      const finalConfig = config || { enabled: false };
+
       if (data && typeof data === "object") {
         if (data?.Meta && data?.Data) {
           payload = data;
-          const parsed = parseMetaDataPayload(data);
+          const parsed = parseMetaDataPayload(data, finalConfig);
           rows = parsed.rows;
           colsFromPayload = parsed.cols;
           dims = parsed.dimensions;
@@ -172,7 +175,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
       } else if (dataUrl && typeof dataUrl === "object") {
         if (dataUrl?.Meta && dataUrl?.Data) {
           payload = dataUrl;
-          const parsed = parseMetaDataPayload(dataUrl);
+          const parsed = parseMetaDataPayload(dataUrl, finalConfig);
           rows = parsed.rows;
           colsFromPayload = parsed.cols;
           dims = parsed.dimensions;
@@ -191,7 +194,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           const json = await res.json();
           if (json?.Meta && json?.Data) {
             payload = json;
-            const parsed = parseMetaDataPayload(json);
+            const parsed = parseMetaDataPayload(json, finalConfig);
             rows = parsed.rows;
             colsFromPayload = parsed.cols;
             dims = parsed.dimensions;
@@ -255,7 +258,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     }
 
     return () => { mounted = false; };
-  }, [dataUrl, data, onFiltersChange]);  // Add dependencies: re-create loadData only when these change
+  }, [dataUrl, data, onFiltersChange, config]);  // Add dependencies: re-create loadData only when these change
 
   // Effect: Load and parse data from dataUrl or data prop
   useEffect(() => {
