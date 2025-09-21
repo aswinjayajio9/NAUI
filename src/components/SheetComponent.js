@@ -65,7 +65,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
   const [treeData, setTreeData] = useState([]); // New: Tree structure
   // Map of { columnKey: { rowKey: rowSpanNumber | 0 } } used to merge repeated dimension cells vertically
   const [rowSpanMap, setRowSpanMap] = useState(computeRowSpanMap(dataSource, dimensions));
-
+  const [filterOptions, setFilterOptions] = useState({});
   // Refs for cell inputs (for keyboard navigation)
   const cellRefs = useRef({});
   // Ref used for drag-and-drop column reordering
@@ -239,12 +239,14 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
         setTreeData([]);
       }
 
-      setOriginalData(rows);
-      setDataSource(rows);
-      setColumns(colsFromPayload ? buildColumnsFromPayload(colsFromPayload, dims, enableEdit) : buildEditableColumns(rows, enableEdit));
+      // Build columns FIRST so we can derive filter options from them (previously columns state was still empty here)
+      const builtCols = colsFromPayload
+        ? buildColumnsFromPayload(colsFromPayload, dims, enableEdit)
+        : buildEditableColumns(rows, enableEdit);
+      setColumns(builtCols);
 
       // Store snapshot for edit detection
-      initialDataRef.current = rows.map((r) => ({ ...r }));
+      initialDataRef.current = rows.map(r => ({ ...r }));
       editedKeysRef.current.clear();
       setEditedKeys([]);
 
@@ -252,9 +254,14 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       const maxKey = rows.length > 0 ? Math.max(...rows.map(r => parseInt(r.key) || 0)) : 0;
       setRowCounter(maxKey);
 
-      // Notify parent of initial filters (only dimensions)
-      const optionsMap = computeOptionsMap(rows, dims);
+      // Compute filter options USING the just-built columns (before this was using old empty columns => empty options)
+      const optionsMap = computeOptionsMap(rows, dims, builtCols);
+      setFilterOptions(optionsMap);
       if (onFiltersChange) onFiltersChange({ activeFilters: {}, options: optionsMap });
+
+      // Finally set data arrays
+      setOriginalData(rows);
+      setDataSource(rows);
     } catch (err) {
       if (mounted) setError(err.message || String(err));
     } finally {
@@ -620,33 +627,44 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
   // Handler: Open filter modal
   const openFilter = () => setFilterVisible(true);
 
-  // Helper: Compute options map for filters (only dimensions)
-  const computeOptionsMap = (data = originalData, dims = dimensions) => {
+  // Helper: Compute options map for filters (only dimensions if present, else all columns)
+  const computeOptionsMap = (data = originalData, dims = dimensions, cols = columns) => {
+    // Only dimension columns if we have them; else fall back to all columns
+    const colsToUse = (dims && dims.length)
+      ? dims.map(d => d.header)
+      : (cols && cols.length
+          ? cols.map(c => c.dataIndex)
+          : (data[0] ? Object.keys(data[0]).filter(k => k !== 'key') : [])
+        );
     const map = {};
-    dims.forEach((dim) => {
-      const set = new Set();
-      data.forEach((r) => {
-        const v = r[dim.header];
-        if (v != null && String(v).trim()) set.add(String(v));
+    colsToUse.forEach(header => {
+      const setVals = new Set();
+      data.forEach(r => {
+        const v = r[header];
+        if (v !== null && v !== undefined && String(v).trim() !== '') {
+          setVals.add(String(v));
+        }
       });
-      map[dim.header] = Array.from(set).sort();
+      map[header] = Array.from(setVals).sort((a,b)=>a.localeCompare(b));
     });
     return map;
   };
 
-  // Handler: Apply filters (only on dimensions)
+  // Handler: Apply filters (only on dimensions if present, else all columns)
   const applyFilters = () => {
     let filtered = originalData.slice();
     Object.entries(filters).forEach(([col, q]) => {
-      if (!q || !dimensions.some(d => d.header === col)) return;  // Only filter dimensions
+      if (!q) return;
+      if (dimensions.length > 0 && !dimensions.some(d => d.header === col)) return;  // Only filter dimensions if present
       const qq = String(q).toLowerCase();
-      filtered = filtered.filter((r) => String(r[col] ?? "").toLowerCase().includes(qq));
+      filtered = filtered.filter((r) => String(r[col] ?? "").toLowerCase() === qq);  // Change to exact match
     });
     setDataSource(filtered);
     setSelectedRowKeys([]);
     setFilterVisible(false);
     const activeFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v?.trim()));
-    const optionsMap = computeOptionsMap();
+    const optionsMap = computeOptionsMap(filtered);  // Use filtered data for options
+    setFilterOptions(optionsMap);  // Update filter options
     if (onFiltersChange) onFiltersChange({ activeFilters, options: optionsMap });
   };
 
@@ -656,6 +674,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
     setDataSource(originalData);
     setFilterVisible(false);
     const optionsMap = computeOptionsMap();
+    setFilterOptions(optionsMap);  // Update filter options
     if (onFiltersChange) onFiltersChange({ activeFilters: {}, options: optionsMap });
   };
 
@@ -1078,7 +1097,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           -webkit-user-select: none;
           user-select: none;
         }
-        /* subtle visible hover to show the user the shrink/expand area */
+        /* subtle visible hover to show the shrink/expand area */
         .ant-table-thead > tr > th:hover .naui-resizer,
         .ant-table-thead > tr > th .naui-resizer:hover {
           background: rgba(0,0,0,0.05);
@@ -1195,13 +1214,18 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
         }
         width={600}
       >
-        {dimensions.map((dim) => (
-          <div key={dim.header} style={{ marginBottom: 16 }}>
-            <div style={{ fontWeight: "bold", marginBottom: 8 }}>{dim.header}</div>
-            <Input
-              value={filters[dim.header]}
-              onChange={(e) => setFilters({ ...filters, [dim.header]: e.target.value })}
-              placeholder={`Filter ${dim.header}`}
+        {(dimensions.length > 0 ? dimensions : columns.map(c => ({ header: c.dataIndex }))).map((col) => (
+          <div key={col.header} style={{ marginBottom: 16 }}>
+            <div style={{ fontWeight: "bold", marginBottom: 8 }}>{col.header}</div>
+            <Select
+              value={filters[col.header]}
+              onChange={(value) => setFilters({ ...filters, [col.header]: value })}
+              placeholder={`Filter ${col.header}`}
+              allowClear
+              showSearch
+              style={{ width: '100%' }}
+              options={filterOptions[col.header]?.map(v => ({ label: v, value: v })) || []}
+              filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
             />
           </div>
         ))}

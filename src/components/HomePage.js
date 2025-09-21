@@ -41,12 +41,26 @@ function NetworkAggHomePage() {
   const [networkSummaryLoading, setNetworkSummaryLoading] = useState(true);
   const [networkSummaryError, setNetworkSummaryError] = useState(null);
 
+  // Enhanced option resolver (supports case & space / underscore differences)
   const getFirstOptions = (colName) => {
     const opts = firstSheetFilters?.options || {};
-    if (!opts || Object.keys(opts).length === 0) return [];
-    const foundKey = Object.keys(opts).find(k => k.toLowerCase() === colName.toLowerCase());
-    return foundKey ? opts[foundKey] : [];
+    if (!opts) return [];
+    const normalize = (s) => s.toLowerCase().replace(/[\s_]/g, '');
+    const target = normalize(colName);
+    const key = Object.keys(opts).find(k => normalize(k) === target);
+    return key ? opts[key] : [];
   };
+
+  // Adjust selected defaults once options arrive (so dropdown shows real data not only hard-coded defaults)
+  useEffect(() => {
+    if (!firstSheetFilters?.options) return;
+    const planOpts = getFirstOptions("Plan Type");
+    if (planOpts.length && !planOpts.includes(srcPlan)) setSrcPlan(planOpts[0]);
+    const verOpts = getFirstOptions("Version");
+    if (verOpts.length && !verOpts.includes(srcVersion)) setSrcVersion(verOpts[0]);
+    if (planOpts.length && !planOpts.includes(tgtPlan)) setTgtPlan(planOpts[0]);
+    if (verOpts.length && !verOpts.includes(tgtVersion)) setTgtVersion(verOpts[0]);
+  }, [firstSheetFilters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Effect: Fetch data on mount
   useEffect(() => {
@@ -123,14 +137,14 @@ function NetworkAggHomePage() {
                   <FormControl>
                     <FormLabel fontSize="xs">Plan Type</FormLabel>
                     <Select value={srcPlan} onChange={(e) => setSrcPlan(e.target.value)}>
-                      {getFirstOptions("NETWORK").map(v => <option key={v}>{v}</option>)}
+                      {getFirstOptions("Plan Type").map(v => <option key={v}>{v}</option>)}
                       <option>Other</option>
                     </Select>
                   </FormControl>
                   <FormControl>
                     <FormLabel fontSize="xs">Version</FormLabel>
                     <Select value={srcVersion} onChange={(e) => setSrcVersion(e.target.value)}>
-                      {getFirstOptions("VERSION").map(v => <option key={v}>{v}</option>)}
+                      {getFirstOptions("Version").map(v => <option key={v}>{v}</option>)}
                       <option>CurrentWorkingView</option>
                     </Select>
                   </FormControl>
@@ -143,14 +157,14 @@ function NetworkAggHomePage() {
                   <FormControl>
                     <FormLabel fontSize="xs">Plan Type</FormLabel>
                     <Select value={tgtPlan} onChange={(e) => setTgtPlan(e.target.value)}>
-                      {getFirstOptions("NETWORK").map(v => <option key={v}>{v}</option>)}
+                      {getFirstOptions("Plan Type").map(v => <option key={v}>{v}</option>)}
                       <option>Other</option>
                     </Select>
                   </FormControl>
                   <FormControl>
                     <FormLabel fontSize="xs">Version</FormLabel>
                     <Select value={tgtVersion} onChange={(e) => setTgtVersion(e.target.value)}>
-                      {getFirstOptions("VERSION").map(v => <option key={v}>{v}</option>)}
+                      {getFirstOptions("Version").map(v => <option key={v}>{v}</option>)}
                       <option>CurrentWorkingView</option>
                     </Select>
                   </FormControl>
