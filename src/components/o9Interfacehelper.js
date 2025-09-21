@@ -3,7 +3,7 @@ import o9Interface from "./o9Interface";
 // Helper: Parse Meta/Data payload into rows and columns
 
 export const parseMetaDataPayload = (payload) => {
-  if (!payload?.Meta || !payload?.Data) return { rows: [], cols: [], dimensions: [], measures: [], treeData: [] };
+  if (!payload?.Meta || !payload?.Data) return { rows: [], cols: [], dimensions: [], measures: [], nestedData: 'item' };
 
   const metaByAlias = {};
   payload.Meta.forEach((m) => {
@@ -64,38 +64,6 @@ export const parseMetaDataPayload = (payload) => {
     })
     .filter(Boolean);  // Remove nulls
 
-  // Build tree structure: Group rows by dimensions (simple hierarchy)
-  const treeData = [];
-  const grouped = {};
-  rows.forEach((row) => {
-    let current = grouped;
-    dimensions.forEach((dim) => {
-      const value = row[dim.header];
-      if (!current[value]) current[value] = {};
-      current = current[value];
-    });
-    if (!current.rows) current.rows = [];
-    current.rows.push(row);
-  });
-
-  // Flatten tree for UI (e.g., Ant Design Tree)
-  const buildTree = (node, path = []) => {
-    const children = [];
-    Object.keys(node).forEach((key) => {
-      if (key === 'rows') {
-        node.rows.forEach((row) => children.push({ ...row, isLeaf: true }));
-      } else {
-        children.push({
-          title: key,
-          key: [...path, key].join('-'),
-          children: buildTree(node[key], [...path, key]),
-        });
-      }
-    });
-    return children;
-  };
-  const treeRoot = buildTree(grouped);
-
   const cols = aliases.map((a) => ({
     dataIndex: aliasHeader[a],
     title: aliasHeader[a],
@@ -103,7 +71,8 @@ export const parseMetaDataPayload = (payload) => {
     isDimension: !!metaByAlias[a]?.DimensionName,  // Flag for UI
   }));
 
-  return { rows, cols, dimensions, measures, treeData: treeRoot };
+  // NOTE: 'treeData' has been removed. Add 'nestedData' (hard-coded to "item" for now)
+  return { rows, cols, dimensions, measures, nestedData: 'Item' };
 };
 
 // Helper: Parse generic JSON into rows

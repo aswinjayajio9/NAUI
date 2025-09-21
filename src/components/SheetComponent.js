@@ -46,7 +46,10 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
   const [viewVisible, setViewVisible] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
   const [filters, setFilters] = useState({}); // Active filters per column
-  const [viewMode, setViewMode] = useState("table"); // "table" or "chart"
+  const [viewMode, setViewMode] = useState("table"); // "table" | "chart" | "nested"
+  // NEW: dimension group collapse state for Nested View
+  const [dimGroupsMap, setDimGroupsMap] = useState({});      // { dimHeader: [{ id, value, rowKeys, firstKey }] }
+  const [collapsedGroups, setCollapsedGroups] = useState({}); // { dimHeader: Set(groupId) }
   const [saveLoading, setSaveLoading] = useState(false);
 
   // Add sort state for header keyboard/controls
@@ -713,6 +716,92 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
     }
   };
 
+  // Build / refresh dimension group metadata whenever dimensions or dataSource change
+  useEffect(() => {
+    if (!dimensions.length || !dataSource.length) {
+      setDimGroupsMap({});
+      setCollapsedGroups({});
+      return;
+    }
+    const nextMap = {};
+    const nextCollapsed = {};
+    dimensions.forEach((d) => {
+      const header = d.header;
+      const groups = [];
+      let curVal = null;
+      let curGroup = null;
+      dataSource.forEach((row, idx) => {
+        const v = row[header];
+        if (idx === 0 || String(v) !== String(curVal)) {
+          // start new group
+            curVal = v;
+            curGroup = { id: row.key, value: v, rowKeys: [row.key], firstKey: row.key };
+            groups.push(curGroup);
+        } else {
+          curGroup.rowKeys.push(row.key);
+        }
+      });
+      nextMap[header] = groups;
+      // DEFAULT: collapsed (show only first row) when group size > 1
+      nextCollapsed[header] = new Set(groups.filter(g => g.rowKeys.length > 1).map(g => g.id));
+    });
+    setDimGroupsMap(nextMap);
+    setCollapsedGroups(nextCollapsed);
+  }, [dimensions, dataSource]);
+
+  // Toggle a single dimension group (expand / collapse)
+  const toggleDimGroup = (dimHeader, groupId) => {
+    setCollapsedGroups(prev => {
+      const setCopy = new Set(prev[dimHeader] || []);
+      if (setCopy.has(groupId)) setCopy.delete(groupId); else setCopy.add(groupId);
+      return { ...prev, [dimHeader]: setCopy };
+    });
+  };
+
+  // Rows for Nested View:
+  // For each row, if it belongs to ANY collapsed group (for ANY dimension) and is NOT that group's first row -> hide.
+  const nestedViewRows = useMemo(() => {
+    if (viewMode !== "nested") return dataSource;
+    if (!dimensions.length) return dataSource;
+    const collapsed = collapsedGroups;
+    const dimGroupIndex = {}; // dim -> rowKey -> { group, isFirst }
+    Object.entries(dimGroupsMap).forEach(([dim, groups]) => {
+      const map = {};
+      groups.forEach(g => {
+        g.rowKeys.forEach((rk, i) => {
+          map[rk] = { group: g, isFirst: i === 0 };
+        });
+      });
+      dimGroupIndex[dim] = map;
+    });
+
+    return dataSource.filter(row => {
+      // if any dimension group is collapsed and row not first in that group => filter out
+      for (const dim of dimensions.map(d => d.header)) {
+        const info = dimGroupIndex[dim]?.[row.key];
+        if (info && collapsed[dim]?.has(info.group.id) && !info.isFirst) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [viewMode, dataSource, dimensions, collapsedGroups, dimGroupsMap]);
+
+  // Helper: quick lookup to know if a cell is first of its group & group size
+  const dimGroupCellMeta = useMemo(() => {
+    const meta = {};
+    Object.entries(dimGroupsMap).forEach(([dim, groups]) => {
+      const map = {};
+      groups.forEach(g => {
+        g.rowKeys.forEach((rk, idx) => {
+          map[rk] = { isFirst: idx === 0, size: g.rowKeys.length, groupId: g.id };
+        });
+      });
+      meta[dim] = map;
+    });
+    return meta;
+  }, [dimGroupsMap]);
+
   // Before rendering the table, build columns with dynamic header nodes so sort icons reflect current sortConfig
   const columnsWithTitles = useMemo(() => {
     return columns.map((c, idx) => {
@@ -729,17 +818,101 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
         title: renderHeader(c.headerText ?? String(c.title ?? ""), c.dataIndex, isDim, idx),
         className,
         fixed: isDim ? "left" : undefined,
-        // drive width from the throttled state; updating this value is now throttled by RAF
         width: columnWidths[c.dataIndex] || (isDim ? 180 : c.width),
-         // Render fixed-height placeholder for duplicate dimension rows instead of empty string
-         render: (text, record) => {
-           const isDuplicate = isDim && (rowSpanMap[c.dataIndex]?.[record.key] === 0);
-           const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, c.dataIndex, c.editable);
-           return { children };
-         },
-       };
-     });
-   }, [columns, rowSpanMap, sortConfig, hoveredCell, columnWidths]);
+        render: (text, record) => {
+          // NORMAL table/chart view: keep original rowSpan blank behavior
+          const duplicateInStandard = viewMode !== "nested" && isDim && (rowSpanMap[c.dataIndex]?.[record.key] === 0);
+          if (!isDim) {
+            const children = duplicateInStandard
+              ? <div style={{ minHeight: CELL_MIN_HEIGHT }} />
+              : renderEditableCell(text, record, c.dataIndex, c.editable);
+            return { children };
+          }
+
+          // Dimension column:
+          if (viewMode !== "nested") {
+            const children = duplicateInStandard
+              ? <div style={{ minHeight: CELL_MIN_HEIGHT }} />
+              : (
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span>{String(text ?? "")}</span>
+                </div>
+              );
+            return { children };
+          }
+
+          // Nested view custom +/- per group with suppression of repeated values
+          const cellMeta = dimGroupCellMeta[c.dataIndex]?.[record.key];
+          const isFirst = cellMeta?.isFirst;
+          const size = cellMeta?.size || 1;
+          const groupId = cellMeta?.groupId;
+          const isCollapsed = groupId && collapsedGroups[c.dataIndex]?.has(groupId);
+
+          if (!isFirst) {
+            // Group expanded: hide repeated dimension value (show blank placeholder)
+            return { children: <div style={{ minHeight: CELL_MIN_HEIGHT }} /> };
+          }
+
+          const showToggle = size > 1;
+          const toggleBtn = showToggle ? (
+            <span
+              onClick={(e) => { e.stopPropagation(); toggleDimGroup(c.dataIndex, groupId); }}
+              style={{
+                cursor: "pointer",
+                display: "inline-flex",
+                width: 16,
+                justifyContent: "center",
+                marginRight: 4,
+                fontWeight: 600,
+                userSelect: "none",
+              }}
+            >
+              {isCollapsed ? "+" : "-"}
+            </span>
+          ) : <span style={{ width: 16, display: "inline-block" }} />;
+
+          return {
+            children: (
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {toggleBtn}
+                <span>{String(text ?? "")}</span>
+              </div>
+            ),
+          };
+        },
+      };
+    });
+  }, [columns, rowSpanMap, sortConfig, hoveredCell, columnWidths, viewMode, collapsedGroups, dimGroupCellMeta]);
+
+  // Build nested tree WITHOUT mutating the base dataSource (so table view shows no +/-)
+  const nestedTreeData = useMemo(() => {
+    if (!dimensions.length || !dataSource.length) return dataSource;
+    const dimHeaders = dimensions.map(d => d.header);
+    const groups = new Map();
+    dataSource.forEach(r => {
+      const key = dimHeaders.map(h => String(r[h] ?? "")).join("||");
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(r);
+    });
+    const tree = [];
+    groups.forEach((rows) => {
+      if (rows.length === 1) {
+        // single row: clone so we never attach children to original
+        tree.push({ ...rows[0] });
+      } else {
+        const parentOrig = rows[0];
+        const parent = { ...parentOrig }; // clone parent
+        parent.children = rows.slice(1).map((r, i) => {
+          // clone child; ensure unique key if same as parent
+          return r.key === parentOrig.key
+            ? { ...r, key: `${r.key}::c${i + 1}` }
+            : { ...r };
+        });
+        tree.push(parent);
+      }
+    });
+    return tree;
+  }, [dataSource, dimensions]);
 
   // Recompute vertical rowSpan map for dimension columns whenever dataSource or dimensions change
   useEffect(() => {
@@ -882,6 +1055,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           options={[
             { label: "Table View", value: "table" },
             { label: "Chart View", value: "chart" },
+            { label: "Nested View", value: "nested" },
           ]}
           style={{ width: 200 }}
         />
@@ -892,7 +1066,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
           dataSource={dataSource}
           columns={columnsWithTitles}
         />
-      ) : (
+      ) : viewMode === "chart" ? (
         <ChartComponent
           data={dataSource}
           dimensions={dimensions}
@@ -902,6 +1076,15 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange }) {
             setDataSource(newData);
             setOriginalData(newData);
           }}
+        />
+      ) : (
+        <Table
+          {...commonTableProps}
+          dataSource={nestedViewRows}
+          columns={columnsWithTitles}
+          pagination={false}
+          // no default expand icon; we handle +/- per cell
+          expandable={undefined}
         />
       )}
       <Modal
