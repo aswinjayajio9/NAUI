@@ -3,7 +3,7 @@ import { Flex, Box, Text, Button } from "@chakra-ui/react";
 
 export default function NavigateDefinition({
   steps = [
-    "Planning Level Definition",
+    "Material Definition",
     "Resource Definition",
     "Parameters Definition",
     "Preview Network",

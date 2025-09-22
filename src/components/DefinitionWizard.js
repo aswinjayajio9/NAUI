@@ -16,7 +16,7 @@ export default function DefinitionWizard({
   previewUrl, // added prop: when provided, clicking the last step redirects here
 }) {
   const steps = [
-    "Planning Level Definition",
+    "Material Definition",
     "Resource Definition",
     "Parameters Definition",
     "Preview Network",
