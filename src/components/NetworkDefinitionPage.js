@@ -15,7 +15,7 @@ import { API_BASE_URL } from "./HomePage"; // Import the constant
 import NetworkGraph from "./NetworkGraph";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import React, { useState, useEffect } from "react";
-import { materialDetailsDataPayload } from "./payloads"
+import { materialDetailsDataPayload,networkMaterialRulesDataPayload } from "./payloads"
 /*
   NetworkDefinitionPage
   - Dummy layout that matches the pasted image: step progress + several sheet-like boxes
@@ -80,9 +80,20 @@ export default function NetworkDefinitionPage({
 
   useEffect(() => {
     setNetworkMaterialRulesDataLoading(true);
-    getPayloadFromUrl({url:`${API_BASE_URL}/read_json/material_definition_rules.json`})
+    getPayloadFromUrl({payload: networkMaterialRulesDataPayload})
       .then((data) => {
-        setNetworkMaterialRulesData(data);
+        // console.log("Network summary data:",data );
+        if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+          } catch (parseError) {
+            throw new Error("Failed to parse API response as JSON: " + parseError.message);
+          }
+        }
+        if (!data || !data["Results"] || !Array.isArray(data["Results"]) || data["Results"].length === 0) {
+          throw new Error("Invalid API response: Missing or empty 'Results' array");
+        }
+        setNetworkMaterialRulesData(data["Results"]["0"]);
       })
       .catch((error) => {
         setNetworkMaterialRulesDataLoading(error.message);
@@ -129,7 +140,7 @@ export default function NetworkDefinitionPage({
       {/* Summary of Material Definition */}
       <Box w="100%" mb={6}>
         <Heading size="sm" mb={3}>
-            Summary of Material Definition
+            Material Definition
         </Heading>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">

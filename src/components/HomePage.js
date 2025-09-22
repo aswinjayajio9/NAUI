@@ -68,9 +68,20 @@ function NetworkAggHomePage() {
   // Effect: Fetch data on mount
   useEffect(() => {
     setNetworkSummaryLoading(true);
-    getPayloadFromUrl({url:`${API_BASE_URL}/read_json/network_summary.json`})
+    getPayloadFromUrl({payload: networkSummaryPayload})
       .then((data) => {
-        setNetworkSummaryData(data);
+        // console.log("Network summary data:",data );
+        if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+          } catch (parseError) {
+            throw new Error("Failed to parse API response as JSON: " + parseError.message);
+          }
+        }
+        if (!data || !data["Results"] || !Array.isArray(data["Results"]) || data["Results"].length === 0) {
+          throw new Error("Invalid API response: Missing or empty 'Results' array");
+        }
+        setNetworkSummaryData(data["Results"]["0"]);
       })
       .catch((error) => {
         setNetworkSummaryError(error.message);

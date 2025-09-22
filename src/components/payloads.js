@@ -1,430 +1,14 @@
 export const networkSummaryPayload = {
-    "RegularMeasures": [
-        {
-            "Name": "Network Aggregation Base Plan Type",
-            "Id": "5fb611b8-4c54-1bbe-17bc-49dad3915edb",
-            "IsVisible": true,
-            "IsEditable": true,
-            "IsMultiFileUpload": false,
-            "ShowInLocalTimeZone": false,
-            "RenderType": "Value",
-            "Alignment": "MiddleRight",
-            "FormatString": "",
-            "ColumnWidth": 0,
-            "Sort": "",
-            "UseExcelAggregation": false,
-            "MeasureFormatting": [
-                {
-                    "BGCOLOR": "",
-                    "FGCOLOR": "",
-                    "ApplyForData": false,
-                    "ApplyForHeader": false
-                }
-            ],
-            "TimeHorizon": "",
-            "CalculatedMembers": [],
-            "ShowInfo": {
-                "ShowDetail": true,
-                "ShowPulse": true,
-                "ShowTask": true,
-                "ShowMarketIntelligence": true
-            },
-            "ChildMeasureCollections": null,
-            "IsMultiDimensionProperty": false,
-            "Guid": "5fb611b8-4c54-1bbe-17bc-49dad3915edb"
-        },
-        {
-            "Name": "Network Aggregation Target Version",
-            "Id": "58b35621-2001-d49c-5c48-fed54d57e8d7",
-            "IsVisible": true,
-            "IsEditable": false,
-            "IsMultiFileUpload": false,
-            "ShowInLocalTimeZone": false,
-            "RenderType": "Value",
-            "Alignment": "MiddleRight",
-            "FormatString": "",
-            "ColumnWidth": 0,
-            "Sort": "",
-            "UseExcelAggregation": false,
-            "MeasureFormatting": [
-                {
-                    "BGCOLOR": "",
-                    "FGCOLOR": "",
-                    "ApplyForData": false,
-                    "ApplyForHeader": false
-                }
-            ],
-            "TimeHorizon": "",
-            "CalculatedMembers": [],
-            "ShowInfo": {
-                "ShowDetail": true,
-                "ShowPulse": true,
-                "ShowTask": true,
-                "ShowMarketIntelligence": true
-            },
-            "ChildMeasureCollections": null,
-            "IsMultiDimensionProperty": false,
-            "Guid": "58b35621-2001-d49c-5c48-fed54d57e8d7"
-        },
-        {
-            "Name": "Network Aggregation BOM Count",
-            "Id": "dd370f68-3089-ddb6-f8b7-5e3da4ad3df0",
-            "IsVisible": true,
-            "IsEditable": false,
-            "IsMultiFileUpload": false,
-            "ShowInLocalTimeZone": false,
-            "RenderType": "Value",
-            "Alignment": "MiddleRight",
-            "FormatString": "",
-            "ColumnWidth": 0,
-            "Sort": "",
-            "UseExcelAggregation": false,
-            "MeasureFormatting": [
-                {
-                    "BGCOLOR": "",
-                    "FGCOLOR": "",
-                    "ApplyForData": false,
-                    "ApplyForHeader": false
-                }
-            ],
-            "TimeHorizon": "",
-            "CalculatedMembers": [],
-            "ShowInfo": {
-                "ShowDetail": true,
-                "ShowPulse": true,
-                "ShowTask": true,
-                "ShowMarketIntelligence": true
-            },
-            "ChildMeasureCollections": null,
-            "IsMultiDimensionProperty": false,
-            "Guid": "dd370f68-3089-ddb6-f8b7-5e3da4ad3df0"
-        },
-        {
-            "Name": "Network Aggregation Routing Count",
-            "Id": "3316f289-fcfd-e45e-2fa9-06159457cbaf",
-            "IsVisible": true,
-            "IsEditable": false,
-            "IsMultiFileUpload": false,
-            "ShowInLocalTimeZone": false,
-            "RenderType": "Value",
-            "Alignment": "MiddleRight",
-            "FormatString": "",
-            "ColumnWidth": 0,
-            "Sort": "",
-            "UseExcelAggregation": false,
-            "MeasureFormatting": [
-                {
-                    "BGCOLOR": "",
-                    "FGCOLOR": "",
-                    "ApplyForData": false,
-                    "ApplyForHeader": false
-                }
-            ],
-            "TimeHorizon": "",
-            "CalculatedMembers": [],
-            "ShowInfo": {
-                "ShowDetail": true,
-                "ShowPulse": true,
-                "ShowTask": true,
-                "ShowMarketIntelligence": true
-            },
-            "ChildMeasureCollections": null,
-            "IsMultiDimensionProperty": false,
-            "Guid": "3316f289-fcfd-e45e-2fa9-06159457cbaf"
-        },
-        {
-            "Name": "Network Aggregation Item Count",
-            "Id": "a24b567c-eb38-0694-c614-1c08ae85d791",
-            "IsVisible": true,
-            "IsEditable": false,
-            "IsMultiFileUpload": false,
-            "ShowInLocalTimeZone": false,
-            "RenderType": "Value",
-            "Alignment": "MiddleRight",
-            "FormatString": "",
-            "ColumnWidth": 0,
-            "Sort": "",
-            "UseExcelAggregation": false,
-            "MeasureFormatting": [
-                {
-                    "BGCOLOR": "",
-                    "FGCOLOR": "",
-                    "ApplyForData": false,
-                    "ApplyForHeader": false
-                }
-            ],
-            "TimeHorizon": "",
-            "CalculatedMembers": [],
-            "ShowInfo": {
-                "ShowDetail": true,
-                "ShowPulse": true,
-                "ShowTask": true,
-                "ShowMarketIntelligence": true
-            },
-            "ChildMeasureCollections": null,
-            "IsMultiDimensionProperty": false,
-            "Guid": "a24b567c-eb38-0694-c614-1c08ae85d791"
-        },
-        {
-            "Name": "Network Aggregation Resource Count",
-            "Id": "dea58817-02a4-e060-6f2d-a3179a251002",
-            "IsVisible": true,
-            "IsEditable": false,
-            "IsMultiFileUpload": false,
-            "ShowInLocalTimeZone": false,
-            "RenderType": "Value",
-            "Alignment": "MiddleRight",
-            "FormatString": "",
-            "ColumnWidth": 0,
-            "Sort": "",
-            "UseExcelAggregation": false,
-            "MeasureFormatting": [
-                {
-                    "BGCOLOR": "",
-                    "FGCOLOR": "",
-                    "ApplyForData": false,
-                    "ApplyForHeader": false
-                }
-            ],
-            "TimeHorizon": "",
-            "CalculatedMembers": [],
-            "ShowInfo": {
-                "ShowDetail": true,
-                "ShowPulse": true,
-                "ShowTask": true,
-                "ShowMarketIntelligence": true
-            },
-            "ChildMeasureCollections": null,
-            "IsMultiDimensionProperty": false,
-            "Guid": "dea58817-02a4-e060-6f2d-a3179a251002"
-        }
-    ],
-    "LevelAttributes": [
-        {
-            "Id": "76b53acc-f155-c829-ff34-2f931a6ff3b4",
-            "AttributeName": "o9NetworkAggregation Network Plan Type",
-            "Dimension": "o9NetworkAggregation Network Plan Type",
-            "Axis": "row",
-            "ShowInfo": {
-                "ShowDetail": true,
-                "ShowPulse": true,
-                "ShowTask": true,
-                "ShowMarketIntelligence": true
-            },
-            "IsVisible": true,
-            "IsAttributeRequired": false,
-            "ShowSubtotal": false,
-            "ShowMemberConditionalFormatting": false,
-            "UOMMember": null,
-            "DisplayName": "Aggregation Target Plan Type",
-            "ShortName": "",
-            "SortBy": "",
-            "JoinWithGraph": false,
-            "JoinGraphName": null,
-            "JoinWithNode": "FROM",
-            "Name": "o9NetworkAggregation Network Plan Type",
-            "DimensionName": "o9NetworkAggregation Network Plan Type",
-            "Guid": "76b53acc-f155-c829-ff34-2f931a6ff3b4"
-        },
-        {
-            "Id": "76b53acc-f155-c829-ff34-2f931a6ff3b4",
-            "AttributeName": "o9NetworkAggregation Network Plan Type",
-            "Dimension": "o9NetworkAggregation Network Plan Type",
-            "DimensionId": 5224809,
-            "IsFilter": true,
-            "Axis": "none",
-            "IsDefault": true,
-            "AllSelection": true,
-            "SelectedMembers": [],
-            "Name": "o9NetworkAggregation Network Plan Type",
-            "DimensionName": "o9NetworkAggregation Network Plan Type",
-            "OverrideFavSelection": false,
-            "CurrencyFilter": false,
-            "IsSingleSelect": false,
-            "MemberFilterExpression": "",
-            "DefaultValueExpression": "",
-            "WorksheetLevelFilter": false,
-            "HideDummyMembers": false,
-            "SortBy": "",
-            "SortOrder": "",
-            "IsNarrowYourSelection": false,
-            "Position": 0,
-            "ShowFilterAs": "TileView",
-            "FiltersMap": {
-                "4b51781b21f9c5cda80da0939b6d1202": "4b51781b21f9c5cda80da0939b6d1202"
-            },
-            "UserBagSelection": [],
-            "Guid": "76b53acc-f155-c829-ff34-2f931a6ff3b4",
-            "SelectedMembersIbplExpression": ""
-        },
-        {
-            "Id": "e594aad2-d604-4a05-95b8-81a9047605b7",
-            "AttributeName": "Item",
-            "Dimension": "Item",
-            "DimensionId": 5224905,
-            "IsFilter": true,
-            "Axis": "none",
-            "IsDefault": true,
-            "AllSelection": true,
-            "SelectedMembers": [],
-            "Name": "Item",
-            "DimensionName": "Item",
-            "CurrencyFilter": false,
-            "IsSingleSelect": false,
-            "MemberFilterExpression": "",
-            "DefaultValueExpression": "",
-            "OverrideFavSelection": false,
-            "WorksheetLevelFilter": false,
-            "HideDummyMembers": false,
-            "SortBy": "",
-            "SortOrder": "",
-            "IsNarrowYourSelection": false,
-            "Position": 1,
-            "ShowFilterAs": "TileView",
-            "FiltersMap": {
-                "fd0f45bd630376f9cc6c76bde001c1a0": "fd0f45bd630376f9cc6c76bde001c1a0"
-            },
-            "UserBagSelection": [],
-            "Guid": "e594aad2-d604-4a05-95b8-81a9047605b7",
-            "SelectedMembersIbplExpression": ""
-        },
-        {
-            "Id": "53d1dc5b-1cb4-4ca4-afa4-fcebf83c1bec",
-            "AttributeName": "Item Type",
-            "Dimension": "Item",
-            "DimensionId": 5224905,
-            "IsFilter": true,
-            "Axis": "none",
-            "IsDefault": true,
-            "AllSelection": true,
-            "SelectedMembers": [],
-            "Name": "Item Type",
-            "DimensionName": "Item",
-            "Position": 2,
-            "ShowFilterAs": "TileView",
-            "CurrencyFilter": false,
-            "FiltersMap": {
-                "fd0f45bd630376f9cc6c76bde001c1a0": "fd0f45bd630376f9cc6c76bde001c1a0"
-            },
-            "UserBagSelection": [],
-            "Guid": "53d1dc5b-1cb4-4ca4-afa4-fcebf83c1bec"
-        },
-        {
-            "Id": "9c3b45ac-e578-4b7d-8bba-9b631bdb0b79",
-            "AttributeName": "Location",
-            "Dimension": "Location",
-            "DimensionId": 5224886,
-            "IsFilter": true,
-            "Axis": "none",
-            "IsDefault": true,
-            "AllSelection": true,
-            "SelectedMembers": [],
-            "Name": "Location",
-            "DimensionName": "Location",
-            "CurrencyFilter": false,
-            "IsSingleSelect": false,
-            "MemberFilterExpression": "",
-            "DefaultValueExpression": "",
-            "OverrideFavSelection": false,
-            "WorksheetLevelFilter": false,
-            "HideDummyMembers": false,
-            "SortBy": "",
-            "SortOrder": "",
-            "IsNarrowYourSelection": false,
-            "Position": 3,
-            "ShowFilterAs": "TileView",
-            "FiltersMap": {
-                "2a16690954040d01018ef2f22ce8719d": "2a16690954040d01018ef2f22ce8719d"
-            },
-            "UserBagSelection": [],
-            "Guid": "9c3b45ac-e578-4b7d-8bba-9b631bdb0b79",
-            "SelectedMembersIbplExpression": ""
-        },
-        {
-            "Id": "f3ca661d-2418-4d28-908b-e1a582074ae7",
-            "AttributeName": "Location Type",
-            "Dimension": "Location",
-            "DimensionId": 5224886,
-            "IsFilter": true,
-            "Axis": "none",
-            "IsDefault": true,
-            "AllSelection": true,
-            "SelectedMembers": [],
-            "Name": "Location Type",
-            "DimensionName": "Location",
-            "Position": 4,
-            "ShowFilterAs": "TileView",
-            "CurrencyFilter": false,
-            "FiltersMap": {
-                "2a16690954040d01018ef2f22ce8719d": "2a16690954040d01018ef2f22ce8719d"
-            },
-            "UserBagSelection": [],
-            "Guid": "f3ca661d-2418-4d28-908b-e1a582074ae7"
-        },
-        {
-            "Id": "211b33d5-d91f-40ec-9668-20e0da2ae7b3",
-            "AttributeName": "Version Name",
-            "Dimension": "Version",
-            "DimensionId": 5224789,
-            "IsFilter": true,
-            "Axis": "none",
-            "IsDefault": true,
-            "AllSelection": false,
-            "SelectedMembers": [
-                {
-                    "Name": "Operational Plan"
-                }
-            ],
-            "Name": "Version Name",
-            "DimensionName": "Version",
-            "OverrideFavSelection": false,
-            "IsSingleSelect": true,
-            "MemberFilterExpression": "",
-            "DefaultValueExpression": "",
-            "WorksheetLevelFilter": false,
-            "HideDummyMembers": false,
-            "SortBy": "",
-            "SortOrder": "",
-            "IsNarrowYourSelection": false,
-            "Position": 5,
-            "ShowFilterAs": "TileView",
-            "CurrencyFilter": false,
-            "FiltersMap": {
-                "d68e103980ccd153fc7eaa3e2c2dee46": "d68e103980ccd153fc7eaa3e2c2dee46"
-            },
-            "UserBagSelection": [],
-            "Guid": "211b33d5-d91f-40ec-9668-20e0da2ae7b3",
-            "SelectedMembersIbplExpression": ""
-        }
-    ],
-    "NamedSets": [],
-    "DataProperties": {
-        "IncludeInactiveMembers": false,
-        "IncludeNulls": true,
-        "NullsForFinerGrainSelect": false,
-        "NullsForUnrelatedAttrSelect": false,
-        "RequireEditValidation": false,
-        "SubTotalsType": "NoSubtotals",
-        "IncludeNullsForSeries": "",
-        "AssociationMeasureExpression": "",
-        "ExcludeConditionalFormatting": true,
-        "NodeTraversalSteps": "ALL"
-    },
-    "AssociationMeasures": [
-        {
-            "MeasureFilterIBPLExpression": "",
-            "MeasureFilterScope": "Post Filter"
-        }
-    ],
-    "AssociationMeasureExpressions": [
-        {
-            "Expression": ""
-        }
-    ],
-    "MeasureValueFilters": [],
-    "TransientMeasures": [],
-    "PeggingAttributes": [],
-    "GraphRelations": []
+    "Tenant": 6760,
+    "Query": "Select ([Version].[Version Name].[Operational Plan] * [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type] ) on row, \n({Measure.[Network Aggregation BOM Count], Measure.[Network Aggregation Base Plan Type], Measure.[Network Aggregation Item Count], Measure.[Network Aggregation Resource Count], Measure.[Network Aggregation Routing Count], Measure.[Network Aggregation Target Version]}) on column;",
+    "ExecutionContext": "Kibo Debugging Workspace",
+    "EnableMultipleResults": true
+}
+export const networkMaterialRulesDataPayload = {
+    "Tenant": 6760,
+    "Query": "SELECT ([Version].[Version Name] * [Data Object].[Data Object].[Exclude Material Node]*[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type] * [DM Rule].[Rule]) ON ROW,({Measure.[Network Aggregation Item], Measure.[Network Aggregation Item Class], Measure.[Network Aggregation Item Stage], Measure.[Network Aggregation Item Type], Measure.[Network Aggregation Location], Measure.[Network Aggregation Location Region], Measure.[Network Aggregation Location Type], Measure.[Network Aggregation Include Material Node]}) ON COLUMN;",
+    "ExecutionContext": "Kibo Debugging Workspace",
+    "EnableMultipleResults": true
 }
 
 export const materialDetailsDataPayload = {
@@ -620,3 +204,47 @@ export const materialDetailsDataPayload = {
     ]
 }
 
+export const versionPayload = {
+    "LevelAttributes": [
+        {
+            "Id": "211b33d5-d91f-40ec-9668-20e0da2ae7b3",
+            "AttributeName": "Version Name",
+            "Dimension": "Version",
+            "DimensionId": 5224789,
+            "IsFilter": false,
+            "Axis": "row",
+            "IsDefault": true,
+            "AllSelection": true,
+            "SelectedMembers": [],
+            "Name": "Version Name",
+            "DimensionName": "Version",
+            "OverrideFavSelection": false,
+            "IsSingleSelect": true,
+            "MemberFilterExpression": "",
+            "DefaultValueExpression": "",
+            "WorksheetLevelFilter": false,
+            "HideDummyMembers": false,
+            "SortBy": "",
+            "SortOrder": "",
+            "IsNarrowYourSelection": false,
+            "Position": 3,
+            "ShowFilterAs": "TileView",
+            "CurrencyFilter": false,
+            "IncludeAllMemberProperties": false,
+            "MemberProperties": [
+                {
+                    "Name": "DisplayName",
+                    "Sort": "ascending",
+                    "ExcludeFromSelect": true
+                }
+            ]
+        }
+    ],
+    "DataProperties": {
+        "IncludeNulls": false,
+        "NullsForFinerGrainSelect": false,
+        "NullsForUnrelatedAttrSelect": false,
+        "SubTotalsType": "NoSubtotals",
+        "MaxRecordLimit": 10000
+    }
+};

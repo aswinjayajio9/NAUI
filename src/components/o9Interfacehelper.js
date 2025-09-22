@@ -297,12 +297,12 @@ export const createCellEditPayload = (
 // Helper: Fetch payload from URL and return JSON
 export const getPayloadFromUrl = (
   params = {
-    url: "/api/v2/widget/getdata",
+    url: "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true",
     payload: {},
     apiKey: API_KEY
   }
 ) => {
-  const url = params.url || "/api/v2/widget/getdata";
+  const url = params.url || "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true";
   const payload = params.payload || {};
   const apiKey = params.apiKey || API_KEY;
   const headers = {
@@ -365,4 +365,29 @@ export const getPayloadFromUrl = (
       console.error("Error fetching payload:", error);
       throw error;
     });
+};
+
+
+// Accepts a payload object (from payload.js) and returns dimension dropdown values
+export const fetchDimensionDropdowns = async (payload) => {
+  try {
+    const data = await getPayloadFromUrl({
+      url: "/api/v2/widget/getdata",
+      payload: payload
+    });
+    // Extract all dimension values from Meta
+    const dropdowns = {};
+    if (Array.isArray(data.Meta)) {
+      data.Meta.forEach(meta => {
+        if (meta.DimensionValues) {
+          dropdowns[meta.Name] = meta.DimensionValues;
+        }
+      });
+    }
+    console.log("Fetched dimension dropdowns:", dropdowns);
+    return dropdowns;
+  } catch (err) {
+    console.error("Failed to fetch dimension dropdowns:", err);
+    return {};
+  }
 };

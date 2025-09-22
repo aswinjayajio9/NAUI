@@ -24,7 +24,8 @@ import ChartComponent from "./chartComponent";
 // Add import for parser functions from the helper
 import { parseMetaDataPayload, parseGenericJson, parseCsv, createCellEditPayload } from "./o9Interfacehelper";
 import o9Interface from "./o9Interface";
-  const CELL_MIN_HEIGHT = 5;
+import AddRow from "./AddRow";  // Add this import for the AddRow modal component
+const CELL_MIN_HEIGHT = 5;
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
 export default function SheetComponent({ dataUrl, data, onFiltersChange, config, enableEdit = true }) {
   // State for data and UI
@@ -74,7 +75,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
   const rafRef = useRef(null);
   // State & refs for column resizing
   const [columnWidths, setColumnWidths] = useState({});
-  const resizingRef = useRef(null);
+  const resizingRef = useRef(null);  // Ensure this is defined before use
   const columnsRef = useRef(columns);
   useEffect(() => { columnsRef.current = columns; }, [columns]);
   
@@ -281,6 +282,10 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
 
   // Add state for row counter to generate unique keys for new rows
   const [rowCounter, setRowCounter] = useState(0);
+
+  // Add state for AddRow modal
+  const [addRowVisible, setAddRowVisible] = useState(false);
+  const [newRowData, setNewRowData] = useState({});
 
   // Helper: Build columns from payload (editable with highlighting and sticky dimensions)
   const buildColumnsFromPayload = (colsFromPayload, dims, enableEdit) => {
@@ -685,18 +690,6 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
     if (onFiltersChange) onFiltersChange({ activeFilters: {}, options: dimOptions });
   };
 
-  // Helper: Build CSV string
-  const buildCSV = (rows, cols) => {
-    const header = cols.join(",");
-    const lines = rows.map((r) => 
-      cols.map((c) => {
-        const v = String(r[c] ?? "");
-        return v.includes(",") || v.includes('"') ? `"${v.replace(/"/g, '""')}"` : v;
-      }).join(",")
-    );
-    return [header, ...lines].join("\r\n");
-  };
-
   // Handler: Save a row (manual save for edited rows)
   const saveRow = async (key, updatedRow = null) => {
     if (!updatedRow) {
@@ -752,39 +745,6 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
     } finally {
       setSaveLoading(false);
     }
-  };
-
-  // Handler: Add a new row
-  const addRow = () => {
-    if (!enableEdit) return; // Prevent adding if editing disabled
-    const newKey = rowCounter + 1;
-    setRowCounter(newKey);
-    const newRow = { key: newKey };
-    columns.forEach((col) => {
-      newRow[col.dataIndex] = ""; // Default empty value
-    });
-    setDataSource((prev) => [...prev, newRow]);
-    setOriginalData((prev) => [...prev, newRow]);
-    // Add to initial snapshot
-    initialDataRef.current.push({ ...newRow });
-  };
-
-  // Handler: Delete selected rows
-  const deleteRows = () => {
-    if (!enableEdit) return; // Prevent deleting if editing disabled
-    if (selectedRowKeys.length === 0) {
-      message.info("No rows selected to delete");
-      return;
-    }
-    setDataSource((prev) => prev.filter((r) => !selectedRowKeys.includes(r.key)));
-    setOriginalData((prev) => prev.filter((r) => !selectedRowKeys.includes(r.key)));
-    // Remove from edited keys
-    editedKeysRef.current = new Set(Array.from(editedKeysRef.current).filter((k) => !selectedRowKeys.includes(k)));
-    setEditedKeys(Array.from(editedKeysRef.current));
-    // Remove from initial snapshot
-    initialDataRef.current = initialDataRef.current.filter((r) => !selectedRowKeys.includes(r.key));
-    setSelectedRowKeys([]);
-    message.success(`${selectedRowKeys.length} row(s) deleted`);
   };
 
   // Build / refresh dimension group metadata whenever dimensions or dataSource change
@@ -896,7 +856,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       const nextIsDim = !!columns[idx + 1]?.isDimension;
       let className;
       if (isDim) {
-        className = nextIsDim ? "naui-dim-col" : "naui-dim-col naui-dim-last";
+        className = nextIsDim ? "naui-dim-col" : "naui-dim-last";
       } else {
         className = "naui-meas-col";
       }
@@ -1051,6 +1011,28 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
     // Removed onRow to prevent row click selection; only checkbox selects
   };
 
+  // Add this handler before the return statement
+  const deleteRows = () => {
+    if (selectedRowKeys.length === 0) {
+      message.info("No rows selected for deletion");
+      return;
+    }
+    Modal.confirm({
+      title: "Delete Selected Rows",
+      content: `Are you sure you want to delete ${selectedRowKeys.length} row(s)?`,
+      okText: "Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        // If you want to delete on server, replace this with a fetch call
+        setDataSource((prev) => prev.filter((row) => !selectedRowKeys.includes(row.key)));
+        setOriginalData((prev) => prev.filter((row) => !selectedRowKeys.includes(row.key)));
+        setSelectedRowKeys([]);
+        message.success("Selected rows deleted");
+      },
+    });
+  };
+
   return (
     <div style={{ padding: 16, backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }}>
       {/* Styles for frozen dimension columns and hard divider after last dimension */}
@@ -1126,7 +1108,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           Filter
         </Button>
         {enableEdit && (
-          <Button type="default" onClick={addRow}>
+          <Button type="default" onClick={() => setAddRowVisible(true)}>
             Add Row
           </Button>
         )}
@@ -1238,6 +1220,20 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           </div>
         ))}
       </Modal>
+      <AddRow
+        visible={addRowVisible}
+        onCancel={() => setAddRowVisible(false)}
+        onAdd={(data) => {
+          // Optional: Handle local add if needed, but prioritize server sync
+          setDataSource((prev) => [...prev, { ...data, key: rowCounter + 1 }]);
+          setOriginalData((prev) => [...prev, { ...data, key: rowCounter + 1 }]);
+          setRowCounter((prev) => prev + 1);
+        }}
+        columns={columns}
+        newRowData={newRowData}
+        setNewRowData={setNewRowData}
+        onSuccess={() => loadData()}
+      />
     </div>
   );
 }
