@@ -8,7 +8,7 @@ import TableComponent from "./TableComponent";
 
 // DashboardComponent fetches data and columns from a URL, renders dynamically, and supports loading/error states
 // Pass dataUrl and (optionally) onFiltersChange as props
-function DashboardComponent({ dataUrl = "http://127.0.0.1:8998/read/network_summary1.csv", onFiltersChange }) {
+function DashboardComponent({ dataUrl = "http://172.20.10.250:8998/read/network_summary1.csv", onFiltersChange }) {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,11 +93,11 @@ function DashboardComponent({ dataUrl = "http://127.0.0.1:8998/read/network_summ
       {/* Status Card with counts (static or can be made dynamic) */}
       <StatusCard
         title="Network Status"
-        dataUrl="http://127.0.0.1:8998/read/status_summary.csv"
+        dataUrl="http://172.20.10.250:8998/read/status_summary.csv"
       />
       <StatusCard
         title="Network Status"
-        dataUrl="http://127.0.0.1:8998/read/status_summary.csv"
+        dataUrl="http://172.20.10.250:8998/read/status_summary.csv"
       />
       <TableCard title="Network Details">
         {loading ? (

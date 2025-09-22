@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 // NavigateDefinition removed (parent will render it)
 import SheetComponent from "./SheetComponent";
+import { API_BASE_URL } from "./HomePage"; // Import the constant
 
 import NetworkGraph from "./NetworkGraph";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
@@ -41,7 +42,7 @@ export default function NetworkDefinitionPage({
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
-      const res = await fetch("http://127.0.0.1:8998/docs", { method: "GET" });
+      const res = await fetch(`${API_BASE_URL}/docs`, { method: "GET" });
       if (!res.ok) throw new Error(await res.text());
       toast({ title: "ABDM started", status: "success", duration: 3000 });
 
@@ -67,7 +68,7 @@ export default function NetworkDefinitionPage({
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);
     try {
-      // const data = await getPayloadFromUrl("http://127.0.0.1:8998/read_json/material_definition_multilevels.json");
+      // const data = await getPayloadFromUrl("http://172.20.10.250:8998/read_json/material_definition_multilevels.json");
       const data = await getPayloadFromUrl({ payload : materialDetailsDataPayload});
       setMaterialDetailsData(data);
     } catch (err) {
@@ -79,7 +80,7 @@ export default function NetworkDefinitionPage({
 
   useEffect(() => {
     setNetworkMaterialRulesDataLoading(true);
-    getPayloadFromUrl({url:"http://127.0.0.1:8998/read_json/material_definition_rules.json"})
+    getPayloadFromUrl({url:`${API_BASE_URL}/read_json/material_definition_rules.json`})
       .then((data) => {
         setNetworkMaterialRulesData(data);
       })
@@ -119,9 +120,9 @@ export default function NetworkDefinitionPage({
         </Flex>
 
         <SimpleGrid columns={1} spacing={6}>
-          <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/material_definition_rules.csv" data={networkMaterialRulesData} />
-          </Box>
+          
+            <SheetComponent dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`} data={networkMaterialRulesData} />
+         
         </SimpleGrid>
       </Box>
 
@@ -132,12 +133,8 @@ export default function NetworkDefinitionPage({
         </Heading>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/summary_definition1.csv" enableEdit={false} />
-            </Box>
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/summary_definition2.csv" enableEdit={false} />
-            </Box>
+            <SheetComponent dataUrl={`${API_BASE_URL}/read/summary_definition1.csv`} enableEdit={false} />
+            <SheetComponent dataUrl={`${API_BASE_URL}/read/summary_definition2.csv`} enableEdit={false} />
         </SimpleGrid>
       </Box>
 
@@ -150,14 +147,12 @@ export default function NetworkDefinitionPage({
 
          
             <SimpleGrid columns={1} spacing={6}>
-              <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
                 <SheetComponent
                   data={materialDetailsData}
                   isLoading={materialDetailsLoading}
                   error={materialDetailsError}
                   config = {{ enabled: true, levelDimension: 'Level', targetDimension: 'Item' }}
                 />
-              </Box>
             </SimpleGrid>
         </Box>
       )}

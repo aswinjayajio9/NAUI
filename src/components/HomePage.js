@@ -25,6 +25,9 @@ import DefinitionWizard from "./DefinitionWizard";
 
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { networkSummaryPayload } from "./payloads";
+
+export const API_BASE_URL = "http://172.20.10.250:8998";
+
 function NetworkAggHomePage() {
   const [firstSheetFilters, setFirstSheetFilters] = useState({});
   const [defineOpen, setDefineOpen] = useState(false);
@@ -65,7 +68,7 @@ function NetworkAggHomePage() {
   // Effect: Fetch data on mount
   useEffect(() => {
     setNetworkSummaryLoading(true);
-    getPayloadFromUrl({url:"http://127.0.0.1:8998/read_json/network_summary.json"})
+    getPayloadFromUrl({url:`${API_BASE_URL}/read_json/network_summary.json`})
       .then((data) => {
         setNetworkSummaryData(data);
       })
@@ -121,7 +124,7 @@ function NetworkAggHomePage() {
             )}
           </Box>
           <Box bg="white" p={4} borderRadius="lg" >
-            <SheetComponent dataUrl="http://127.0.0.1:8998/read/network_violations.csv" />
+            <SheetComponent dataUrl={`${API_BASE_URL}/read/network_violations.csv`} />
           </Box>
         </SimpleGrid>
 

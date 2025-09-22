@@ -11,6 +11,7 @@ import {
 // NavigateDefinition removed from this page (parent will render it)
 import SheetComponent from "./SheetComponent";
 import NetworkGraph from "./NetworkGraph";
+import { API_BASE_URL } from "./HomePage"; // Import the constant
 
 /*
   ResourceDefinitionPage
@@ -51,9 +52,9 @@ export default function ResourceDefinitionPage({
             Parameters
         </Heading>
         <SimpleGrid columns={1} spacing={6}>
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-                <SheetComponent dataUrl="http://127.0.0.1:8998/read/parameters.csv" />
-            </Box>
+        
+                <SheetComponent dataUrl={`${API_BASE_URL}/read/parameters.csv`} />
+   
         </SimpleGrid>
       </Box>
       {/* Consolidating Non-Similar/Simultaneous Resources */}
@@ -62,9 +63,9 @@ export default function ResourceDefinitionPage({
             Consolidating Non-Similar/Simultaneous Resources
         </Heading>
         <SimpleGrid columns={1} spacing={6}>
-            <Box bg="white" p={4} borderRadius="lg" boxShadow="md" overflowX="auto">
-                <SheetComponent dataUrl="http://127.0.0.1:8998/read/parameter_definition.csv" />
-            </Box>
+
+                <SheetComponent dataUrl={`${API_BASE_URL}/read/parameter_definition.csv`} />
+ 
         </SimpleGrid>
       </Box>
 
