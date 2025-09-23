@@ -69,8 +69,18 @@ export default function NetworkDefinitionPage({
     setMaterialDetailsError(null);
     try {
       // const data = await getPayloadFromUrl("http://172.20.10.250:8998/read_json/material_definition_multilevels.json");
-      const data = await getPayloadFromUrl({ payload : materialDetailsDataPayload});
-      setMaterialDetailsData(data);
+      var data = await getPayloadFromUrl({ payload : materialDetailsDataPayload});
+      if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+          } catch (parseError) {
+            throw new Error("Failed to parse API response as JSON: " + parseError.message);
+          }
+        }
+        if (!data || !data["Results"] || !Array.isArray(data["Results"]) || data["Results"].length === 0) {
+          throw new Error("Invalid API response: Missing or empty 'Results' array");
+        }
+        setMaterialDetailsData(data["Results"]["0"]);
     } catch (err) {
       setMaterialDetailsError(err.message || String(err));
     } finally {

@@ -26,7 +26,7 @@ import DefinitionWizard from "./DefinitionWizard";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { networkSummaryPayload } from "./payloads";
 
-export const API_BASE_URL = "http://172.20.10.250:8998";
+export const API_BASE_URL = "http://172.20.9.21:8998";
 
 function NetworkAggHomePage() {
   const [firstSheetFilters, setFirstSheetFilters] = useState({});

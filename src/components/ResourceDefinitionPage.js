@@ -15,7 +15,7 @@ import NetworkGraph from "./NetworkGraph";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
 
-// import { resourceRulesPayload, resourceDetailsPayload } from "./payloads";
+import { resourceRulesPayload, resourceDetailsPayload } from "./payloads";
 
 /*
   ResourceDefinitionPage
@@ -71,8 +71,18 @@ export default function ResourceDefinitionPage({
     setResourceDetailsLoading(true);
     setResourceDetailsError(null);
     try {
-      const data = await getPayloadFromUrl({ url:`${API_BASE_URL}/read_json/resource_definition_details.json`});
-      setResourceDetailsData(data);
+      var data = await getPayloadFromUrl({ payload:resourceDetailsPayload});
+      if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+          } catch (parseError) {
+            throw new Error("Failed to parse API response as JSON: " + parseError.message);
+          }
+        }
+        if (!data || !data["Results"] || !Array.isArray(data["Results"]) || data["Results"].length === 0) {
+          throw new Error("Invalid API response: Missing or empty 'Results' array");
+        }
+      setResourceDetailsData(data["Results"]["0"]);
     } catch (err) {
       setResourceDetailsError(err.message || String(err));
     } finally {
@@ -82,9 +92,20 @@ export default function ResourceDefinitionPage({
 
   useEffect(() => {
     setResourceRulesLoading(true);
-    getPayloadFromUrl({ url:`${API_BASE_URL}/read_json/resource_definition_rules.json`})
+    getPayloadFromUrl({payload: resourceRulesPayload})
       .then((data) => {
-        setResourceRulesData(data);
+        // console.log("Network summary data:",data );
+        if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+          } catch (parseError) {
+            throw new Error("Failed to parse API response as JSON: " + parseError.message);
+          }
+        }
+        if (!data || !data["Results"] || !Array.isArray(data["Results"]) || data["Results"].length === 0) {
+          throw new Error("Invalid API response: Missing or empty 'Results' array");
+        }
+        setResourceRulesData(data["Results"]["0"]);
       })
       .catch((error) => {
         setResourceRulesError(error.message);

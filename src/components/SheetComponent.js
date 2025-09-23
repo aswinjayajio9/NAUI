@@ -64,6 +64,8 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
   const [dimensions, setDimensions] = useState([]); // New: Dimension columns
   const [measures, setMeasures] = useState([]); // New: Measure columns
   const [treeData, setTreeData] = useState([]); // New: Tree structure
+  const [colsDisplayNameMapping, setColsDisplayNameMapping] = useState({}); // New: Mapping for column display names
+
   // Map of { columnKey: { rowKey: rowSpanNumber | 0 } } used to merge repeated dimension cells vertically
   const [rowSpanMap, setRowSpanMap] = useState(computeRowSpanMap(dataSource, dimensions));
   const [filterOptions, setFilterOptions] = useState({});
@@ -170,6 +172,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           dims = parsed.dimensions;
           meas = parsed.measures;
           tree = parsed.treeData;
+          setColsDisplayNameMapping(parsed.colsDisplayNameMapping); // Set the mapping
         } else {
           rows = parseGenericJson(data);
         }
@@ -182,6 +185,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           dims = parsed.dimensions;
           meas = parsed.measures;
           tree = parsed.treeData;
+          setColsDisplayNameMapping(parsed.colsDisplayNameMapping); // Set the mapping
         } else {
           rows = parseGenericJson(dataUrl);
         }
@@ -201,6 +205,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
             dims = parsed.dimensions;
             meas = parsed.measures;
             tree = parsed.treeData;
+            setColsDisplayNameMapping(parsed.colsDisplayNameMapping); // Set the mapping
           } else {
             rows = parseGenericJson(json);
           }
@@ -1233,6 +1238,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
         newRowData={newRowData}
         setNewRowData={setNewRowData}
         onSuccess={() => loadData()}
+        colsDisplayNameMapping={colsDisplayNameMapping}
       />
     </div>
   );
