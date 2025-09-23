@@ -15,7 +15,7 @@ import { API_BASE_URL } from "./HomePage"; // Import the constant
 import NetworkGraph from "./NetworkGraph";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import React, { useState, useEffect } from "react";
-import { materialDetailsDataPayload,networkMaterialRulesDataPayload } from "./payloads"
+import { materialDetailsDataPayload,networkMaterialRulesDataPayload,getMaterialDetailsDataPayload, getNetworkMaterialRulesDataPayload } from "./payloads"
 /*
   NetworkDefinitionPage
   - Dummy layout that matches the pasted image: step progress + several sheet-like boxes
@@ -69,7 +69,7 @@ export default function NetworkDefinitionPage({
     setMaterialDetailsError(null);
     try {
       // const data = await getPayloadFromUrl("http://172.20.10.250:8998/read_json/material_definition_multilevels.json");
-      var data = await getPayloadFromUrl({ payload : materialDetailsDataPayload});
+      var data = await getPayloadFromUrl({ payload : materialDetailsPayload});
       if (typeof data === 'string') {
           try {
             data = JSON.parse(data);
@@ -90,7 +90,7 @@ export default function NetworkDefinitionPage({
 
   useEffect(() => {
     setNetworkMaterialRulesDataLoading(true);
-    getPayloadFromUrl({payload: networkMaterialRulesDataPayload})
+    getPayloadFromUrl({payload: networkMaterialRulesPayload})
       .then((data) => {
         // console.log("Network summary data:",data );
         if (typeof data === 'string') {
@@ -112,6 +112,10 @@ export default function NetworkDefinitionPage({
         setNetworkMaterialRulesDataSummaryError(false);
       });
   }, []);
+  // Assuming tgtVersion and tgtPlan are available in the component
+  // Update the payload usage
+  const materialDetailsPayload = getMaterialDetailsDataPayload(tgtVersion, tgtPlan);
+  const networkMaterialRulesPayload = getNetworkMaterialRulesDataPayload(tgtVersion, tgtPlan);
   return (
     <Box p={6}>
       <Flex mb={4} justify="space-between" align="center">

@@ -395,6 +395,7 @@ export const fetchDimensionDropdowns = async (colsDisplayNameMapping) => {
     console.log("Generated payload for dimensions:", payload_for_dims);
     for (const [displayName, payload] of Object.entries(payload_for_dims)) {
       dimension_dropdowns[displayName] = [];
+      console.log(`Fetched dropdown values for`, colsDisplayNameMapping,displayName);
       const data = await getPayloadFromUrl({ payload: payload });
       if (typeof data === 'string') {
         try {
@@ -413,7 +414,7 @@ export const fetchDimensionDropdowns = async (colsDisplayNameMapping) => {
         dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];        
       }
     }
-    console.log(`Fetched dropdown values for`, dimension_dropdowns);
+    
     return dimension_dropdowns;
   } catch (err) {
     console.error("Failed to fetch dimension dropdowns:", err);

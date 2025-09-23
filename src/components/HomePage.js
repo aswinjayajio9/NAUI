@@ -7,34 +7,20 @@ import {
   Box,
   Flex,
   Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  FormControl,
-  FormLabel,
-  Select,
-  Text,
 } from "@chakra-ui/react";
 import SheetComponent from "./SheetComponent";
 import DashboardComponent from "./DashboardComponent";
 // replaced NetworkDefinitionPage with DefinitionWizard
 import DefinitionWizard from "./DefinitionWizard";
+import NetworkDefinitionButton from "./NetworkDefinitionButton";
 
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-import { networkSummaryPayload } from "./payloads";
+import { getNetworkSummaryPayload } from "./payloads";
 
-export const API_BASE_URL = "http://172.20.9.21:8998";
+export const API_BASE_URL = "http://localhost:8998";
 
 function NetworkAggHomePage() {
   const [firstSheetFilters, setFirstSheetFilters] = useState({});
-  const [defineOpen, setDefineOpen] = useState(false);
-  const [srcPlan, setSrcPlan] = useState("ERP");
-  const [srcVersion, setSrcVersion] = useState("CWV");
-  const [tgtPlan, setTgtPlan] = useState("MP");
-  const [tgtVersion, setTgtVersion] = useState("CWV");
   const [currentPage, setCurrentPage] = useState("home"); // "home" | "networkDefinition"
   const [networkDefPayload, setNetworkDefPayload] = useState(null);
 
@@ -44,31 +30,16 @@ function NetworkAggHomePage() {
   const [networkSummaryLoading, setNetworkSummaryLoading] = useState(true);
   const [networkSummaryError, setNetworkSummaryError] = useState(null);
 
-  // Enhanced option resolver (supports case & space / underscore differences)
-  const getFirstOptions = (colName) => {
-    const opts = firstSheetFilters?.options || {};
-    if (!opts) return [];
-    const normalize = (s) => s.toLowerCase().replace(/[\s_]/g, '');
-    const target = normalize(colName);
-    const key = Object.keys(opts).find(k => normalize(k) === target);
-    return key ? opts[key] : [];
+  const handleDefineNetwork = (definition) => {
+    console.log("Creating network with definition:", definition);
+    setNetworkDefPayload(definition);
+    setCurrentPage("networkDefinition");
   };
-
-  // Adjust selected defaults once options arrive (so dropdown shows real data not only hard-coded defaults)
-  useEffect(() => {
-    if (!firstSheetFilters?.options) return;
-    const planOpts = getFirstOptions("Plan Type");
-    if (planOpts.length && !planOpts.includes(srcPlan)) setSrcPlan(planOpts[0]);
-    const verOpts = getFirstOptions("Version");
-    if (verOpts.length && !verOpts.includes(srcVersion)) setSrcVersion(verOpts[0]);
-    if (planOpts.length && !planOpts.includes(tgtPlan)) setTgtPlan(planOpts[0]);
-    if (verOpts.length && !verOpts.includes(tgtVersion)) setTgtVersion(verOpts[0]);
-  }, [firstSheetFilters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Effect: Fetch data on mount
   useEffect(() => {
     setNetworkSummaryLoading(true);
-    getPayloadFromUrl({payload: networkSummaryPayload})
+    getPayloadFromUrl({payload: getNetworkSummaryPayload("Operational Plan", "MP")})
       .then((data) => {
         // console.log("Network summary data:",data );
         if (typeof data === 'string') {
@@ -123,7 +94,10 @@ function NetworkAggHomePage() {
         <SimpleGrid columns={1} spacing={6}>
           <Box bg="white" p={4} borderRadius="lg" >
             <Flex justify="flex-end" mb={2}>
-              <Button size="sm" onClick={() => setDefineOpen(true)}>Define New Network</Button>
+              <NetworkDefinitionButton 
+                firstSheetFilters={firstSheetFilters}
+                onDefine={handleDefineNetwork}
+              />
             </Flex>
             {/* Pass resolved data instead of the Promise */}
             {networkSummaryLoading ? (
@@ -138,69 +112,6 @@ function NetworkAggHomePage() {
             <SheetComponent dataUrl={`${API_BASE_URL}/read/network_violations.csv`} />
           </Box>
         </SimpleGrid>
-
-        {/* Small modal that visually matches the pasted image 2 and uses filters from the first sheet */}
-        <Modal isOpen={defineOpen} onClose={() => setDefineOpen(false)} isCentered>
-          <ModalOverlay />
-          <ModalContent maxW="560px" borderRadius="md" p={4}>
-            <ModalHeader fontSize="lg">Network Model Creation</ModalHeader>
-            <ModalBody>
-              <FormControl mb={3}>
-                <FormLabel fontSize="sm">Source Network</FormLabel>
-                <Flex gap={3}>
-                  <FormControl>
-                    <FormLabel fontSize="xs">Plan Type</FormLabel>
-                    <Select value={srcPlan} onChange={(e) => setSrcPlan(e.target.value)}>
-                      {getFirstOptions("Plan Type").map(v => <option key={v}>{v}</option>)}
-                      <option>MP</option>
-                    </Select>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel fontSize="xs">Version</FormLabel>
-                    <Select value={srcVersion} onChange={(e) => setSrcVersion(e.target.value)}>
-                      {getFirstOptions("Version").map(v => <option key={v}>{v}</option>)}
-                      <option>CurrentWorkingView</option>
-                    </Select>
-                  </FormControl>
-                </Flex>
-              </FormControl>
-
-              <FormControl mb={3}>
-                <FormLabel fontSize="sm">Target Network</FormLabel>
-                <Flex gap={3}>
-                  <FormControl>
-                    <FormLabel fontSize="xs">Plan Type</FormLabel>
-                    <Select value={tgtPlan} onChange={(e) => setTgtPlan(e.target.value)}>
-                      {getFirstOptions("Plan Type").map(v => <option key={v}>{v}</option>)}
-                      <option>OP</option>
-                    </Select>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel fontSize="xs">Version</FormLabel>
-                    <Select value={tgtVersion} onChange={(e) => setTgtVersion(e.target.value)}>
-                      {getFirstOptions("Version").map(v => <option key={v}>{v}</option>)}
-                      <option>CurrentWorkingView</option>
-                    </Select>
-                  </FormControl>
-                </Flex>
-              </FormControl>
-
-              <Text fontSize="sm" color="gray.600" mt={2}>
-                Filters from summary sheet: {firstSheetFilters?.activeFilters && Object.keys(firstSheetFilters.activeFilters).length ? JSON.stringify(firstSheetFilters.activeFilters) : "none"}
-              </Text>
-            </ModalBody>
-            <ModalFooter>
-              <Button variant="outline" mr={3} onClick={() => setDefineOpen(false)}>Cancel</Button>
-              <Button colorScheme="blue" onClick={() => {
-                // action: create network (placeholder)
-                console.log({ srcPlan, srcVersion, tgtPlan, tgtVersion, filters: firstSheetFilters });
-                setDefineOpen(false);
-                setNetworkDefPayload({ srcPlan, srcVersion, tgtPlan, tgtVersion, filters: firstSheetFilters });
-                setCurrentPage("networkDefinition");
-              }}>Create</Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
 
       </Container>
     </ChakraProvider>

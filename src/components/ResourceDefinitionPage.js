@@ -14,8 +14,7 @@ import SheetComponent from "./SheetComponent";
 import NetworkGraph from "./NetworkGraph";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
-
-import { resourceRulesPayload, resourceDetailsPayload } from "./payloads";
+import { getResourceDetailsPayload, getResourceRulesPayload } from "./payloads";
 
 /*
   ResourceDefinitionPage
@@ -34,6 +33,10 @@ export default function ResourceDefinitionPage({
   isFirst,   // injected by DefinitionWizard
   isLast,    // injected by DefinitionWizard
 }) {
+
+  // Define the payloads using the functions
+  const resourceDetailsPayload = getResourceDetailsPayload(tgtVersion, tgtPlan);
+  const resourceRulesPayload = getResourceRulesPayload(tgtVersion);
 
   const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
   const toast = useToast();

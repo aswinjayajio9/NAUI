@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Space, Input, Select } from 'antd';
 import { fetchDimensionDropdowns, getPayloadFromUrl } from './o9Interfacehelper'; // Import the helper
-import {versionPayload } from './payloads'; // Import your dynamic payload.js
 
 const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, onSuccess ,colsDisplayNameMapping }) => {
   const [dimensionOptions, setDimensionOptions] = useState({});
@@ -20,7 +19,7 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
     if (visible) {
       fetchDimensions();
     }
-  }, [visible]);
+  }, [visible, colsDisplayNameMapping]); // Add colsDisplayNameMapping to dependencies
 
   const handleSubmit = async () => {
     try {
@@ -56,21 +55,31 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
       const query = `scope: (${dimensions.join(' * ')}); ${measures.join('; ')}; end scope;`;
       const new_payload = { "query": query, "Tenant": 6760, "ExecutionContext": "Kibo Debugging Workspace", "EnableMultipleResults": true };
       console.log("Submitting new payload:", new_payload);
+      
       // Call your API to add the new row
-      var response = await getPayloadFromUrl({payload: new_payload});
-      if (typeof response === 'string') {
+      const response = await getPayloadFromUrl({payload: new_payload});
+
+      // Simplified and more robust response handling
+      let responseData = response;
+      if (typeof responseData === 'string') {
         try {
-          response = JSON.parse(response);
-          response = response["Results"]["0"];
+          responseData = JSON.parse(responseData);
         } catch (parseError) {
           throw new Error("Failed to parse API response as JSON: " + parseError.message);
         }
       }
-      onAdd(newRowData);  // Optional: Keep for any local state updates if needed
-      onSuccess();  // New: Call the success callback to trigger reload in SheetComponent
-      onCancel();  // Close the modal on success
+
+      // Assuming a successful response contains a "Results" key. Adjust if needed.
+      if (responseData && responseData.Results) {
+        console.log("Row added successfully, reloading data...");
+        onSuccess(); // Call the success callback to trigger reload
+        onCancel();  // Close the modal
+      } else {
+        throw new Error("API error: Invalid response from server.");
+      }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error submitting new row:', error);
+      // Optionally show an error message to the user
     }
   };
 
