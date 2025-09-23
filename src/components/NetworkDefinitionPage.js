@@ -13,7 +13,11 @@ import SheetComponent from "./SheetComponent";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import React, { useState, useEffect } from "react";
-import { materialDetailsDataPayload,networkMaterialRulesDataPayload,getMaterialDetailsDataPayload, getNetworkMaterialRulesDataPayload, HideDimensions } from "./payloads"
+import {
+  getMaterialDetailsDataPayload,
+  getNetworkMaterialRulesDataPayload,
+  HideDimensions,
+} from "./payloads";
 /*
   NetworkDefinitionPage
   - Dummy layout that matches the pasted image: step progress + several sheet-like boxes
@@ -27,10 +31,10 @@ export default function NetworkDefinitionPage({
   tgtVersion,
   filters,
   onBack,
-  onNext,    // injected by DefinitionWizard
-  onPrev,    // injected by DefinitionWizard
-  isFirst,   // injected by DefinitionWizard
-  isLast,    // injected by DefinitionWizard
+  onNext, // injected by DefinitionWizard
+  onPrev, // injected by DefinitionWizard
+  isFirst, // injected by DefinitionWizard
+  isLast, // injected by DefinitionWizard
 }) {
   const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
   const toast = useToast();
@@ -48,37 +52,68 @@ export default function NetworkDefinitionPage({
       await loadMaterialDetails();
       setAbdmCompleted(true); // Set completed after successful ABDM and loading
     } catch (err) {
-      toast({ title: "ABDM failed", description: err.message, status: "error", duration: 5000 });
+      toast({
+        title: "ABDM failed",
+        description: err.message,
+        status: "error",
+        duration: 5000,
+      });
     } finally {
       setAbdmRunning(false);
     }
   };
-  const [networkMaterialRulesData, setNetworkMaterialRulesData] = useState(null);
-  const [networkMaterialRulesDataLoading, setNetworkMaterialRulesDataLoading] = useState(true);
-  const [networkMaterialRulesDataError, setNetworkMaterialRulesDataSummaryError] = useState(null);
+  const [networkMaterialRulesData, setNetworkMaterialRulesData] =
+    useState(null);
+  const [networkMaterialRulesDataLoading, setNetworkMaterialRulesDataLoading] =
+    useState(true);
+  const [
+    networkMaterialRulesDataError,
+    setNetworkMaterialRulesDataSummaryError,
+  ] = useState(null);
 
   // New state for Material Definition - Details loaded after running ABDM
   const [materialDetailsData, setMaterialDetailsData] = useState(null);
   const [materialDetailsLoading, setMaterialDetailsLoading] = useState(false);
   const [materialDetailsError, setMaterialDetailsError] = useState(null);
 
+  const [summaryDefinition1Data, setSummaryDefinition1Data] = useState(null);
+  const [summaryDefinition1Loading, setSummaryDefinition1Loading] =
+    useState(true);
+  const [summaryDefinition1Error, setSummaryDefinition1Error] = useState(null);
+
+  const [summaryDefinition2Data, setSummaryDefinition2Data] = useState(null);
+  const [summaryDefinition2Loading, setSummaryDefinition2Loading] =
+    useState(true);
+  const [summaryDefinition2Error, setSummaryDefinition2Error] = useState(null);
+
   const loadMaterialDetails = async () => {
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);
     try {
       // const data = await getPayloadFromUrl("http://172.20.10.250:8998/read_json/material_definition_multilevels.json");
-      var data = await getPayloadFromUrl({ payload : materialDetailsPayload});
-      if (typeof data === 'string') {
-          try {
-            data = JSON.parse(data);
-          } catch (parseError) {
-            throw new Error("Failed to parse API response as JSON: " + parseError.message);
-          }
+      var data = await getPayloadFromUrl({
+        payload: getMaterialDetailsDataPayload(tgtVersion, tgtPlan),
+      });
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch (parseError) {
+          throw new Error(
+            "Failed to parse API response as JSON: " + parseError.message
+          );
         }
-        if (!data || !data["Results"] || !Array.isArray(data["Results"]) || data["Results"].length === 0) {
-          throw new Error("Invalid API response: Missing or empty 'Results' array");
-        }
-        setMaterialDetailsData(data["Results"]["0"]);
+      }
+      if (
+        !data ||
+        !data["Results"] ||
+        !Array.isArray(data["Results"]) ||
+        data["Results"].length === 0
+      ) {
+        throw new Error(
+          "Invalid API response: Missing or empty 'Results' array"
+        );
+      }
+      setMaterialDetailsData(data["Results"]["0"]);
     } catch (err) {
       setMaterialDetailsError(err.message || String(err));
     } finally {
@@ -88,18 +123,29 @@ export default function NetworkDefinitionPage({
 
   useEffect(() => {
     setNetworkMaterialRulesDataLoading(true);
-    getPayloadFromUrl({payload: networkMaterialRulesPayload})
+    getPayloadFromUrl({
+      payload: getNetworkMaterialRulesDataPayload(tgtVersion, tgtPlan),
+    })
       .then((data) => {
         // console.log("Network summary data:",data );
-        if (typeof data === 'string') {
+        if (typeof data === "string") {
           try {
             data = JSON.parse(data);
           } catch (parseError) {
-            throw new Error("Failed to parse API response as JSON: " + parseError.message);
+            throw new Error(
+              "Failed to parse API response as JSON: " + parseError.message
+            );
           }
         }
-        if (!data || !data["Results"] || !Array.isArray(data["Results"]) || data["Results"].length === 0) {
-          throw new Error("Invalid API response: Missing or empty 'Results' array");
+        if (
+          !data ||
+          !data["Results"] ||
+          !Array.isArray(data["Results"]) ||
+          data["Results"].length === 0
+        ) {
+          throw new Error(
+            "Invalid API response: Missing or empty 'Results' array"
+          );
         }
         setNetworkMaterialRulesData(data["Results"]["0"]);
       })
@@ -110,20 +156,92 @@ export default function NetworkDefinitionPage({
         setNetworkMaterialRulesDataSummaryError(false);
       });
   }, []);
-  // Assuming tgtVersion and tgtPlan are available in the component
-  // Update the payload usage
-  const materialDetailsPayload = getMaterialDetailsDataPayload(tgtVersion, tgtPlan);
-  const networkMaterialRulesPayload = getNetworkMaterialRulesDataPayload(tgtVersion, tgtPlan);
+
+  useEffect(() => {
+    // Fetch data for summary_definition1
+    setSummaryDefinition1Loading(true);
+    getPayloadFromUrl({
+      payload: getMaterialDetailsDataPayload(tgtVersion, tgtPlan),
+    })
+      .then((data) => {
+        if (typeof data === "string") {
+          try {
+            data = JSON.parse(data);
+          } catch (parseError) {
+            throw new Error(
+              "Failed to parse API response as JSON: " + parseError.message
+            );
+          }
+        }
+        if (
+          !data ||
+          !data["Results"] ||
+          !Array.isArray(data["Results"]) ||
+          data["Results"].length === 0
+        ) {
+          throw new Error(
+            "Invalid API response: Missing or empty 'Results' array"
+          );
+        }
+        setSummaryDefinition1Data(data["Results"]["0"]);
+      })
+      .catch((error) => {
+        setSummaryDefinition1Error(error.message);
+      })
+      .finally(() => {
+        setSummaryDefinition1Loading(false);
+      });
+
+    // Fetch data for summary_definition2
+    setSummaryDefinition2Loading(true);
+    getPayloadFromUrl({
+      payload: getMaterialDetailsDataPayload(tgtVersion, tgtPlan),
+    })
+      .then((data) => {
+        if (typeof data === "string") {
+          try {
+            data = JSON.parse(data);
+          } catch (parseError) {
+            throw new Error(
+              "Failed to parse API response as JSON: " + parseError.message
+            );
+          }
+        }
+        if (
+          !data ||
+          !data["Results"] ||
+          !Array.isArray(data["Results"]) ||
+          data["Results"].length === 0
+        ) {
+          throw new Error(
+            "Invalid API response: Missing or empty 'Results' array"
+          );
+        }
+        setSummaryDefinition2Data(data["Results"]["0"]);
+      })
+      .catch((error) => {
+        setSummaryDefinition2Error(error.message);
+      })
+      .finally(() => {
+        setSummaryDefinition2Loading(false);
+      });
+  }, []);
   return (
     <Box p={6}>
       <Flex mb={4} justify="space-between" align="center">
         <Flex gap={3} align="center">
-          <Button size="sm" onClick={onBack}>Back</Button>
+          <Button size="sm" onClick={onBack}>
+            Back
+          </Button>
           <Heading size="md">Network Model - Definition</Heading>
         </Flex>
         <Stack spacing={0} align="flex-end">
-          <Text fontSize="sm" color="gray.600">Source: {srcPlan} / {srcVersion}</Text>
-          <Text fontSize="sm" color="gray.600">Target: {tgtPlan} / {tgtVersion}</Text>
+          <Text fontSize="sm" color="gray.600">
+            Source: {srcPlan} / {srcVersion}
+          </Text>
+          <Text fontSize="sm" color="gray.600">
+            Target: {tgtPlan} / {tgtVersion}
+          </Text>
         </Stack>
       </Flex>
 
@@ -143,21 +261,35 @@ export default function NetworkDefinitionPage({
         </Flex>
 
         <SimpleGrid columns={1} spacing={6}>
-
-            <SheetComponent dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`} data={networkMaterialRulesData} hideDims={Object.keys(HideDimensions)} />
-
+          <SheetComponent
+            dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`}
+            data={networkMaterialRulesData}
+            hideDims={Object.keys(HideDimensions)}
+          />
         </SimpleGrid>
       </Box>
 
       {/* Summary of Material Definition */}
       <Box w="100%" mb={6}>
         <Heading size="sm" mb={3}>
-            Material Definition
+          Material Definition
         </Heading>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
-            <SheetComponent dataUrl={`${API_BASE_URL}/read/summary_definition1.csv`} enableEdit={false} />
-            <SheetComponent dataUrl={`${API_BASE_URL}/read/summary_definition2.csv`} enableEdit={false} />
+          <SheetComponent
+            dataUrl={`${API_BASE_URL}/read/summary_definition1.csv`}
+            // data={summaryDefinition1Data}
+            isLoading={summaryDefinition1Loading}
+            error={summaryDefinition1Error}
+            enableEdit={false}
+          />
+          <SheetComponent
+            dataUrl={`${API_BASE_URL}/read/summary_definition2.csv`}
+            // data={summaryDefinition2Data}
+            isLoading={summaryDefinition2Loading}
+            error={summaryDefinition2Error}
+            enableEdit={false}
+          />
         </SimpleGrid>
       </Box>
 
@@ -168,15 +300,18 @@ export default function NetworkDefinitionPage({
             <Heading size="sm">Material Definition - Details</Heading>
           </Flex>
 
-         
-            <SimpleGrid columns={1} spacing={6}>
-                <SheetComponent
-                  data={materialDetailsData}
-                  isLoading={materialDetailsLoading}
-                  error={materialDetailsError}
-                  config = {{ enabled: true, levelDimension: 'Level', targetDimension: 'Item' }}
-                />
-            </SimpleGrid>
+          <SimpleGrid columns={1} spacing={6}>
+            <SheetComponent
+              data={materialDetailsData}
+              isLoading={materialDetailsLoading}
+              error={materialDetailsError}
+              config={{
+                enabled: true,
+                levelDimension: "Level",
+                targetDimension: "Item",
+              }}
+            />
+          </SimpleGrid>
         </Box>
       )}
 

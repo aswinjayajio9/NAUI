@@ -1108,7 +1108,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           z-index: 20;
         }
       `}</style>
-      <Space style={{ marginBottom: 16 }}>
+      <Space wrap style={{ marginBottom: 16 }}>
         <Button type="primary" icon={<DownloadOutlined />} onClick={onDownload}>
           Download CSV
         </Button>
@@ -1150,7 +1150,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
             { label: "Chart View", value: "chart" },
             { label: "Nested View", value: "nested" },
           ]}
-          style={{ width: 200 }}
+          style={{ width: 110 }}
         />
       </Space>
       {viewMode === "table" ? (

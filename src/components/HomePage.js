@@ -83,7 +83,7 @@ function NetworkAggHomePage() {
     <ChakraProvider>
       <Container maxW="100%" p={4}>
         <Heading mb={6} textAlign="center">
-          Network Aggregator Dashboard
+          Network Aggregation Dashboard
         </Heading>
 
         <SimpleGrid columns={1} spacing={6} mb={6}>

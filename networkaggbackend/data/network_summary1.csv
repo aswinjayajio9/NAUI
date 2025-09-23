@@ -1,4 +1,8 @@
-name,status,latency
-Network 1,Success,20ms
-Network 2,Warning,50ms
-Network 3,Failure,200ms
+Category,Change in Network
+FG's,0
+SFG's,1.00%
+RM's,2.00%
+Resources,-1.00%
+BOM's,0.00%
+Routings,0.00%
+Run Time,0.50%

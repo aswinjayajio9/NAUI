@@ -71,31 +71,24 @@ export const parseMetaDataPayload = (
   });
 
   const mapValue = (meta, raw) => {
-    // console.log("Mapping value:", raw, meta);
-    if (raw == null) return raw;
+    if (raw == null) return raw; // Return empty string for null or undefined values
     if (Array.isArray(raw) && raw.length > 0) raw = raw[0]; // Extract value from [value, metadata]
     if (meta?.DimensionValues) {
-      // First, try string-based search for Key or Name (more robust)
-      const found = meta.DimensionValues.find(
-        (dv) =>
-          String(dv.Key) === String(raw) || String(dv.Name) === String(raw)
-      );
-      if (found) return found?.DisplayName || found?.Name || found?.Key;
-      // Fallback: if raw is integer, use as index
+      // If raw is an integer and valid index, use it to access DimensionValues directly
       if (
         typeof raw === "number" &&
         Number.isInteger(raw) &&
         raw >= 0 &&
         raw < meta.DimensionValues.length
       ) {
-        return (
-          meta.DimensionValues[raw]?.DisplayName ||
-          meta.DimensionValues[raw]?.Name ||
-          raw
-        );
+        const dimensionValue = meta.DimensionValues[raw];
+        return dimensionValue?.DisplayName || dimensionValue?.Name;
       }
-      return raw; // Default to raw if no match
+      // If no match is found, return an empty string
+      return raw;
     }
+
+    // Always return an empty string if no DimensionValues are present
     return raw;
   };
 

@@ -93,13 +93,13 @@ function DashboardComponent({ dataUrl = `${API_BASE_URL}/read/network_summary1.c
       {/* Status Card with counts (static or can be made dynamic) */}
       <StatusCard
         title="No of Right Size Network"
-        dataUrl={`${API_BASE_URL}/read/status_summary.csv`}
+        dataUrl={`${API_BASE_URL}/read/status_summary1.csv`}
       />
       <StatusCard
         title=" No of Network Errors"
-        dataUrl={`${API_BASE_URL}/read/status_summary.csv`}
+        dataUrl={`${API_BASE_URL}/read/status_summary2.csv`}
       />
-      <TableCard title="Network Details">
+      <TableCard title="Vs Previous Period">
         {loading ? (
           <Spin tip="Loading..." />
         ) : error ? (
