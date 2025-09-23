@@ -11,11 +11,9 @@ import {
 // NavigateDefinition removed (parent will render it)
 import SheetComponent from "./SheetComponent";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
-
-import NetworkGraph from "./NetworkGraph";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import React, { useState, useEffect } from "react";
-import { materialDetailsDataPayload,networkMaterialRulesDataPayload,getMaterialDetailsDataPayload, getNetworkMaterialRulesDataPayload } from "./payloads"
+import { materialDetailsDataPayload,networkMaterialRulesDataPayload,getMaterialDetailsDataPayload, getNetworkMaterialRulesDataPayload, HideDimensions } from "./payloads"
 /*
   NetworkDefinitionPage
   - Dummy layout that matches the pasted image: step progress + several sheet-like boxes
@@ -145,9 +143,9 @@ export default function NetworkDefinitionPage({
         </Flex>
 
         <SimpleGrid columns={1} spacing={6}>
-          
-            <SheetComponent dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`} data={networkMaterialRulesData} />
-         
+
+            <SheetComponent dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`} data={networkMaterialRulesData} hideDims={Object.keys(HideDimensions)} />
+
         </SimpleGrid>
       </Box>
 

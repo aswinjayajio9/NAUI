@@ -27,7 +27,7 @@ import o9Interface from "./o9Interface";
 import AddRow from "./AddRow";  // Add this import for the AddRow modal component
 const CELL_MIN_HEIGHT = 5;
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
-export default function SheetComponent({ dataUrl, data, onFiltersChange, config, enableEdit = true }) {
+export default function SheetComponent({ dataUrl, data, onFiltersChange, config, enableEdit = true ,hideDims=[]}) {
   // State for data and UI
   const [originalData, setOriginalData] = useState([]); // Master copy for filtering
   const [dataSource, setDataSource] = useState([]);
@@ -161,8 +161,13 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       let tree = [];
 
       // Default config if not provided
-      const finalConfig = config || { enabled: false };
-
+      // Ensure hideDimensions from the component prop `hideDims` is passed into parseMetaDataPayload
+      const finalConfig = {
+        enabled: false,
+        ...(config || {}),
+        hideDimensions: Array.isArray(hideDims) ? hideDims : (config?.hideDimensions || []),
+      };
+      
       if (data && typeof data === "object") {
         if (data?.Meta && data?.Data) {
           payload = data;
@@ -189,6 +194,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
         } else {
           rows = parseGenericJson(dataUrl);
         }
+
       } else {
         if (!dataUrl) throw new Error("No dataUrl or data provided");
         const res = await fetch(dataUrl);
@@ -213,7 +219,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           rows = await parseCsv(res);
         }
       }
-
+      
       if (!mounted) return;
 
       // Extract measures, attributes, filters from payload if available
@@ -767,7 +773,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       let curVal = null;
       let curGroup = null;
       dataSource.forEach((row, idx) => {
-        const v = row[header];
+        const v = String(row[header] ?? "").trim();
         if (idx === 0 || String(v) !== String(curVal)) {
           // start new group
             curVal = v;
@@ -977,7 +983,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       let count = 0;
       dataSource.forEach((row, idx) => {
         const val = row[col] ?? "";
-        const sval = String(val);
+        const sval = String(val).trim();
         if (idx === 0) {
           startKey = row.key;
           startVal = sval;

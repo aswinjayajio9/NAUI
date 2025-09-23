@@ -8,17 +8,28 @@ export const parseMetaDataPayload = (
   payload,
   levelConfig = {
     enabled: true,
+    hideDimensions: [],
     levelDimension: "Level",
     targetDimension: "Item",
   }
 ) => {
+  // Normalize config
+  const cfg = {
+    enabled: true,
+    hideDimensions: [],
+    levelDimension: "Level",
+    targetDimension: "Item",
+    ...(levelConfig || {}),
+  };
+  const hideSet = new Set((cfg.hideDimensions || []).map((v) => String(v)));
+
   if (!payload?.Meta || !payload?.Data)
     return {
       rows: [],
       cols: [],
       dimensions: [],
       measures: [],
-      nestedData: "Item",
+      nestedData: cfg.targetDimension || "Item",
       colsDisplayNameMapping: {},
     };
 
@@ -48,6 +59,16 @@ export const parseMetaDataPayload = (
     } else {
       measures.push({ alias: a, header, meta: m });
     }
+  });
+
+  // Determine which aliases to keep based on hideDimensions
+  const keepAliases = aliases.filter((a) => {
+    const display = aliasHeader[a];
+    const metaName = metaByAlias[a]?.DimensionName;
+    console.log("Loaded rows:", display, metaName, hideSet);
+    if (hideSet.has(display)) return false;
+    if (metaName && hideSet.has(metaName)) return false;
+    return true;
   });
 
   const mapValue = (meta, raw) => {
@@ -83,7 +104,7 @@ export const parseMetaDataPayload = (
     const isArray = Array.isArray(r);
     const obj = {};
     let hasNonNull = false;
-    aliases.forEach((a) => {
+    keepAliases.forEach((a) => {
       const raw = isArray ? r[a] : r[String(a)] || r[a]; // Handle both formats
       const value = mapValue(metaByAlias[a], raw);
       obj[aliasHeader[a]] = value;
@@ -93,7 +114,7 @@ export const parseMetaDataPayload = (
     return hasNonNull ? obj : null; // Skip empty rows
   }).filter(Boolean); // Remove nulls
 
-  const cols = aliases.map((a) => ({
+  const cols = keepAliases.map((a) => ({
     dataIndex: aliasHeader[a],
     title: aliasHeader[a],
     key: aliasHeader[a],
@@ -102,7 +123,7 @@ export const parseMetaDataPayload = (
 
   // Build colsDisplayNameMapping: display name -> real column name
   const colsDisplayNameMapping = {};
-  aliases.forEach((a) => {
+  keepAliases.forEach((a) => {
     const displayName = aliasHeader[a];
     const meta = metaByAlias[a];
     if (meta?.DimensionName) {
@@ -114,7 +135,25 @@ export const parseMetaDataPayload = (
       colsDisplayNameMapping[displayName] = displayName;
     }
   });
-  return { rows, cols, dimensions, measures, nestedData: "Item", colsDisplayNameMapping };
+
+  // Filter dimensions and measures lists to reflect hidden columns
+  const filteredDimensions = dimensions.filter((d) => keepAliases.includes(d.alias));
+  const filteredMeasures = measures.filter((m) => keepAliases.includes(m.alias));
+
+  // Determine nestedData: if a levelDimension exists among kept dimensions, use targetDimension
+  let nestedData = cfg.targetDimension || "Item";
+  if (cfg.enabled && cfg.levelDimension) {
+    const foundLevel = filteredDimensions.find(
+      (d) =>
+        d.meta?.DimensionName === cfg.levelDimension ||
+        d.header === cfg.levelDimension
+    );
+    if (!foundLevel) {
+      nestedData = "Item";
+    }
+  }
+
+  return { rows, cols, dimensions: filteredDimensions, measures: filteredMeasures, nestedData, colsDisplayNameMapping };
 };
 
 // Helper: Parse generic JSON into rows
@@ -388,38 +427,38 @@ export const getPayloadFromUrl = (
 
 
 // Accepts a payload object (from payload.js) and returns dimension dropdown values
-export const fetchDimensionDropdowns = async (colsDisplayNameMapping) => {
-  try {
-    const dimension_dropdowns = {};
-    const payload_for_dims = generatePayloadForDimensions(colsDisplayNameMapping);
-    console.log("Generated payload for dimensions:", payload_for_dims);
-    for (const [displayName, payload] of Object.entries(payload_for_dims)) {
-      dimension_dropdowns[displayName] = [];
-      console.log(`Fetched dropdown values for`, colsDisplayNameMapping,displayName);
-      const data = await getPayloadFromUrl({ payload: payload });
-      if (typeof data === 'string') {
-        try {
-          const parsedData = JSON.parse(data);
-          const resultData = parsedData["Results"]["0"];
-          const { rows } = parseMetaDataPayload(resultData);
-          dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];
-          
-        } catch (parseError) {
-          throw new Error("Failed to parse API response as JSON: " + parseError.message);
-        }
-      } else {
-        // Assuming data is already an object
-        const resultData = data;
-        const { rows } = parseMetaDataPayload(resultData);
-        dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];        
-      }
-    }
-    
-    return dimension_dropdowns;
-  } catch (err) {
-    console.error("Failed to fetch dimension dropdowns:", err);
-    return {};
-  }
-};
+export const fetchDimensionDropdowns = async (colsDisplayNameMapping, hideDims = []) => {
+   try {
+     const dimension_dropdowns = {};
+     const payload_for_dims = generatePayloadForDimensions(colsDisplayNameMapping);
+     console.log("Generated payload for dimensions:", payload_for_dims);
+     for (const [displayName, payload] of Object.entries(payload_for_dims)) {
+       dimension_dropdowns[displayName] = [];
+       console.log(`Fetched dropdown values for`, colsDisplayNameMapping,displayName);
+       const data = await getPayloadFromUrl({ payload: payload });
+       if (typeof data === 'string') {
+         try {
+           const parsedData = JSON.parse(data);
+           const resultData = parsedData["Results"]["0"];
+            const { rows } = parseMetaDataPayload(resultData, { hideDimensions: hideDims });
+             dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];
+             
+           } catch (parseError) {
+             throw new Error("Failed to parse API response as JSON: " + parseError.message);
+           }
+         } else {
+           // Assuming data is already an object
+            const resultData = data;
+            const { rows } = parseMetaDataPayload(resultData, { hideDimensions: hideDims });
+         dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];        
+         }
+       }
+       
+       return dimension_dropdowns;
+     } catch (err) {
+       console.error("Failed to fetch dimension dropdowns:", err);
+       return {};
+     }
+   };
 
 

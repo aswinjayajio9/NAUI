@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { generatePayloadForDimensions } from "./payloads";
 import { getPayloadFromUrl, parseMetaDataPayload } from "./o9Interfacehelper";
+import { HideDimensions } from "./payloads";
 
 const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -28,10 +29,7 @@ const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
 
   useEffect(() => {
     const fetchDropdownOptions = async () => {
-      const dimensionsToFetch = {
-        'Version': 'Version.[Version Name]',
-        'o9NetworkAggregation Network Plan Type': 'o9NetworkAggregation Network Plan Type.[o9NetworkAggregation Network Plan Type]'
-      };
+      const dimensionsToFetch = HideDimensions;
 
       const payloads = generatePayloadForDimensions(dimensionsToFetch);
 

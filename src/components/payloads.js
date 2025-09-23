@@ -1,5 +1,9 @@
-import { useEffect } from "react"
 
+export const HideDimensions = {
+  'Version': 'Version.[Version Name]',
+  'Data Object': 'Data Object.[Data Object]',
+  'o9NetworkAggregation Network Plan Type': 'o9NetworkAggregation Network Plan Type.[o9NetworkAggregation Network Plan Type]'
+};
 export const getNetworkSummaryPayload = (srcVersion, srcPlan) => ({
     "Tenant": 6760,
     "Query": `Select ([Version].[Version Name].[${srcVersion}] * [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type] ) on row, \n({Measure.[Network Aggregation BOM Count], Measure.[Network Aggregation Base Plan Type], Measure.[Network Aggregation Item Count], Measure.[Network Aggregation Resource Count], Measure.[Network Aggregation Routing Count], Measure.[Network Aggregation Target Version]}) on column;`,
