@@ -371,7 +371,7 @@ export const getPayloadFromUrl = (
   if (apiKey) {
     headers["Authorization"] = `ApiKey ${apiKey}`; // Adjust header name/format if needed for O9 API
   }
-  console.log("API Key and payload used:", apiKey,payload);
+  // console.log("API Key and payload used:", apiKey,payload);
   if (payload && Object.keys(payload).length > 0) {
     const total_payload = {
       method: "POST", // Assuming POST for fetching data

@@ -21,12 +21,22 @@ import {
   CaretDownOutlined,
 } from "@ant-design/icons";
 import ChartComponent from "./chartComponent";
-// Add import for parser functions from the helper
-import { parseMetaDataPayload, parseGenericJson, parseCsv, createCellEditPayload } from "./o9Interfacehelper";
-import o9Interface from "./o9Interface";
 import AddRow from "./AddRow";
-import { aliasHeader } from "./payloads";  // Add this import for the AddRow modal component
+import { aliasHeader } from "./payloads";
+import {
+  computeRowSpanMap,
+  computeOptionsMap,
+  downloadCSV,
+  getSheetStyles
+} from "./SheetFunctions"; // Import functions from SheetFunctions.js
+import {
+  parseMetaDataPayload,
+  parseGenericJson,
+  parseCsv,
+  createCellEditPayload,
+} from "./o9Interfacehelper";
 const CELL_MIN_HEIGHT = 5;
+
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
 export default function SheetComponent({ dataUrl, data, onFiltersChange, config, enableEdit = true ,hideDims=[]}) {
   // State for data and UI
@@ -617,8 +627,8 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
 
   // Handler: Download CSV
   const onDownload = () => {
-    const rows = selectedRowKeys.length ? dataSource.filter((r) => selectedRowKeys.includes(r.key)) : dataSource;
-    downloadCSV(rows, "network_export.csv");
+    const rows = dataSource;
+    downloadCSV(rows, columns, "network_export.csv");
   };
 
   // Helper: Download CSV
@@ -679,6 +689,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       filtered = filtered.filter((r) => String(r[col] ?? "").toLowerCase() === qq);  // Change to exact match
     });
     setDataSource(filtered);
+    setFilterOptions(computeOptionsMap(filtered, [], columns));
     setSelectedRowKeys([]);
     setFilterVisible(false);
     const activeFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v?.trim()));
@@ -1050,67 +1061,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
   return (
     <div style={{ padding: 16, backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }}>
       {/* Styles for frozen dimension columns and hard divider after last dimension */}
-      <style>{`
-        /* subtle background for all measure columns (reversed coloring) */
-        .naui-meas-col .ant-table-cell,
-        .naui-meas-col.ant-table-cell {
-          background: #fffaf0;
-        }
-        /* NEW: highlight for maximized (expanded group) rows in Nested View */
-        .naui-expanded-row > td {
-          background: #e6f7ff !important;
-        }
-        /* strong vertical separator after the last dimension column (header + body) */
-        .ant-table-thead > tr > th.naui-dim-last,
-        .ant-table-tbody > tr > td.naui-dim-last {
-          border-right: 3px solid #d9d9d9 !important;
-        }
-
-        /* Ensure fixed-left (dimension) columns render above scroll area so the divider stays visible */
-        .ant-table-fixed-left .naui-dim-col .ant-table-cell,
-        .naui-dim-col.ant-table-cell,
-        .ant-table-thead > tr > th.naui-dim-col {
-          z-index: 6;
-          position: relative;
-        }
-
-        /* Give the last dimension header slightly higher stacking so its divider is clear */
-        .ant-table-thead > tr > th.naui-dim-last {
-          z-index: 8;
-          position: relative;
-        }
-
-        /* Prevent the table's default cell shadow from interfering with the divider */
-        .naui-dim-last .ant-table-cell {
-          box-shadow: none;
-        }
-
-        /* Resizer handle: narrow vertical hit area centered on the column edge.
-           Right is negative so the handle sits exactly over the divider line for precise dragging. */
-        .naui-resizer {
-          position: absolute;
-          top: 0;
-          right: -4px; /* centers the 8px wide handle over the border at right:0 */
-          width: 8px;
-          height: 100%;
-          cursor: col-resize;
-          z-index: 12;
-          background: transparent;
-          transition: background .12s ease;
-          -webkit-user-select: none;
-          user-select: none;
-        }
-        /* subtle visible hover to show the shrink/expand area */
-        .ant-table-thead > tr > th:hover .naui-resizer,
-        .ant-table-thead > tr > th .naui-resizer:hover {
-          background: rgba(0,0,0,0.05);
-        }
-
-        /* when columns are fixed-left ensure the header resizer remains clickable above the body */
-        .ant-table-fixed-left .naui-resizer {
-          z-index: 20;
-        }
-      `}</style>
+      <style>{getSheetStyles()}</style>
       <Space wrap style={{ marginBottom: 16 }}>
         <Button type="primary" icon={<DownloadOutlined />} onClick={onDownload}>
           Download CSV
@@ -1251,38 +1202,4 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       />
     </div>
   );
-}
-
-// New: computeRowSpanMap function to calculate vertical rowSpan for dimension columns
-function computeRowSpanMap(dataSource, dimensions) {
-  const map = {};
-  const dimHeaders = dimensions.map((d) => d.header);
-  dimHeaders.forEach((col) => {
-    map[col] = {};
-    let startKey = null;
-    let startVal = null;
-    let count = 0;
-    dataSource.forEach((row, idx) => {
-      const val = row[col] ?? "";
-      const sval = String(val);
-      if (idx === 0) {
-        startKey = row.key;
-        startVal = sval;
-        count = 1;
-        map[col][row.key] = 1;
-        return;
-      }
-      if (sval === startVal) {
-        count++;
-        map[col][row.key] = 0;
-        map[col][startKey] = count;
-      } else {
-        startKey = row.key;
-        startVal = sval;
-        count = 1;
-        map[col][row.key] = 1;
-      }
-    });
-  });
-  return map;
 }
