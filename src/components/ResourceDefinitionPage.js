@@ -11,10 +11,10 @@ import {
 } from "@chakra-ui/react";
 // NavigateDefinition removed from this page (parent will render it)
 import SheetComponent from "./SheetComponent";
-import NetworkGraph from "./NetworkGraph";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
 import { getResourceDetailsPayload, getResourceRulesPayload } from "./payloads";
+import { HideDimensions } from "./payloads";
 
 /*
   ResourceDefinitionPage
@@ -87,7 +87,7 @@ export default function ResourceDefinitionPage({
     setResourceDetailsLoading(true);
     setResourceDetailsError(null);
     try {
-      var data = await getPayloadFromUrl({ payload: resourceDetailsPayload });
+      var data = await getPayloadFromUrl({ payload: getResourceDetailsPayload(tgtVersion, tgtPlan) });
       if (typeof data === "string") {
         try {
           data = JSON.parse(data);
@@ -117,7 +117,7 @@ export default function ResourceDefinitionPage({
 
   useEffect(() => {
     setResourceRulesLoading(true);
-    getPayloadFromUrl({ payload: resourceRulesPayload })
+    getPayloadFromUrl({ payload: getResourceRulesPayload(tgtVersion, tgtPlan) })
       .then((data) => {
         // console.log("Network summary data:",data );
         if (typeof data === "string") {
@@ -152,7 +152,7 @@ export default function ResourceDefinitionPage({
   useEffect(() => {
     // Fetch data for summary_resource1
     setSummaryResource1Loading(true);
-    getPayloadFromUrl({ payload: `${API_BASE_URL}/read/summary_resource1.csv` })
+    getPayloadFromUrl({ payload: getResourceRulesPayload(tgtVersion, tgtPlan) })
       .then((data) => {
         if (typeof data === "string") {
           try {
@@ -184,7 +184,7 @@ export default function ResourceDefinitionPage({
 
     // Fetch data for summary_resource2
     setSummaryResource2Loading(true);
-    getPayloadFromUrl({ payload: `${API_BASE_URL}/read/summary_resource2.csv` })
+    getPayloadFromUrl({ payload: getResourceRulesPayload(tgtVersion, tgtPlan) })
       .then((data) => {
         if (typeof data === "string") {
           try {
@@ -265,16 +265,20 @@ export default function ResourceDefinitionPage({
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
           <SheetComponent
-            data={summaryResource1Data}
+            dataUrl={`${API_BASE_URL}/read/summary_resource1.csv`}
+            // data={summaryResource1Data}
             isLoading={summaryResource1Loading}
             error={summaryResource1Error}
             enableEdit={false}
+            hideDims={Object.keys(HideDimensions)}
           />
           <SheetComponent
-            data={summaryResource2Data}
+            dataUrl={`${API_BASE_URL}/read/summary_resource2.csv`}
+            // data={summaryResource2Data}
             isLoading={summaryResource2Loading}
             error={summaryResource2Error}
             enableEdit={false}
+            hideDims={Object.keys(HideDimensions)}
           />
         </SimpleGrid>
       </Box>
@@ -291,6 +295,7 @@ export default function ResourceDefinitionPage({
               data={resourceDetailsData}
               isLoading={resourceDetailsLoading}
               error={resourceDetailsError}
+              hideDims={Object.keys(HideDimensions)}
             />
           </SimpleGrid>
         </Box>

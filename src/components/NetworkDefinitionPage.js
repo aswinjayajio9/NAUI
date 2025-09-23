@@ -305,11 +305,13 @@ export default function NetworkDefinitionPage({
               data={materialDetailsData}
               isLoading={materialDetailsLoading}
               error={materialDetailsError}
-              config={{
-                enabled: true,
-                levelDimension: "Level",
-                targetDimension: "Item",
-              }}
+              enableEdit={true}
+              hideDims={Object.keys(HideDimensions)}
+              // config={{
+              //   enabled: true,
+              //   levelDimension: "Level",
+              //   targetDimension: "Item",
+              // }}
             />
           </SimpleGrid>
         </Box>
