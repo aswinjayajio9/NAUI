@@ -149,6 +149,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
 
   // Helper: Load data (supports JSON, CSV, or pre-parsed objects) - now wrapped in useCallback
   const loadData = useCallback(async () => {
+    console.log("loadData function triggered"); // Add this for debugging
     let mounted = true;
     setLoading(true);
     setError(null);

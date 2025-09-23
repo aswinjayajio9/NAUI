@@ -378,12 +378,12 @@ export const getPayloadFromUrl = (
       headers: headers,
       body: JSON.stringify(payload),
     };
-    console.log(
-      "Fetching response from URL with payload:",
-      url,
-      payload,
-      apiKey
-    );
+    // console.log(
+    //   "Fetching response from URL with payload:",
+    //   url,
+    //   payload,
+    //   apiKey
+    // );
 
     return fetch(url, total_payload)
       .then((response) => {

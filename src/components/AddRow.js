@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Space, Input, Select } from 'antd';
 import { fetchDimensionDropdowns, getPayloadFromUrl } from './o9Interfacehelper'; // Import the helper
+import { aliasHeader } from "./payloads";
 
-const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, onSuccess ,colsDisplayNameMapping }) => {
+const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, onSuccess, colsDisplayNameMapping }) => {
   const [dimensionOptions, setDimensionOptions] = useState({});
 
   useEffect(() => {
@@ -32,7 +33,7 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
           // Dimension: parse to [Dim].[Attr].[Value]
           const parts = realName.split('.');
           if (parts.length >= 2) {
-            const dim = parts[0];
+            const dim = parts[0].replace(/\[|\]/g, '');
             const attr = parts[1].replace(/\[|\]/g, ''); // Remove brackets
             dimensions.push(`[${dim}].[${attr}].[${value}]`);
           }
@@ -57,7 +58,7 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
       console.log("Submitting new payload:", new_payload);
       
       // Call your API to add the new row
-      const response = await getPayloadFromUrl({payload: new_payload});
+      const response = await getPayloadFromUrl({ payload: new_payload });
 
       // Simplified and more robust response handling
       let responseData = response;
@@ -84,13 +85,14 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
   };
 
   const renderField = (col) => {
+    const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex; // Use aliasHeader for display name
     if (dimensionOptions[col.dataIndex]) {
       // If dimension dropdown values exist for this column
       return (
         <Select
           value={newRowData[col.dataIndex] || ""}
           onChange={(value) => setNewRowData({ ...newRowData, [col.dataIndex]: value })}
-          placeholder={`Select ${col.headerText || col.dataIndex}`}
+          placeholder={`Select ${displayName}`}
           style={{ width: '100%' }}
         >
           {dimensionOptions[col.dataIndex].map(option => (
@@ -106,7 +108,7 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
         <Input
           value={newRowData[col.dataIndex] || ""}
           onChange={(e) => setNewRowData({ ...newRowData, [col.dataIndex]: e.target.value })}
-          placeholder={`Enter ${col.headerText || col.dataIndex}`}
+          placeholder={`Enter ${displayName}`}
         />
       );
     }
@@ -131,7 +133,9 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
     >
       {columns.map((col) => (
         <div key={col.dataIndex} style={{ marginBottom: 16 }}>
-          <div style={{ fontWeight: "bold", marginBottom: 8 }}>{col.headerText || col.dataIndex}</div>
+          <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+            {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
+          </div>
           {renderField(col)}
         </div>
       ))}

@@ -68,6 +68,7 @@ export const aliasHeader = {
     "Network Aggregation Resource Count": "Resource Count",
     "Network Aggregation Target Version": "Target Version",
     "Network Aggregation Routing Count": "Routing Count",
+    "Network Aggregation Include Material Node": "Include Material Node",
     "Include Material Node": "Include Material Node",
     "Include Material Node Override": "Include Material Node Override",
     "Include Material Node Final": "Include Material Node Final",
