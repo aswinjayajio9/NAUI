@@ -65,13 +65,13 @@ export const parseMetaDataPayload = (
   const keepAliases = aliases.filter((a) => {
     const display = aliasHeader[a];
     const metaName = metaByAlias[a]?.DimensionName;
-    console.log("Loaded rows:", display, metaName, hideSet);
     if (hideSet.has(display)) return false;
     if (metaName && hideSet.has(metaName)) return false;
     return true;
   });
 
   const mapValue = (meta, raw) => {
+    // console.log("Mapping value:", raw, meta);
     if (raw == null) return raw;
     if (Array.isArray(raw) && raw.length > 0) raw = raw[0]; // Extract value from [value, metadata]
     if (meta?.DimensionValues) {
