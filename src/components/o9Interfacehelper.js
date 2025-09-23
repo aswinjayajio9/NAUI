@@ -120,9 +120,8 @@ export const parseMetaDataPayload = (
     const displayName = aliasHeader[a];
     const meta = metaByAlias[a];
     if (meta?.DimensionName) {
-      // For dimensions: [DimensionName] if spaces, else DimensionName . [Name] if spaces
-      const namePart = meta.Name.includes(' ') ? `[${meta.Name}]` : meta.Name;
-      colsDisplayNameMapping[displayName] = `${meta.DimensionName}.${namePart}`;
+      const firstpart = meta.DimensionName.includes(' ') ? `[${meta.DimensionName}]` : meta.DimensionName;
+      colsDisplayNameMapping[displayName] = `${firstpart}.[${meta.Name}]`;
     } else {
       // For measures: just the display name
       colsDisplayNameMapping[displayName] = displayName;
@@ -420,7 +419,7 @@ export const getPayloadFromUrl = (
 
 
 // Accepts a payload object (from payload.js) and returns dimension dropdown values
-export const fetchDimensionDropdowns = async (colsDisplayNameMapping, hideDims = []) => {
+export const fetchDimensionDropdowns = async (colsDisplayNameMapping) => {
    try {
      const dimension_dropdowns = {};
      const payload_for_dims = generatePayloadForDimensions(colsDisplayNameMapping);
@@ -433,7 +432,7 @@ export const fetchDimensionDropdowns = async (colsDisplayNameMapping, hideDims =
          try {
            const parsedData = JSON.parse(data);
            const resultData = parsedData["Results"]["0"];
-            const { rows } = parseMetaDataPayload(resultData, { hideDimensions: hideDims });
+            const { rows } = parseMetaDataPayload(resultData);
              dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];
              
            } catch (parseError) {
@@ -442,7 +441,7 @@ export const fetchDimensionDropdowns = async (colsDisplayNameMapping, hideDims =
          } else {
            // Assuming data is already an object
             const resultData = data;
-            const { rows } = parseMetaDataPayload(resultData, { hideDimensions: hideDims });
+            const { rows } = parseMetaDataPayload(resultData);
          dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];        
          }
        }

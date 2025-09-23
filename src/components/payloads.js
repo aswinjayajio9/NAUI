@@ -1,4 +1,3 @@
-
 export const HideDimensions = {
   'Version': 'Version.[Version Name]',
   'Data Object': 'Data Object.[Data Object]',
@@ -46,15 +45,51 @@ export const versionPayload = {
     "EnableMultipleResults": true
 };
 
+
+export const aliasHeader = {
+    "Version": "Version",
+    "Data Object": "Data Object",
+    "DM Rule": "Rule",
+    "o9NetworkAggregation Network Plan Type": "Network Plan Type",
+    "Network Aggregation Resource": "Resource",
+    "Network Aggregation Resource Type": "Resource Type",
+    "Network Aggregation Location": "Location",
+    "Network Aggregation Location Region": "Location Region",
+    "Network Aggregation Location Type": "Location Type",
+    "Network Aggregation Include Resource Node": "Include Resource Node",
+    "Network Aggregation Item": "Item",
+    "Network Aggregation Item Class": "Item Class",
+    "Network Aggregation Item Stage": "Item Stage",
+    "Network Aggregation Item Type": "Item Type",
+    "Network Aggregation Routing": "Routing",
+    "Network Aggregation BOM Count": "BOM Count",
+    "Network Aggregation Base Plan Type": "Base Plan Type",
+    "Network Aggregation Item Count": "Item Count",
+    "Network Aggregation Resource Count": "Resource Count",
+    "Network Aggregation Target Version": "Target Version",
+    "Network Aggregation Routing Count": "Routing Count",
+    "Include Material Node": "Include Material Node",
+    "Include Material Node Override": "Include Material Node Override",
+    "Include Material Node Final": "Include Material Node Final",
+    "Applied Material ABDM Rule": "Applied Material ABDM Rule",
+    "Include Resource Node": "Include Resource Node",
+    "Include Resource Node Override": "Include Resource Node Override",
+    "Include Resource Node Final": "Include Resource Node Final",
+    "Aggregation Simultaneous Resource": "Aggregation Simultaneous Resource",
+    "Applied Resource ABDM Rule": "Applied Resource ABDM Rule",
+    "Item": "Item",
+    "Location": "Location"
+};
+
 export const generatePayloadForDimensions = (colsDisplayNameMapping = {}) => {
   const payloads = {};
   Object.entries(colsDisplayNameMapping).forEach(([displayName, realName]) => {
-    if (realName.includes('[') && realName.includes(']')) {
+    if (realName.includes('.[') && realName.includes(']')) {
       // It's a dimension: extract DimensionName and Name
-      const parts = realName.split('[');
+      const parts = realName.split('.[');
       if (parts.length === 2) {
-        const dimensionName = parts[0].slice(0, -1); // Remove the trailing .
-        const name = parts[1].slice(0, -1); // Remove the trailing ]
+        const dimensionName = parts[0].replace(/^\[|\]$/g, ""); // Remove beginning and trailing brackets
+        const name = parts[1].replace(/^\[|\]$/g, ""); // Remove beginning and trailing brackets
         payloads[displayName] = {
           "Tenant": 6760,
           "Query": `SELECT ([${dimensionName}].[${name}]);`,

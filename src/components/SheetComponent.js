@@ -24,7 +24,8 @@ import ChartComponent from "./chartComponent";
 // Add import for parser functions from the helper
 import { parseMetaDataPayload, parseGenericJson, parseCsv, createCellEditPayload } from "./o9Interfacehelper";
 import o9Interface from "./o9Interface";
-import AddRow from "./AddRow";  // Add this import for the AddRow modal component
+import AddRow from "./AddRow";
+import { aliasHeader } from "./payloads";  // Add this import for the AddRow modal component
 const CELL_MIN_HEIGHT = 5;
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
 export default function SheetComponent({ dataUrl, data, onFiltersChange, config, enableEdit = true ,hideDims=[]}) {
@@ -358,6 +359,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
 
   // New: header renderer that attaches sort icons (dimension-only), drag handlers and keyboard support
   const renderHeader = (text, dataIndex, isDimension, idx) => {
+    const displayName = aliasHeader[dataIndex] || text; // Use aliasHeader mapping or fallback to original text
     const activeAsc = sortConfig.col === dataIndex && sortConfig.order === "asc";
     const activeDesc = sortConfig.col === dataIndex && sortConfig.order === "desc";
     const currentWidth = columnWidths[dataIndex];
@@ -408,7 +410,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           dragIndexRef.current = null;
         }}
       >
-        <div style={{ flex: 1, paddingRight: 8 }}>{text}</div>
+        <div style={{ flex: 1, paddingRight: 8 }}>{displayName}</div>
         {/* Only show sort icons for dimensions, placed on rightmost side */}
         {isDimension ? (
           <div style={{ display: "flex", gap: 6 }}>
@@ -873,7 +875,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       }
       return {
         ...c,
-        title: renderHeader(c.headerText ?? String(c.title ?? ""), c.dataIndex, isDim, idx),
+        title: renderHeader(aliasHeader[c.dataIndex] || c.headerText || String(c.title || ""), c.dataIndex, isDim, idx),
         className,
         fixed: isDim ? "left" : undefined,
         width: columnWidths[c.dataIndex] || (isDim ? 180 : c.width),
