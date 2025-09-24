@@ -5,7 +5,6 @@ import NetworkDefinitionPage from "./NetworkDefinitionPage";
 import ResourceDefinitionPage from "./ResourceDefinitionPage";
 import ParametersDefinitionPage from "./Parameters";
 
-
 export default function DefinitionWizard({
   srcPlan,
   srcVersion,
@@ -13,7 +12,7 @@ export default function DefinitionWizard({
   tgtVersion,
   filters,
   onBack,
-  previewUrl, // added prop: when provided, clicking the last step redirects here
+  previewUrl,
 }) {
   const steps = [
     "Material Definition",
@@ -30,15 +29,12 @@ export default function DefinitionWizard({
   };
   const goPrev = () => setCurrent((c) => Math.max(0, c - 1));
 
-  // jumpTo now redirects when user clicks the final "Preview Network" step
   const jumpTo = (idx) => {
     if (idx === steps.length - 1) {
       if (previewUrl) {
-        // open preview in a new tab without keeping a reference to this window
         const newWin = window.open(previewUrl, "_blank");
         if (newWin) newWin.opener = null;
       } else {
-        // fallback: do nothing or log
         console.warn("Preview URL not provided for Preview Network step");
       }
       return;
@@ -48,9 +44,7 @@ export default function DefinitionWizard({
 
   return (
     <Container maxW="100%" p={4}>
-      {/* navigation line with Prev/Next on the far right */}
       <Flex position="relative" maxW="100%" mx="auto" px={2} mb={4} align="center" w="100%">
-        {/* centered step nav */}
         <Box position="absolute" left="50%" transform="translateX(-50%)" zIndex={1} width="fit-content">
           <NavigateDefinition
             steps={steps}
@@ -62,7 +56,6 @@ export default function DefinitionWizard({
           />
         </Box>
 
-        {/* right-most Prev/Next buttons */}
         <Flex gap={2} ml="auto" zIndex={2}>
           <Button size="sm" variant="outline" onClick={goPrev} isDisabled={current === 0}>
             Previous
@@ -73,9 +66,9 @@ export default function DefinitionWizard({
         </Flex>
       </Flex>
 
-      {/* page content - full width (like App.js panels) */}
       <Box w="100%" px={{ base: 4, md: 6 }} py={2}>
-        {current === 0 && (
+        {/* Render all pages but only show the current one */}
+        <Box display={current === 0 ? "block" : "none"}>
           <NetworkDefinitionPage
             srcPlan={srcPlan}
             srcVersion={srcVersion}
@@ -88,9 +81,9 @@ export default function DefinitionWizard({
             isFirst={current === 0}
             isLast={current === steps.length - 1}
           />
-        )}
+        </Box>
 
-        {current === 1 && (
+        <Box display={current === 1 ? "block" : "none"}>
           <ResourceDefinitionPage
             srcPlan={srcPlan}
             srcVersion={srcVersion}
@@ -103,8 +96,9 @@ export default function DefinitionWizard({
             isFirst={current === 0}
             isLast={current === steps.length - 1}
           />
-        )}
-        {current === 2 && (
+        </Box>
+
+        <Box display={current === 2 ? "block" : "none"}>
           <ParametersDefinitionPage
             srcPlan={srcPlan}
             srcVersion={srcVersion}
@@ -117,7 +111,7 @@ export default function DefinitionWizard({
             isFirst={current === 0}
             isLast={current === steps.length - 1}
           />
-        )}
+        </Box>
       </Box>
     </Container>
   );
