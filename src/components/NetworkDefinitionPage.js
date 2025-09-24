@@ -19,6 +19,7 @@ import {
   HideDimensions,
   runExcludeMaterialNodeProcessPayload,
 } from "./payloads";
+import PlanTypeVersionBox from "./PlanTypeVersionBox"; // Import the new component
 /*
   NetworkDefinitionPage
   - Dummy layout that matches the pasted image: step progress + several sheet-like boxes
@@ -246,14 +247,12 @@ export default function NetworkDefinitionPage({
           </Button>
           <Heading size="md">Network Model - Definition</Heading>
         </Flex>
-        <Stack spacing={0} align="flex-end">
-          <Text fontSize="sm" color="gray.600">
-            Source: {srcPlan} / {srcVersion}
-          </Text>
-          <Text fontSize="sm" color="gray.600">
-            Target: {tgtPlan} / {tgtVersion}
-          </Text>
-        </Stack>
+        <PlanTypeVersionBox 
+                  srcPlan={srcPlan} 
+                  srcVersion={srcVersion} 
+                  tgtPlan={tgtPlan} 
+                  tgtVersion={tgtVersion} 
+                />
       </Flex>
 
       {/* Material Definition - Rules Section */}

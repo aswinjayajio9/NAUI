@@ -18,7 +18,7 @@ import {
   runExcludeResourceNodeProcessPayload,
   HideDimensions,
 } from "./payloads";
-
+import PlanTypeVersionBox from "./PlanTypeVersionBox"; // Import the new component
 /*
   ResourceDefinitionPage
   - Clean page: parent provides step control.
@@ -94,7 +94,7 @@ export default function ResourceDefinitionPage({
     setResourceDetailsError(null);
     try {
       const data = await getPayloadFromUrl({
-        payload: getResourceDetailsPayload(tgtVersion, tgtPlan),
+        payload: getResourceDetailsPayload(srcVersion, tgtPlan),
       });
       const parsedData = typeof data === "string" ? JSON.parse(data) : data;
 
@@ -116,7 +116,7 @@ export default function ResourceDefinitionPage({
 
   useEffect(() => {
     setResourceRulesLoading(true);
-    getPayloadFromUrl({ payload: getResourceRulesPayload(tgtVersion, tgtPlan) })
+    getPayloadFromUrl({ payload: getResourceRulesPayload(srcVersion, tgtPlan) })
       .then((data) => {
         const parsedData = typeof data === "string" ? JSON.parse(data) : data;
 
@@ -146,15 +146,14 @@ export default function ResourceDefinitionPage({
             Back
           </Button>
           <Heading size="md">Resource Definition</Heading>
+          
         </Flex>
-        <Stack spacing={0} align="flex-end">
-          <Text fontSize="sm" color="gray.600">
-            Source: {srcPlan} / {srcVersion}
-          </Text>
-          <Text fontSize="sm" color="gray.600">
-            Target: {tgtPlan} / {tgtVersion}
-          </Text>
-        </Stack>
+        <PlanTypeVersionBox 
+                  srcPlan={srcPlan} 
+                  srcVersion={srcVersion} 
+                  tgtPlan={tgtPlan} 
+                  tgtVersion={tgtVersion} 
+                />
       </Flex>
 
       {/* Resource Definition - Rules Section */}

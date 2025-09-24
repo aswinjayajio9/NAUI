@@ -41,20 +41,20 @@ export const getResourceDetailsPayload = (tgtVersion, tgtPlan) => ({
 
 export const runExcludeMaterialNodeProcessPayload = (srcVersion, srcPlan) => ({
     "Tenant": 6760,
-    "Query": `exec plugin instance [ABDM_py_Exclude_Material_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in{"${srcVersion}"})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in{"${srcPlan}"})* [Data Object].[Data Object].filter(#.Name in{"Exclude Material Node"}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
+    "Query": `exec plugin instance [ABDM_py_Exclude_Material_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in {"${srcVersion}"})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in {"${srcPlan}"})* [Data Object].[Data Object].filter(#.Name in {"Exclude Material Node"}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
 export const runExcludeResourceNodeProcessPayload = (srcVersion, srcPlan) => ({
     "Tenant": 6760,
-    "Query": `exec plugin instance [ABDM_py_Exclude_Resource_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in{"${srcVersion}"})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in{"${srcPlan}"})* [Data Object].[Data Object].filter(#.Name in{"Exclude Resource Node"}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
+    "Query": `exec plugin instance [ABDM_py_Exclude_Resource_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in {"${srcVersion}"})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in {"${srcPlan}"})* [Data Object].[Data Object].filter(#.Name in {"Exclude Resource Node"}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
 
-export const getPayloadForParameters = () => ({
+export const getPayloadForParameters = (srcVersion) => ({
     "Tenant": 6760,
-    "Query": `Select ([Version].[Version Name].[CurrentWorkingView] * [o9PC Component].[Component Instance].[Network Aggregation Demo] * [o9PC Setting].[Setting] ) on row,({Measure.[PC Setting Is Enabled], Measure.[PC Setting Value - Aggregation Method]}) on column;`,
+    "Query": `Select ([Version].[Version Name].[${srcVersion}] * [o9PC Component].[Component Instance].[Network Aggregation Demo] * [o9PC Setting].[Setting] ) on row,({Measure.[PC Setting Is Enabled], Measure.[PC Setting Value - Aggregation Method],Measure.[PC Setting Value]}) on column;`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
@@ -98,7 +98,8 @@ export const aliasHeader = {
     "Item": "Item",
     "Location": "Location",
     "PC Setting Is Enabled": "Is Enabled",
-    "PC Setting Value - Aggregation Method": "Aggregation Method"
+    "PC Setting Value - Aggregation Method": "Aggregation Method",
+    "PC Setting Value": "Calculation Details"
 };
 
 export const editableMeasureList = [
