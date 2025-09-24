@@ -261,84 +261,74 @@ export const createPayload = (
  * );
  */
 export const createCellEditPayload = (
-  updatedRow,
-  measures = [],
-  attributes = [],
-  filters = [],
-  rowIndex = 0
+  meta, // Meta passed as a parameter
+  updatedRow, // Row data to update
+  measures = [], // Measures metadata
+  attributes = [], // Attributes metadata
+  filters = [], // Filters metadata
+  rowIndex = 0 // Row index
 ) => {
-  const meta = [];
-  let aliasCounter = 0;
+  // Initialize o9DataSource
+  const dataSource = o9Interface.o9DataSource();
+  dataSource.reset(); // Reset the data structure
 
-  // Build Meta for attributes
+  // Add Meta to o9DataSource
+  meta.forEach((metaItem) => {
+    if (metaItem.DimensionName) {
+      // Add attribute column definitions
+      dataSource.addAttributeColumnDef({
+        DimensionName: metaItem.DimensionName,
+        AttributeName: metaItem.Name,
+        RelationshipType: metaItem.RelationshipType || null,
+        EdgeDirection: metaItem.EdgeDirection || null,
+        DimensionValues: metaItem.DimensionValues || [],
+      });
+    } else if (metaItem.MeasureId) {
+      // Add measure column definitions
+      dataSource.addMeasureColumnDef({
+        Name: metaItem.Name,
+        DataType: metaItem.DataType || "string",
+        DisplayName: metaItem.Translation || metaItem.Name,
+        FormatString: metaItem.FormatString || "#,##0;(#,##0)",
+      });
+    }
+  });
+
+  // Add Attribute Data to o9DataSource
   attributes.forEach((attr) => {
-    meta.push({
-      DimensionName: attr.DimensionName,
-      Alias: String(aliasCounter++),
-      Name: attr.Name,
-      DimensionValues: attr.DimensionValues || [],
-    });
-  });
-
-  // Build Meta for measures
-  measures.forEach((measure) => {
-    meta.push({
-      DataType: "number", // Assume number; adjust if needed
-      Name: measure,
-      Alias: String(aliasCounter++),
-    });
-  });
-
-  // Build UpdatedRows
-  const memberCells = [];
-  const dataCells = [];
-
-  // Map attributes to MemberCells
-  attributes.forEach((attr, idx) => {
     const value = updatedRow[attr.Name];
     if (value != null) {
-      const dimensionValue = attr.DimensionValues?.find(
-        (dv) => dv.Name === value
+      const columnIndex = dataSource.getAttributeColumnIndex(
+        attr.DimensionName,
+        attr.Name,
+        attr.RelationshipType || null,
+        attr.EdgeDirection || null
       );
-      const memberIndex = dimensionValue?.MemberIndex ?? 0; // Default to 0 if not found
-      memberCells.push({
-        Alias: String(idx),
-        MemberIndex: memberIndex,
-      });
+      if (columnIndex >= 0) {
+        dataSource.addAttributeData(rowIndex, columnIndex, value);
+      }
     }
   });
 
-  // Map measures to DataCells
-  measures.forEach((measure, idx) => {
-    const value = updatedRow[measure];
+  // Add Measure Data to o9DataSource
+  measures.forEach((measure) => {
+    const value = updatedRow[measure.Name];
     if (value != null) {
-      dataCells.push({
-        Alias: String(attributes.length + idx),
-        Value: value,
-      });
+      const columnIndex = dataSource.getMeasureColumnIndex(
+        measure.Name,
+        measure.RelationshipType || null
+      );
+      if (columnIndex >= 0) {
+        dataSource.addMeasureData(rowIndex, columnIndex, value);
+      }
     }
   });
 
-  const updatedRows = [
-    {
-      MemberCells: memberCells,
-      DataCells: dataCells,
-    },
-  ];
+  // Convert o9DataSource to JSON
+  const payload = dataSource.toJson();
 
-  // Build ModelDefinition using createPayload logic
-  const modelDefinition = createPayload(
-    measures,
-    attributes.map((attr) => ({
-      Name: attr.Name,
-      DimensionName: attr.DimensionName,
-      Axis: attr.Axis || "row", // Default axis
-    })),
-    {}
-  );
-
-  // Build Filters
-  const filtersArray = filters.map((filter) => ({
+  // Add Filters to the payload
+  payload.Filters = filters.map((filter) => ({
     IsFilter: true,
     Axis: "none",
     AllSelection: filter.AllSelection || false,
@@ -347,12 +337,7 @@ export const createCellEditPayload = (
     DimensionName: filter.DimensionName,
   }));
 
-  return {
-    Meta: meta,
-    UpdatedRows: updatedRows,
-    ModelDefinition: modelDefinition,
-    Filters: filtersArray,
-  };
+  return payload;
 };
 
 // Helper: Fetch payload from URL and return JSON
