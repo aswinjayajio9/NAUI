@@ -87,13 +87,25 @@ const AddRow = ({ visible, onCancel, onAdd, dimensions, columns, newRowData, set
 
   const renderField = (col) => {
     const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex; // Use aliasHeader for display name
+    const isDimAttribute = dimAttributes.some((dimCol) => dimCol.dataIndex === col.dataIndex); // Check if the field is a Dim Attribute
+
     if (dimensionOptions[col.dataIndex]) {
       // If dimension dropdown values exist for this column
       return (
         <Select
-          mode="tags" // Enable multi-select with comma-separated values
-          value={newRowData[col.dataIndex]?.split(',').filter(Boolean) || []} // Filter out empty values
-          onChange={(values) => setNewRowData({ ...newRowData, [col.dataIndex]: values.join(',') })} // Convert array back to comma-separated string
+          mode={isDimAttribute ? undefined : "tags"} // Disable multi-select for Dim Attributes
+          value={
+            isDimAttribute
+              ? newRowData[col.dataIndex] || "" // Single value for Dim Attributes
+              : newRowData[col.dataIndex]?.split(',').filter(Boolean) || [] // Multi-select for other attributes
+          }
+          onChange={(values) => {
+            if (isDimAttribute) {
+              setNewRowData({ ...newRowData, [col.dataIndex]: values }); // Single value for Dim Attributes
+            } else {
+              setNewRowData({ ...newRowData, [col.dataIndex]: values.join(',') }); // Convert array back to comma-separated string for multi-select
+            }
+          }}
           placeholder={`Select ${displayName}`}
           style={{ width: '100%' }}
         >

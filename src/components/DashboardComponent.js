@@ -89,15 +89,16 @@ function DashboardComponent({ dataUrl = `${API_BASE_URL}/read/network_summary1.c
   }, [dataUrl, onFiltersChange]);
 
   return (
-    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} w="100%">
-      {/* Status Card with counts (static or can be made dynamic) */}
+    <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} w="100%"> {/* Reduced spacing */}
       <StatusCard
         title="No of Right Size Network"
         dataUrl={`${API_BASE_URL}/read/status_summary1.csv`}
+        style={{ padding: "8px", fontSize: "14px" }} // Compact styling for StatusCard
       />
       <StatusCard
-        title=" No of Network Errors"
+        title="No of Network Errors"
         dataUrl={`${API_BASE_URL}/read/status_summary2.csv`}
+        style={{ padding: "8px", fontSize: "14px" }} // Compact styling for StatusCard
       />
       <TableCard title="Vs Previous Period">
         {loading ? (
@@ -105,7 +106,9 @@ function DashboardComponent({ dataUrl = `${API_BASE_URL}/read/network_summary1.c
         ) : error ? (
           <Alert type="error" message={error} />
         ) : (
-          <TableComponent data={data} columns={columns} />
+          <div style={{ maxHeight: "150px", overflowY: "auto" }}> {/* Fixed height for Table */}
+            <TableComponent data={data} columns={columns} />
+          </div>
         )}
       </TableCard>
     </SimpleGrid>
