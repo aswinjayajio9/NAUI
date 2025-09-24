@@ -83,6 +83,17 @@ export const aliasHeader = {
     "Item": "Item",
     "Location": "Location"
 };
+export const measure_dimensions_mapper = {
+  "Network Aggregation Item": "Item.[Item]",
+  "Network Aggregation Item Type": "Item.[Item Type]",
+  "Network Aggregation Location": "Location.[Location]",
+  "Network Aggregation Location Region": "Location.[Location Region]",
+  "Network Aggregation Location Type": "Location.[Location Type]",
+  "Network Aggregation Sub Brand": "Item.[L1]",
+  "Network Aggregation Brand": "Item.[L2]",
+  "Network Aggregation Resource": "Resource.[Resource]",
+  "Network Aggregation Resource Type": "Resource.[Resource Type]",
+};
 
 export const generatePayloadForDimensions = (colsDisplayNameMapping = {}) => {
   const payloads = {};

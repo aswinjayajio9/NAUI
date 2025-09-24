@@ -1194,6 +1194,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           setOriginalData((prev) => [...prev, { ...data, key: rowCounter + 1 }]);
           setRowCounter((prev) => prev + 1);
         }}
+        dimensions={dimensions}
         columns={columns}
         newRowData={newRowData}
         setNewRowData={setNewRowData}

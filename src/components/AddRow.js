@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Space, Input, Select, Row, Col } from 'antd';
 import { fetchDimensionDropdowns, getPayloadFromUrl } from './o9Interfacehelper'; // Import the helper
-import { aliasHeader } from "./payloads";
+import { aliasHeader, measure_dimensions_mapper } from "./payloads"; // Import measure_dimensions_mapper
 
-const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, onSuccess, colsDisplayNameMapping }) => {
+const AddRow = ({ visible, onCancel, onAdd, dimensions, columns, newRowData, setNewRowData, onSuccess, colsDisplayNameMapping }) => {
   const [dimensionOptions, setDimensionOptions] = useState({});
 
   useEffect(() => {
     const fetchDimensions = async () => {
       try {
-        const dropdowns = await fetchDimensionDropdowns(colsDisplayNameMapping); // Use dynamic payload
-        console.log("Fetched dimension dropdowns:", dropdowns);
+        // Merge colsDisplayNameMapping with measure_dimensions_mapper
+        const updatedMapping = { ...colsDisplayNameMapping, ...measure_dimensions_mapper };
+        const dropdowns = await fetchDimensionDropdowns(updatedMapping); // Use updated mapping
         setDimensionOptions(dropdowns); // dropdowns is an object: { DimensionName: [values] }
       } catch (error) {
         console.error('Error fetching dimensions:', error);
@@ -27,7 +28,6 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
       // Build the query string
       const dimensions = [];
       const measures = [];
-      console.log("New row data to submit:", colsDisplayNameMapping);
       Object.entries(newRowData).forEach(([key, value]) => {
         const realName = colsDisplayNameMapping[key];
         if (realName && realName.includes('.[')) {
@@ -91,8 +91,9 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
       // If dimension dropdown values exist for this column
       return (
         <Select
-          value={newRowData[col.dataIndex] || ""}
-          onChange={(value) => setNewRowData({ ...newRowData, [col.dataIndex]: value })}
+          mode="tags" // Enable multi-select with comma-separated values
+          value={newRowData[col.dataIndex]?.split(',').filter(Boolean) || []} // Filter out empty values
+          onChange={(values) => setNewRowData({ ...newRowData, [col.dataIndex]: values.join(',') })} // Convert array back to comma-separated string
           placeholder={`Select ${displayName}`}
           style={{ width: '100%' }}
         >

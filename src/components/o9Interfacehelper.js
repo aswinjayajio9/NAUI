@@ -45,7 +45,8 @@ export const parseMetaDataPayload = (
   const aliasHeader = {};
   aliases.forEach((a) => {
     const m = metaByAlias[a];
-    aliasHeader[a] = m?.DimensionName || m?.Translation || m?.Name || `col_${a}`;
+    aliasHeader[a] =
+      m?.DimensionName || m?.Translation || m?.Name || `col_${a}`;
   });
 
   // Classify dimensions and measures
@@ -120,7 +121,9 @@ export const parseMetaDataPayload = (
     const displayName = aliasHeader[a];
     const meta = metaByAlias[a];
     if (meta?.DimensionName) {
-      const firstpart = meta.DimensionName.includes(' ') ? `[${meta.DimensionName}]` : meta.DimensionName;
+      const firstpart = meta.DimensionName.includes(" ")
+        ? `[${meta.DimensionName}]`
+        : meta.DimensionName;
       colsDisplayNameMapping[displayName] = `${firstpart}.[${meta.Name}]`;
     } else {
       // For measures: just the display name
@@ -129,8 +132,12 @@ export const parseMetaDataPayload = (
   });
 
   // Filter dimensions and measures lists to reflect hidden columns
-  const filteredDimensions = dimensions.filter((d) => keepAliases.includes(d.alias));
-  const filteredMeasures = measures.filter((m) => keepAliases.includes(m.alias));
+  const filteredDimensions = dimensions.filter((d) =>
+    keepAliases.includes(d.alias)
+  );
+  const filteredMeasures = measures.filter((m) =>
+    keepAliases.includes(m.alias)
+  );
 
   // Determine nestedData: if a levelDimension exists among kept dimensions, use targetDimension
   let nestedData = cfg.targetDimension || "Item";
@@ -145,7 +152,14 @@ export const parseMetaDataPayload = (
     }
   }
 
-  return { rows, cols, dimensions: filteredDimensions, measures: filteredMeasures, nestedData, colsDisplayNameMapping };
+  return {
+    rows,
+    cols,
+    dimensions: filteredDimensions,
+    measures: filteredMeasures,
+    nestedData,
+    colsDisplayNameMapping,
+  };
 };
 
 // Helper: Parse generic JSON into rows
@@ -346,14 +360,15 @@ export const getPayloadFromUrl = (
   params = {
     url: "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true",
     payload: {},
-    apiKey: API_KEY
+    apiKey: API_KEY,
   }
 ) => {
-  const url = params.url || "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true";
+  const url =
+    params.url || "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true";
   const payload = params.payload || {};
   const apiKey = params.apiKey || API_KEY;
   const headers = {
-    "accept": "application/json",
+    accept: "application/json",
     "content-type": "application/json",
     // "o9-request-ttid": "6760",
     // "sec-fetch-mode": "cors",
@@ -396,61 +411,70 @@ export const getPayloadFromUrl = (
         console.error("Error fetching payload:", error);
         throw error;
       });
-  }
-  else {
+  } else {
     console.log("Fetching response from local:", url);
     return fetch(url, {
-    method: "GET", // Assuming GET for fetching data
-    headers: headers,
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
+      method: "GET", // Assuming GET for fetching data
+      headers: headers,
     })
-    .catch((error) => {
-      console.error("Error fetching payload:", error);
-      throw error;
-    });
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .catch((error) => {
+        console.error("Error fetching payload:", error);
+        throw error;
+      });
   }
-  
 };
 
+const dropdownCache = {}; // Cache object to store fetched dropdowns
 
 // Accepts a payload object (from payload.js) and returns dimension dropdown values
 export const fetchDimensionDropdowns = async (colsDisplayNameMapping) => {
-   try {
-     const dimension_dropdowns = {};
-     const payload_for_dims = generatePayloadForDimensions(colsDisplayNameMapping);
-     console.log("Generated payload for dimensions:", payload_for_dims);
-     for (const [displayName, payload] of Object.entries(payload_for_dims)) {
-       dimension_dropdowns[displayName] = [];
-       console.log(`Fetched dropdown values for`, colsDisplayNameMapping,displayName);
-       const data = await getPayloadFromUrl({ payload: payload });
-       if (typeof data === 'string') {
-         try {
-           const parsedData = JSON.parse(data);
-           const resultData = parsedData["Results"]["0"];
-            const { rows } = parseMetaDataPayload(resultData);
-             dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];
-             
-           } catch (parseError) {
-             throw new Error("Failed to parse API response as JSON: " + parseError.message);
-           }
-         } else {
-           // Assuming data is already an object
-            const resultData = data;
-            const { rows } = parseMetaDataPayload(resultData);
-         dimension_dropdowns[displayName] = [...new Set(rows.map(row => row[displayName]))];        
-         }
-       }
-       
-       return dimension_dropdowns;
-     } catch (err) {
-       console.error("Failed to fetch dimension dropdowns:", err);
-       return {};
-     }
-   };
+  try {
+    const cacheKey = JSON.stringify(colsDisplayNameMapping); // Use mapping as the cache key
+    if (dropdownCache[cacheKey]) {
+      console.log("Returning cached dropdowns for:", cacheKey);
+      return dropdownCache[cacheKey]; // Return cached data if available
+    }
 
+    const dimension_dropdowns = {};
+    const payload_for_dims = generatePayloadForDimensions(colsDisplayNameMapping);
 
+    for (const [displayName, payload] of Object.entries(payload_for_dims)) {
+      dimension_dropdowns[displayName] = [];
+      const data = await getPayloadFromUrl({ payload: payload });
+      if (typeof data === "string") {
+        try {
+          const parsedData = JSON.parse(data);
+          const resultData = parsedData["Results"]["0"];
+          const { rows, dimensions } = parseMetaDataPayload(resultData);
+          console.log("Rows fetched for", displayName, rows);
+          dimension_dropdowns[displayName] = [
+            ...new Set(rows.map((row) => row[displayName] || row[dimensions[0]?.header])),
+          ];
+        } catch (parseError) {
+          throw new Error(
+            "Failed to parse API response as JSON: " + parseError.message
+          );
+        }
+      } else {
+        // Assuming data is already an object
+        const resultData = data;
+        const { rows } = parseMetaDataPayload(resultData);
+        dimension_dropdowns[displayName] = [
+          ...new Set(rows.map((row) => row[displayName])),
+        ];
+      }
+    }
+
+    dropdownCache[cacheKey] = dimension_dropdowns; // Store fetched dropdowns in cache
+    return dimension_dropdowns;
+  } catch (err) {
+    console.error("Failed to fetch dimension dropdowns:", err);
+    return {};
+  }
+};
