@@ -37,7 +37,6 @@ export default function NetworkDefinitionPage({
   isFirst, // injected by DefinitionWizard
   isLast, // injected by DefinitionWizard
 }) {
-  const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
   const [abdmCompleted, setAbdmCompleted] = React.useState(false); // New state to track if ABDM has completed
@@ -96,7 +95,7 @@ export default function NetworkDefinitionPage({
   const [summaryDefinition2Loading, setSummaryDefinition2Loading] =
     useState(true);
   const [summaryDefinition2Error, setSummaryDefinition2Error] = useState(null);
-
+  const [data_object, setDataObject] = useState("Exclude Material Node");
   const loadMaterialDetails = async () => {
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);
@@ -305,6 +304,7 @@ export default function NetworkDefinitionPage({
 
           <SimpleGrid columns={1} spacing={6}>
             <SheetComponent
+              src_tgt={{ src: srcVersion, tgt: tgtPlan,data_object: data_object }}
               data={materialDetailsData}
               isLoading={materialDetailsLoading}
               error={materialDetailsError}

@@ -141,6 +141,18 @@ export const measure_picklist = {
   "PC Setting Value - Aggregation Method": ["Min", "Max", "Average", "Sum"]
 }
 
+export const add_row_orders = {
+  "Network Aggregation Item": 4,
+  "Network Aggregation Item Type": 3 ,
+  "Network Aggregation Brand": 1,
+  "Network Aggregation Sub Brand": 2,
+  "Network Aggregation Location": 3,
+  "Network Aggregation Location Region": 1,
+  "Network Aggregation Location Type": 2,
+  "Network Aggregation Resource": 2,
+  "Network Aggregation Resource Type": 1,
+}
+
 export const generatePayloadForDimensions = (colsDisplayNameMapping = {}) => {
   const payloads = {};
   Object.entries(colsDisplayNameMapping).forEach(([displayName, realName]) => {

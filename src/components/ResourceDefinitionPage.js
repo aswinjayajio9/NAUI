@@ -33,11 +33,6 @@ export default function ResourceDefinitionPage({
   isFirst, // injected by DefinitionWizard
   isLast, // injected by DefinitionWizard
 }) {
-  // Define the payloads using the functions
-  const resourceDetailsPayload = getResourceDetailsPayload(tgtVersion, tgtPlan);
-  const resourceRulesPayload = getResourceRulesPayload(tgtVersion);
-
-  const [detailsView, setDetailsView] = React.useState("table"); // "table" or "network"
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
   const [abdmCompleted, setAbdmCompleted] = React.useState(false); // New state to track if ABDM has completed
@@ -60,7 +55,7 @@ export default function ResourceDefinitionPage({
   const [summaryResource2Data, setSummaryResource2Data] = useState(null);
   const [summaryResource2Loading, setSummaryResource2Loading] = useState(true);
   const [summaryResource2Error, setSummaryResource2Error] = useState(null);
-
+  const [data_object, setDataObject] = useState("Exclude Resource Node");
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
@@ -253,6 +248,12 @@ export default function ResourceDefinitionPage({
             data={resourceRulesData}
             isLoading={resourceRulesLoading}
             error={resourceRulesError}
+            hideDims={Object.keys(HideDimensions)}
+            src_tgt={{
+                src: srcVersion,
+                tgt: tgtPlan,
+                data_object: data_object,
+              }}
           />
         </SimpleGrid>
       </Box>
@@ -286,6 +287,11 @@ export default function ResourceDefinitionPage({
               isLoading={resourceDetailsLoading}
               error={resourceDetailsError}
               hideDims={Object.keys(HideDimensions)}
+              src_tgt={{
+                src: srcVersion,
+                tgt: tgtPlan,
+                data_object: data_object,
+              }}
             />
           </SimpleGrid>
         </Box>

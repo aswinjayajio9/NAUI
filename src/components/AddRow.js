@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Space, Input, Select, Row, Col } from 'antd';
 import { fetchDimensionDropdowns, getPayloadFromUrl } from './o9Interfacehelper'; // Import the helper
-import { aliasHeader, measure_dimensions_mapper } from "./payloads"; // Import measure_dimensions_mapper
+import { aliasHeader, measure_dimensions_mapper, add_row_orders, HideDimensions } from "./payloads"; // Import measure_dimensions_mapper and add_row_orders
 
-const AddRow = ({ visible, onCancel, onAdd, dimensions, columns, newRowData, setNewRowData, onSuccess, colsDisplayNameMapping }) => {
+// Helper function to sort columns based on add_row_orders
+const sortColumnsByOrder = (columns) => {
+  return [...columns].sort((a, b) => {
+    const orderA = add_row_orders[a.dataIndex] || Infinity; // Default to Infinity if not in add_row_orders
+    const orderB = add_row_orders[b.dataIndex] || Infinity;
+    return orderA - orderB; // Ascending order: smallest values first
+  });
+};
+
+const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, setNewRowData, onSuccess, colsDisplayNameMapping }) => {
   const [dimensionOptions, setDimensionOptions] = useState({});
+  const [newRule, setNewRule] = useState("Rule_01");
+
+  // Create updatedMapping globally within the component
+  const updatedMapping = Object.fromEntries(
+    Object.entries({ ...colsDisplayNameMapping, ...measure_dimensions_mapper }).filter(
+      ([key, value]) => !key.toLowerCase().includes("dm rule")
+    )
+  );
 
   useEffect(() => {
     const fetchDimensions = async () => {
       try {
-        // Merge colsDisplayNameMapping with measure_dimensions_mapper
-        const updatedMapping = { ...colsDisplayNameMapping, ...measure_dimensions_mapper };
         const dropdowns = await fetchDimensionDropdowns(updatedMapping); // Use updated mapping
-        setDimensionOptions(dropdowns); // dropdowns is an object: { DimensionName: [values] }
+        console.log("Dimensional Values:", dropdowns);
+        setDimensionOptions(dropdowns); // Set filtered dropdowns
+        setNewRule(findMissingOrNextRule(dimensions));
       } catch (error) {
         console.error('Error fetching dimensions:', error);
       }
@@ -21,22 +38,38 @@ const AddRow = ({ visible, onCancel, onAdd, dimensions, columns, newRowData, set
     if (visible) {
       fetchDimensions();
     }
-  }, [visible, colsDisplayNameMapping]); // Add colsDisplayNameMapping to dependencies
+  }, [visible, colsDisplayNameMapping]); // Add dimensions to dependencies
 
   const handleSubmit = async () => {
     try {
       // Build the query string
       const dimensions = [];
       const measures = [];
+      const all_colsDisplayNameMapping = { 
+        ...colsDisplayNameMapping,
+        Version: HideDimensions['Version'],
+        PlanType: HideDimensions['o9NetworkAggregation Network Plan Type'],
+        DataObject: HideDimensions['Data Object'],
+      };
       Object.entries(newRowData).forEach(([key, value]) => {
-        const realName = colsDisplayNameMapping[key];
+        const realName = all_colsDisplayNameMapping[key];
         if (realName && realName.includes('.[')) {
           // Dimension: parse to [Dim].[Attr].[Value]
           const parts = realName.split('.[');
           if (parts.length >= 2) {
             const dim = parts[0].replace(/\[|\]/g, '');
             const attr = parts[1].replace(/\[|\]/g, ''); // Remove brackets
+            if (dim === 'Version') {
+              value = src_tgt.src; // Use source version
+            }
+            if (dim === 'o9NetworkAggregation Network Plan Type') {
+              value = src_tgt.tgt; // Use target plan type
+            }
+            if (dim === 'Data Object') {
+              value = src_tgt.data_object; // Use data object from props
+            }
             dimensions.push(`[${dim}].[${attr}].[${value}]`);
+            
           }
         } else {
           // Measure: Measure.[Name] = value; auto-detect string/number
@@ -89,6 +122,11 @@ const AddRow = ({ visible, onCancel, onAdd, dimensions, columns, newRowData, set
     const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex; // Use aliasHeader for display name
     const isDimAttribute = dimAttributes.some((dimCol) => dimCol.dataIndex === col.dataIndex); // Check if the field is a Dim Attribute
 
+    // Check if the dimension is "DM Rule" and skip rendering
+    if (displayName.toLowerCase().includes("dm rule")) {
+      return null; // Skip rendering this field
+    }
+
     if (dimensionOptions[col.dataIndex]) {
       // If dimension dropdown values exist for this column
       return (
@@ -128,32 +166,65 @@ const AddRow = ({ visible, onCancel, onAdd, dimensions, columns, newRowData, set
     }
   };
 
-  const dimAttributes = columns.filter(col => {
+  // Sort columns based on add_row_orders
+  const sortedColumns = sortColumnsByOrder(columns);
+
+  // Sort each section individually
+  const dimAttributes = sortedColumns.filter(col => {
     const realName = colsDisplayNameMapping[col.dataIndex];
-    return realName && realName.includes('.[');
+    const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex;
+
+    // Exclude dimensions with "DM Rule"
+    return realName && realName.includes('.[') && !displayName.toLowerCase().includes("rule");
   });
 
-  const itemAttributes = columns.filter(col => {
+  const itemAttributes = sortedColumns.filter(col => {
     const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex;
     return displayName.toLowerCase().includes('item') || displayName.toLowerCase().includes('brand') || displayName.toLowerCase().includes('criticality');
   });
 
-  const resourceAttributes = columns.filter(col => {
+  const resourceAttributes = sortedColumns.filter(col => {
     const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex;
     return displayName.toLowerCase().includes('resource');
   });
 
-  const locationAttributes = columns.filter(col => {
+  const locationAttributes = sortedColumns.filter(col => {
     const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex;
     return displayName.toLowerCase().includes('location');
   });
 
-  const otherAttributes = columns.filter(col => 
-    !dimAttributes.includes(col) && 
-    !itemAttributes.includes(col) && 
-    !resourceAttributes.includes(col) && 
-    !locationAttributes.includes(col)
-  );
+  const otherAttributes = sortedColumns.filter(col => {
+    const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex;
+
+    return (
+      !dimAttributes.includes(col) &&
+      !itemAttributes.includes(col) &&
+      !resourceAttributes.includes(col) &&
+      !locationAttributes.includes(col) &&
+      !displayName.toLowerCase().includes("rule") // Exclude "DM Rule"
+    );
+  });
+
+  const renderSection = (title, attributes, isLastSection) => {
+    if (attributes.length === 0) return null;
+
+    return (
+      <div style={{ marginBottom: 12 }}>
+        <h3 style={{ marginBottom: 8 }}>{title}</h3>
+        <Row gutter={[8, 8]}>
+          {attributes.map((col) => (
+            <Col key={col.dataIndex} span={12}>
+              <div style={{ fontWeight: "bold", marginBottom: 4 }}>
+                {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
+              </div>
+              {renderField(col)}
+            </Col>
+          ))}
+        </Row>
+        {!isLastSection && <hr style={{ marginTop: 8, marginBottom: 8 }} />}
+      </div>
+    );
+  };
 
   return (
     <Modal
@@ -161,94 +232,48 @@ const AddRow = ({ visible, onCancel, onAdd, dimensions, columns, newRowData, set
       title="Add New Row"
       onCancel={onCancel}
       footer={
-        <Space>
-          <Button onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="primary" onClick={handleSubmit}>
-            Submit
-          </Button>
+        <Space size="small">
+          <Button onClick={onCancel}>Cancel</Button>
+          <Button type="primary" onClick={handleSubmit}>Submit</Button>
         </Space>
       }
-      width={800}
+      width={700}
     >
-      {dimAttributes.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <h3>Dim Attributes</h3>
-          <Row gutter={[16, 16]}>
-            {dimAttributes.map((col) => (
-              <Col key={col.dataIndex} span={12}>
-                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
-                </div>
-                {renderField(col)}
-              </Col>
-            ))}
-          </Row>
-        </div>
-      )}
-      {itemAttributes.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <h3>Item Attributes</h3>
-          <Row gutter={[16, 16]}>
-            {itemAttributes.map((col) => (
-              <Col key={col.dataIndex} span={12}>
-                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
-                </div>
-                {renderField(col)}
-              </Col>
-            ))}
-          </Row>
-        </div>
-      )}
-      {resourceAttributes.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <h3>Resource Attributes</h3>
-          <Row gutter={[16, 16]}>
-            {resourceAttributes.map((col) => (
-              <Col key={col.dataIndex} span={12}>
-                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
-                </div>
-                {renderField(col)}
-              </Col>
-            ))}
-          </Row>
-        </div>
-      )}
-      {locationAttributes.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
-          <h3>Location Attributes</h3>
-          <Row gutter={[16, 16]}>
-            {locationAttributes.map((col) => (
-              <Col key={col.dataIndex} span={12}>
-                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
-                </div>
-                {renderField(col)}
-              </Col>
-            ))}
-          </Row>
-        </div>
-      )}
-      {otherAttributes.length > 0 && (
-        <div>
-          <h3>Other Attributes</h3>
-          <Row gutter={[16, 16]}>
-            {otherAttributes.map((col) => (
-              <Col key={col.dataIndex} span={12}>
-                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
-                </div>
-                {renderField(col)}
-              </Col>
-            ))}
-          </Row>
-        </div>
-      )}
+      {renderSection("Dim Attributes", dimAttributes, false)}
+      {renderSection("Item Attributes", itemAttributes, false)}
+      {renderSection("Resource Attributes", resourceAttributes, false)}
+      {renderSection("Location Attributes", locationAttributes, false)}
+      {renderSection("Other Attributes", otherAttributes, true)} {/* Last section */}
     </Modal>
   );
+};
+
+const findMissingOrNextRule = (dimensions) => {
+  if (!dimensions || !dimensions[0]?.meta?.DimensionValues) {
+    console.error("Invalid dimensions input");
+    return null;
+  }
+
+  const dimensionalValues = dimensions[0].meta.DimensionValues || [];
+  console.log("Dimensional Values:", dimensionalValues);
+
+  // Extract rule names in the format Rule_01, rule_02, etc.
+  const ruleNumbers = dimensionalValues
+    .map((rule) => rule?.Name) // Extract the Name property
+    .filter((name) => /^rule_\d+$/i.test(name)) // Match "rule_xx" format (case-insensitive)
+    .map((name) => parseInt(name.split('_')[1], 10)) // Extract the numeric part
+    .sort((a, b) => a - b); // Sort in ascending order
+
+  // Find the missing number or return the next highest + 1
+  for (let i = 1; i <= ruleNumbers.length; i++) {
+    if (!ruleNumbers.includes(i)) {
+      return `Rule_${String(i).padStart(2, '0')}`; // Return missing rule in "Rule_XX" format
+    }
+  }
+
+  // If no missing value, return the next highest + 1
+  const nextRule = ruleNumbers.length > 0 ? ruleNumbers[ruleNumbers.length - 1] + 1 : 1;
+  return `Rule_${String(nextRule).padStart(2, '0')}`;
 };
 
 export default AddRow;

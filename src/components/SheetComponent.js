@@ -39,7 +39,7 @@ import { editableMeasureList,measure_picklist } from "./payloads";
 const CELL_MIN_HEIGHT = 5;
 
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
-export default function SheetComponent({ dataUrl, data, onFiltersChange, config, enableEdit = true ,hideDims=[]}) {
+export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange, config, enableEdit = true ,hideDims=[]}) {
   // State for data and UI
   const [originalData, setOriginalData] = useState([]); // Master copy for filtering
   const [dataSource, setDataSource] = useState([]);
@@ -1220,6 +1220,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
           setOriginalData((prev) => [...prev, { ...data, key: rowCounter + 1 }]);
           setRowCounter((prev) => prev + 1);
         }}
+        src_tgt={src_tgt}
         dimensions={dimensions}
         columns={columns}
         newRowData={newRowData}
