@@ -270,12 +270,12 @@ export default function NetworkDefinitionPage({
       </Box>
 
       {/* Summary of Material Definition */}
-      <Box w="100%" mb={6}>
+      {abdmCompleted && (<Box w="100%" mb={6}>
         <Heading size="sm" mb={3}>
           Material Definition
         </Heading>
 
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
+        
           <SheetComponent
             dataUrl={`${API_BASE_URL}/read/summary_definition1.csv`}
             // data={summaryDefinition1Data}
@@ -283,15 +283,7 @@ export default function NetworkDefinitionPage({
             error={summaryDefinition1Error}
             enableEdit={false}
           />
-          <SheetComponent
-            dataUrl={`${API_BASE_URL}/read/summary_definition2.csv`}
-            // data={summaryDefinition2Data}
-            isLoading={summaryDefinition2Loading}
-            error={summaryDefinition2Error}
-            enableEdit={false}
-          />
-        </SimpleGrid>
-      </Box>
+      </Box>)}
 
       {/* Material Definition - Details (toggle Table / Network) - Only visible after ABDM */}
       {abdmCompleted && (

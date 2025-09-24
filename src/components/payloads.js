@@ -12,7 +12,7 @@ export const getNetworkSummaryPayload = (srcVersion, srcPlan) => ({
 
 export const getNetworkMaterialRulesDataPayload = (tgtVersion, tgtPlan) => ({
     "Tenant": 6760,
-    "Query": `SELECT ([Version].[Version Name].[${tgtVersion}] * [Data Object].[Data Object].[Exclude Material Node]*[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].[${tgtPlan}] * [DM Rule].[Rule]) ON ROW,({Measure.[Network Aggregation Item], Measure.[Network Aggregation Item Class], Measure.[Network Aggregation Item Stage], Measure.[Network Aggregation Item Type], Measure.[Network Aggregation Location], Measure.[Network Aggregation Location Region], Measure.[Network Aggregation Location Type], Measure.[Network Aggregation Include Material Node]}) ON COLUMN;`,
+    "Query": `SELECT ([Version].[Version Name].[${tgtVersion}] * [Data Object].[Data Object].[Exclude Material Node]*[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].[${tgtPlan}] * [DM Rule].[Rule]) ON ROW,({Measure.[Network Aggregation Item], Measure.[Network Aggregation Item Type],Measure.[Network Aggregation Brand],Measure.[Network Aggregation Sub Brand], Measure.[Network Aggregation Location], Measure.[Network Aggregation Location Region], Measure.[Network Aggregation Location Type], Measure.[Network Aggregation Include Material Node] ,Measure.[Network Aggregation Criticality]}) ON COLUMN;`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
@@ -59,7 +59,9 @@ export const aliasHeader = {
     "Network Aggregation Include Resource Node": "Include Resource Node",
     "Network Aggregation Item": "Item",
     "Network Aggregation Item Class": "Item Class",
-    "Network Aggregation Item Stage": "Item Stage",
+    "Network Aggregation Criticality": "Criticality",
+    "Network Aggregation Sub Brand": "Sub Brand",
+    "Network Aggregation Brand": "Brand",
     "Network Aggregation Item Type": "Item Type",
     "Network Aggregation Routing": "Routing",
     "Network Aggregation BOM Count": "BOM Count",

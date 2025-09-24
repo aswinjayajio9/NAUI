@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Space, Input, Select } from 'antd';
+import { Modal, Button, Space, Input, Select, Row, Col } from 'antd';
 import { fetchDimensionDropdowns, getPayloadFromUrl } from './o9Interfacehelper'; // Import the helper
 import { aliasHeader } from "./payloads";
 
@@ -27,11 +27,12 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
       // Build the query string
       const dimensions = [];
       const measures = [];
+      console.log("New row data to submit:", colsDisplayNameMapping);
       Object.entries(newRowData).forEach(([key, value]) => {
         const realName = colsDisplayNameMapping[key];
-        if (realName && realName.includes('.')) {
+        if (realName && realName.includes('.[')) {
           // Dimension: parse to [Dim].[Attr].[Value]
-          const parts = realName.split('.');
+          const parts = realName.split('.[');
           if (parts.length >= 2) {
             const dim = parts[0].replace(/\[|\]/g, '');
             const attr = parts[1].replace(/\[|\]/g, ''); // Remove brackets
@@ -114,6 +115,33 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
     }
   };
 
+  const dimAttributes = columns.filter(col => {
+    const realName = colsDisplayNameMapping[col.dataIndex];
+    return realName && realName.includes('.[');
+  });
+
+  const itemAttributes = columns.filter(col => {
+    const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex;
+    return displayName.toLowerCase().includes('item') || displayName.toLowerCase().includes('brand') || displayName.toLowerCase().includes('criticality');
+  });
+
+  const resourceAttributes = columns.filter(col => {
+    const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex;
+    return displayName.toLowerCase().includes('resource');
+  });
+
+  const locationAttributes = columns.filter(col => {
+    const displayName = aliasHeader[col.dataIndex] || col.headerText || col.dataIndex;
+    return displayName.toLowerCase().includes('location');
+  });
+
+  const otherAttributes = columns.filter(col => 
+    !dimAttributes.includes(col) && 
+    !itemAttributes.includes(col) && 
+    !resourceAttributes.includes(col) && 
+    !locationAttributes.includes(col)
+  );
+
   return (
     <Modal
       visible={visible}
@@ -129,16 +157,83 @@ const AddRow = ({ visible, onCancel, onAdd, columns, newRowData, setNewRowData, 
           </Button>
         </Space>
       }
-      width={600}
+      width={800}
     >
-      {columns.map((col) => (
-        <div key={col.dataIndex} style={{ marginBottom: 16 }}>
-          <div style={{ fontWeight: "bold", marginBottom: 8 }}>
-            {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
-          </div>
-          {renderField(col)}
+      {dimAttributes.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <h3>Dim Attributes</h3>
+          <Row gutter={[16, 16]}>
+            {dimAttributes.map((col) => (
+              <Col key={col.dataIndex} span={12}>
+                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
+                </div>
+                {renderField(col)}
+              </Col>
+            ))}
+          </Row>
         </div>
-      ))}
+      )}
+      {itemAttributes.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <h3>Item Attributes</h3>
+          <Row gutter={[16, 16]}>
+            {itemAttributes.map((col) => (
+              <Col key={col.dataIndex} span={12}>
+                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
+                </div>
+                {renderField(col)}
+              </Col>
+            ))}
+          </Row>
+        </div>
+      )}
+      {resourceAttributes.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <h3>Resource Attributes</h3>
+          <Row gutter={[16, 16]}>
+            {resourceAttributes.map((col) => (
+              <Col key={col.dataIndex} span={12}>
+                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
+                </div>
+                {renderField(col)}
+              </Col>
+            ))}
+          </Row>
+        </div>
+      )}
+      {locationAttributes.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <h3>Location Attributes</h3>
+          <Row gutter={[16, 16]}>
+            {locationAttributes.map((col) => (
+              <Col key={col.dataIndex} span={12}>
+                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
+                </div>
+                {renderField(col)}
+              </Col>
+            ))}
+          </Row>
+        </div>
+      )}
+      {otherAttributes.length > 0 && (
+        <div>
+          <h3>Other Attributes</h3>
+          <Row gutter={[16, 16]}>
+            {otherAttributes.map((col) => (
+              <Col key={col.dataIndex} span={12}>
+                <div style={{ fontWeight: "bold", marginBottom: 8 }}>
+                  {aliasHeader[col.dataIndex] || col.headerText || col.dataIndex}
+                </div>
+                {renderField(col)}
+              </Col>
+            ))}
+          </Row>
+        </div>
+      )}
     </Modal>
   );
 };

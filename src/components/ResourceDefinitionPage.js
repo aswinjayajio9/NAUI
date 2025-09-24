@@ -263,7 +263,6 @@ export default function ResourceDefinitionPage({
           Summary of Resource Definition
         </Heading>
 
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} w="100%">
           <SheetComponent
             dataUrl={`${API_BASE_URL}/read/summary_resource1.csv`}
             // data={summaryResource1Data}
@@ -272,15 +271,6 @@ export default function ResourceDefinitionPage({
             enableEdit={false}
             hideDims={Object.keys(HideDimensions)}
           />
-          <SheetComponent
-            dataUrl={`${API_BASE_URL}/read/summary_resource2.csv`}
-            // data={summaryResource2Data}
-            isLoading={summaryResource2Loading}
-            error={summaryResource2Error}
-            enableEdit={false}
-            hideDims={Object.keys(HideDimensions)}
-          />
-        </SimpleGrid>
       </Box>
 
       {/* Resource Definition - Details (toggle Table / Network) - Only visible after ABDM */}
