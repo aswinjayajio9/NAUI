@@ -96,6 +96,7 @@ export default function NetworkDefinitionPage({
     useState(true);
   const [summaryDefinition2Error, setSummaryDefinition2Error] = useState(null);
   const [data_object, setDataObject] = useState("Exclude Material Node");
+  const src_tgt = { src: srcVersion, tgt: tgtPlan, data_object: data_object };
   const loadMaterialDetails = async () => {
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);
@@ -275,6 +276,7 @@ export default function NetworkDefinitionPage({
             dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`}
             data={networkMaterialRulesData}
             hideDims={Object.keys(HideDimensions)}
+            src_tgt={src_tgt}
           />
         </SimpleGrid>
       </Box>
@@ -304,7 +306,7 @@ export default function NetworkDefinitionPage({
 
           <SimpleGrid columns={1} spacing={6}>
             <SheetComponent
-              src_tgt={{ src: srcVersion, tgt: tgtPlan,data_object: data_object }}
+              src_tgt={src_tgt}
               data={materialDetailsData}
               isLoading={materialDetailsLoading}
               error={materialDetailsError}

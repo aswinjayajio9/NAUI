@@ -9,12 +9,15 @@ import {
   Stack,
   useToast,
 } from "@chakra-ui/react";
-// NavigateDefinition removed from this page (parent will render it)
 import SheetComponent from "./SheetComponent";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
-import { getResourceDetailsPayload, getResourceRulesPayload } from "./payloads";
-import { HideDimensions } from "./payloads";
+import {
+  getResourceDetailsPayload,
+  getResourceRulesPayload,
+  runExcludeResourceNodeProcessPayload,
+  HideDimensions,
+} from "./payloads";
 
 /*
   ResourceDefinitionPage
@@ -34,8 +37,8 @@ export default function ResourceDefinitionPage({
   isLast, // injected by DefinitionWizard
 }) {
   const toast = useToast();
-  const [abdmRunning, setAbdmRunning] = React.useState(false);
-  const [abdmCompleted, setAbdmCompleted] = React.useState(false); // New state to track if ABDM has completed
+  const [abdmRunning, setAbdmRunning] = useState(false);
+  const [abdmCompleted, setAbdmCompleted] = useState(false); // New state to track if ABDM has completed
 
   // States for Resource Definition - Rules
   const [resourceRulesData, setResourceRulesData] = useState(null);
@@ -52,16 +55,24 @@ export default function ResourceDefinitionPage({
   const [summaryResource1Loading, setSummaryResource1Loading] = useState(true);
   const [summaryResource1Error, setSummaryResource1Error] = useState(null);
 
-  const [summaryResource2Data, setSummaryResource2Data] = useState(null);
-  const [summaryResource2Loading, setSummaryResource2Loading] = useState(true);
-  const [summaryResource2Error, setSummaryResource2Error] = useState(null);
   const [data_object, setDataObject] = useState("Exclude Resource Node");
+  const src_tgt = { src: srcVersion, tgt: tgtPlan, data_object: data_object };
+
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/docs`, { method: "GET" });
-      if (!res.ok) throw new Error(await res.text());
-      toast({ title: "ABDM started", status: "success", duration: 3000 });
+      // Use the correct payload for the ABDM process
+      const resdata = await getPayloadFromUrl({
+        payload: runExcludeResourceNodeProcessPayload(srcVersion, tgtPlan),
+      });
+
+      // Check if the response is valid
+      const data = JSON.parse(resdata);
+      if (!data || typeof data !== "object") {
+        throw new Error("Invalid response from ABDM process");
+      }
+      console.log("ABDM process response:", data);
+      toast({ title: "ABDM started successfully", status: "success", duration: 3000 });
 
       // Load Resource Definition - Details after ABDM is started
       await loadResourceDetails();
@@ -82,27 +93,20 @@ export default function ResourceDefinitionPage({
     setResourceDetailsLoading(true);
     setResourceDetailsError(null);
     try {
-      var data = await getPayloadFromUrl({ payload: getResourceDetailsPayload(tgtVersion, tgtPlan) });
-      if (typeof data === "string") {
-        try {
-          data = JSON.parse(data);
-        } catch (parseError) {
-          throw new Error(
-            "Failed to parse API response as JSON: " + parseError.message
-          );
-        }
-      }
+      const data = await getPayloadFromUrl({
+        payload: getResourceDetailsPayload(tgtVersion, tgtPlan),
+      });
+      const parsedData = typeof data === "string" ? JSON.parse(data) : data;
+
       if (
-        !data ||
-        !data["Results"] ||
-        !Array.isArray(data["Results"]) ||
-        data["Results"].length === 0
+        !parsedData ||
+        !parsedData["Results"] ||
+        !Array.isArray(parsedData["Results"]) ||
+        parsedData["Results"].length === 0
       ) {
-        throw new Error(
-          "Invalid API response: Missing or empty 'Results' array"
-        );
+        throw new Error("Invalid API response: Missing or empty 'Results' array");
       }
-      setResourceDetailsData(data["Results"]["0"]);
+      setResourceDetailsData(parsedData["Results"]["0"]);
     } catch (err) {
       setResourceDetailsError(err.message || String(err));
     } finally {
@@ -114,99 +118,23 @@ export default function ResourceDefinitionPage({
     setResourceRulesLoading(true);
     getPayloadFromUrl({ payload: getResourceRulesPayload(tgtVersion, tgtPlan) })
       .then((data) => {
-        // console.log("Network summary data:",data );
-        if (typeof data === "string") {
-          try {
-            data = JSON.parse(data);
-          } catch (parseError) {
-            throw new Error(
-              "Failed to parse API response as JSON: " + parseError.message
-            );
-          }
-        }
+        const parsedData = typeof data === "string" ? JSON.parse(data) : data;
+
         if (
-          !data ||
-          !data["Results"] ||
-          !Array.isArray(data["Results"]) ||
-          data["Results"].length === 0
+          !parsedData ||
+          !parsedData["Results"] ||
+          !Array.isArray(parsedData["Results"]) ||
+          parsedData["Results"].length === 0
         ) {
-          throw new Error(
-            "Invalid API response: Missing or empty 'Results' array"
-          );
+          throw new Error("Invalid API response: Missing or empty 'Results' array");
         }
-        setResourceRulesData(data["Results"]["0"]);
+        setResourceRulesData(parsedData["Results"]["0"]);
       })
       .catch((error) => {
         setResourceRulesError(error.message);
       })
       .finally(() => {
         setResourceRulesLoading(false);
-      });
-  }, []);
-
-  useEffect(() => {
-    // Fetch data for summary_resource1
-    setSummaryResource1Loading(true);
-    getPayloadFromUrl({ payload: getResourceRulesPayload(tgtVersion, tgtPlan) })
-      .then((data) => {
-        if (typeof data === "string") {
-          try {
-            data = JSON.parse(data);
-          } catch (parseError) {
-            throw new Error(
-              "Failed to parse API response as JSON: " + parseError.message
-            );
-          }
-        }
-        if (
-          !data ||
-          !data["Results"] ||
-          !Array.isArray(data["Results"]) ||
-          data["Results"].length === 0
-        ) {
-          throw new Error(
-            "Invalid API response: Missing or empty 'Results' array"
-          );
-        }
-        setSummaryResource1Data(data["Results"]["0"]);
-      })
-      .catch((error) => {
-        setSummaryResource1Error(error.message);
-      })
-      .finally(() => {
-        setSummaryResource1Loading(false);
-      });
-
-    // Fetch data for summary_resource2
-    setSummaryResource2Loading(true);
-    getPayloadFromUrl({ payload: getResourceRulesPayload(tgtVersion, tgtPlan) })
-      .then((data) => {
-        if (typeof data === "string") {
-          try {
-            data = JSON.parse(data);
-          } catch (parseError) {
-            throw new Error(
-              "Failed to parse API response as JSON: " + parseError.message
-            );
-          }
-        }
-        if (
-          !data ||
-          !data["Results"] ||
-          !Array.isArray(data["Results"]) ||
-          data["Results"].length === 0
-        ) {
-          throw new Error(
-            "Invalid API response: Missing or empty 'Results' array"
-          );
-        }
-        setSummaryResource2Data(data["Results"]["0"]);
-      })
-      .catch((error) => {
-        setSummaryResource2Error(error.message);
-      })
-      .finally(() => {
-        setSummaryResource2Loading(false);
       });
   }, []);
 
@@ -249,17 +177,13 @@ export default function ResourceDefinitionPage({
             isLoading={resourceRulesLoading}
             error={resourceRulesError}
             hideDims={Object.keys(HideDimensions)}
-            src_tgt={{
-                src: srcVersion,
-                tgt: tgtPlan,
-                data_object: data_object,
-              }}
+            src_tgt={src_tgt}
           />
         </SimpleGrid>
       </Box>
 
       {/* Summary of Resource Definition */}
-      <Box w="100%" mb={6}>
+      {abdmCompleted &&(<Box w="100%" mb={6}>
         <Heading size="sm" mb={3}>
           Summary of Resource Definition
         </Heading>
@@ -272,7 +196,7 @@ export default function ResourceDefinitionPage({
             enableEdit={false}
             hideDims={Object.keys(HideDimensions)}
           />
-      </Box>
+      </Box>)}
 
       {/* Resource Definition - Details (toggle Table / Network) - Only visible after ABDM */}
       {abdmCompleted && (
@@ -280,18 +204,13 @@ export default function ResourceDefinitionPage({
           <Flex justify="space-between" align="center" mb={3}>
             <Heading size="sm">Resource Definition - Details</Heading>
           </Flex>
-
           <SimpleGrid columns={1} spacing={6}>
             <SheetComponent
               data={resourceDetailsData}
               isLoading={resourceDetailsLoading}
               error={resourceDetailsError}
               hideDims={Object.keys(HideDimensions)}
-              src_tgt={{
-                src: srcVersion,
-                tgt: tgtPlan,
-                data_object: data_object,
-              }}
+              src_tgt={src_tgt}
             />
           </SimpleGrid>
         </Box>

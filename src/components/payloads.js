@@ -136,6 +136,8 @@ export const measure_dimensions_mapper = {
 };
 
 export const measure_picklist = {
+  "Include Material Node": ["Yes", "No"],
+  "Include Resource Node": ["Yes", "No"],
   "Include Material Node Override": ["Yes", "No"],
   "Include Resource Node Override": ["Yes", "No"],
   "PC Setting Value - Aggregation Method": ["Min", "Max", "Average", "Sum"]

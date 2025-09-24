@@ -164,7 +164,7 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
     let mounted = true;
     setLoading(true);
     setError(null);
-
+   
     try {
       let rows = [];
       let colsFromPayload = null;
@@ -493,10 +493,9 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
     };
     const id = `${record.key}:::${dataIndex}`;
 
-    // Check if the column has a picklist
+    // Check if the column has a picklist and is editable
     const picklist = measure_picklist[dataIndex];
-
-    if (picklist) {
+    if (picklist && editable) {
       return (
         <div style={commonStyle}>
           <Select
