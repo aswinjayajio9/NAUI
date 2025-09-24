@@ -17,6 +17,7 @@ import {
   getMaterialDetailsDataPayload,
   getNetworkMaterialRulesDataPayload,
   HideDimensions,
+  runExcludeMaterialNodeProcessPayload,
 } from "./payloads";
 /*
   NetworkDefinitionPage
@@ -40,13 +41,23 @@ export default function NetworkDefinitionPage({
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
   const [abdmCompleted, setAbdmCompleted] = React.useState(false); // New state to track if ABDM has completed
-
+ 
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/docs`, { method: "GET" });
-      if (!res.ok) throw new Error(await res.text());
-      toast({ title: "ABDM started", status: "success", duration: 3000 });
+      // Use the correct payload for the ABDM process
+      const resdata = await getPayloadFromUrl({
+        payload: runExcludeMaterialNodeProcessPayload(srcVersion, tgtPlan),
+      });
+
+      // Check if the response is valid
+      const data = JSON.parse(resdata);
+      
+      if (!data || typeof data !== "object") {
+        throw new Error("Invalid response from ABDM process");
+      }
+      console.log("ABDM process response:", data);
+      toast({ title: "ABDM started successfully", status: "success", duration: 3000 });
 
       // Load Material Definition - Details after ABDM is started
       await loadMaterialDetails();
@@ -92,7 +103,7 @@ export default function NetworkDefinitionPage({
     try {
       // const data = await getPayloadFromUrl("http://172.20.10.250:8998/read_json/material_definition_multilevels.json");
       var data = await getPayloadFromUrl({
-        payload: getMaterialDetailsDataPayload(tgtVersion, tgtPlan),
+        payload: getMaterialDetailsDataPayload(srcVersion, tgtPlan),
       });
       if (typeof data === "string") {
         try {
@@ -124,7 +135,7 @@ export default function NetworkDefinitionPage({
   useEffect(() => {
     setNetworkMaterialRulesDataLoading(true);
     getPayloadFromUrl({
-      payload: getNetworkMaterialRulesDataPayload(tgtVersion, tgtPlan),
+      payload: getNetworkMaterialRulesDataPayload(srcVersion, tgtPlan),
     })
       .then((data) => {
         // console.log("Network summary data:",data );
@@ -161,7 +172,7 @@ export default function NetworkDefinitionPage({
     // Fetch data for summary_definition1
     setSummaryDefinition1Loading(true);
     getPayloadFromUrl({
-      payload: getMaterialDetailsDataPayload(tgtVersion, tgtPlan),
+      payload: getMaterialDetailsDataPayload(srcVersion, tgtPlan),
     })
       .then((data) => {
         if (typeof data === "string") {
@@ -195,7 +206,7 @@ export default function NetworkDefinitionPage({
     // Fetch data for summary_definition2
     setSummaryDefinition2Loading(true);
     getPayloadFromUrl({
-      payload: getMaterialDetailsDataPayload(tgtVersion, tgtPlan),
+      payload: getMaterialDetailsDataPayload(srcVersion, tgtPlan),
     })
       .then((data) => {
         if (typeof data === "string") {
@@ -297,13 +308,7 @@ export default function NetworkDefinitionPage({
               data={materialDetailsData}
               isLoading={materialDetailsLoading}
               error={materialDetailsError}
-              enableEdit={true}
               hideDims={Object.keys(HideDimensions)}
-              // config={{
-              //   enabled: true,
-              //   levelDimension: "Level",
-              //   targetDimension: "Item",
-              // }}
             />
           </SimpleGrid>
         </Box>

@@ -17,7 +17,7 @@ import NetworkDefinitionButton from "./NetworkDefinitionButton";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { getNetworkSummaryPayload } from "./payloads";
 
-export const API_BASE_URL = "http://172.20.11.199:8998";
+export const API_BASE_URL = "http://localhost:8998";
 
 
 function NetworkAggHomePage() {

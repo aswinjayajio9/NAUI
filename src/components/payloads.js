@@ -1,6 +1,7 @@
 export const HideDimensions = {
   'Version': 'Version.[Version Name]',
   'Data Object': 'Data Object.[Data Object]',
+  'o9PC Component': 'o9PC Component.[o9PC Component]',
   'o9NetworkAggregation Network Plan Type': 'o9NetworkAggregation Network Plan Type.[o9NetworkAggregation Network Plan Type]'
 };
 export const getNetworkSummaryPayload = (srcVersion, srcPlan) => ({
@@ -38,18 +39,32 @@ export const getResourceDetailsPayload = (tgtVersion, tgtPlan) => ({
     "EnableMultipleResults": true
 });
 
-export const versionPayload = {
+export const runExcludeMaterialNodeProcessPayload = (srcVersion, srcPlan) => ({
     "Tenant": 6760,
-    "Query": "SELECT ([Version].[Version Name]);",
+    "Query": `exec plugin instance [ABDM_py_Exclude_Material_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in{"${srcVersion}"})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in{"${srcPlan}"})* [Data Object].[Data Object].filter(#.Name in{"Exclude Material Node"}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
-};
+});
+export const runExcludeResourceNodeProcessPayload = (srcVersion, srcPlan) => ({
+    "Tenant": 6760,
+    "Query": `exec plugin instance [ABDM_py_Exclude_Resource_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in{"${srcVersion}"})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in{"${srcPlan}"})* [Data Object].[Data Object].filter(#.Name in{"Exclude Resource Node"}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
+    "ExecutionContext": "Kibo Debugging Workspace",
+    "EnableMultipleResults": true
+});
 
+export const getPayloadForParameters = () => ({
+    "Tenant": 6760,
+    "Query": `Select ([Version].[Version Name].[CurrentWorkingView] * [o9PC Component].[Component Instance].[Network Aggregation Demo] * [o9PC Setting].[Setting] ) on row,({Measure.[PC Setting Is Enabled], Measure.[PC Setting Value - Aggregation Method]}) on column;`,
+    "ExecutionContext": "Kibo Debugging Workspace",
+    "EnableMultipleResults": true
+});
 
 export const aliasHeader = {
     "Version": "Version",
     "Data Object": "Data Object",
     "DM Rule": "Rule",
+    "o9PC Component": "PC Component",
+    "o9PC Setting": "Parameters",
     "o9NetworkAggregation Network Plan Type": "Network Plan Type",
     "Network Aggregation Resource": "Resource",
     "Network Aggregation Resource Type": "Resource Type",
@@ -64,12 +79,12 @@ export const aliasHeader = {
     "Network Aggregation Brand": "Brand",
     "Network Aggregation Item Type": "Item Type",
     "Network Aggregation Routing": "Routing",
-    "Network Aggregation BOM Count": "BOM Count",
+    "Network Aggregation BOM Count": "No. of BOMs",
     "Network Aggregation Base Plan Type": "Base Plan Type",
-    "Network Aggregation Item Count": "Item Count",
-    "Network Aggregation Resource Count": "Resource Count",
+    "Network Aggregation Item Count": "No. of Items",
+    "Network Aggregation Resource Count": "No. of Resources",
     "Network Aggregation Target Version": "Target Version",
-    "Network Aggregation Routing Count": "Routing Count",
+    "Network Aggregation Routing Count": "No. of Routings",
     "Network Aggregation Include Material Node": "Include Material Node",
     "Include Material Node": "Include Material Node",
     "Include Material Node Override": "Include Material Node Override",
@@ -81,8 +96,33 @@ export const aliasHeader = {
     "Aggregation Simultaneous Resource": "Aggregation Simultaneous Resource",
     "Applied Resource ABDM Rule": "Applied Resource ABDM Rule",
     "Item": "Item",
-    "Location": "Location"
+    "Location": "Location",
+    "PC Setting Is Enabled": "Is Enabled",
+    "PC Setting Value - Aggregation Method": "Aggregation Method"
 };
+
+export const editableMeasureList = [
+  "Network Aggregation Base Plan Type",
+  "Network Aggregation Target Version",
+  "Network Aggregation Item",
+  "Network Aggregation Item Type",
+  "Network Aggregation Brand",
+  "Network Aggregation Sub Brand",
+  "Network Aggregation Resource",
+  "Network Aggregation Resource Type",
+  "Network Aggregation Location",
+  "Network Aggregation Location Region",
+  "Network Aggregation Location Type",
+  "Network Aggregation Include Material Node",
+  "Network Aggregation Criticality",
+  "Network Aggregation Include Resource Node",
+  "Include Material Node Override",
+  "Include Resource Node Override",
+  "Aggregation Simultaneous Resource",
+  "Applied Resource ABDM Rule",
+  "PC Setting Is Enabled",
+  "PC Setting Value - Aggregation Method"
+];
 export const measure_dimensions_mapper = {
   "Network Aggregation Item": "Item.[Item]",
   "Network Aggregation Item Type": "Item.[Item Type]",
@@ -94,6 +134,12 @@ export const measure_dimensions_mapper = {
   "Network Aggregation Resource": "Resource.[Resource]",
   "Network Aggregation Resource Type": "Resource.[Resource Type]",
 };
+
+export const measure_picklist = {
+  "Include Material Node Override": ["Yes", "No"],
+  "Include Resource Node Override": ["Yes", "No"],
+  "PC Setting Value - Aggregation Method": ["Min", "Max", "Average", "Sum"]
+}
 
 export const generatePayloadForDimensions = (colsDisplayNameMapping = {}) => {
   const payloads = {};

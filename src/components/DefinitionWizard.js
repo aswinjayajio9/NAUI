@@ -24,9 +24,16 @@ export default function DefinitionWizard({
   const [current, setCurrent] = React.useState(0);
 
   const goNext = () => {
-    if (current < steps.length - 1) setCurrent((c) => c + 1);
-    else console.log("DefinitionWizard finished");
+    if (current < steps.length - 1) {
+      if (current === 2) {
+        // Prevent navigation beyond "Parameters Definition"
+        console.log("DefinitionWizard finished");
+        return;
+      }
+      setCurrent((c) => c + 1);
+    }
   };
+
   const goPrev = () => setCurrent((c) => Math.max(0, c - 1));
 
   const jumpTo = (idx) => {
@@ -60,8 +67,13 @@ export default function DefinitionWizard({
           <Button size="sm" variant="outline" onClick={goPrev} isDisabled={current === 0}>
             Previous
           </Button>
-          <Button size="sm" colorScheme="blue" onClick={goNext} isDisabled={current === steps.length - 1}>
-            Next
+          <Button
+            size="sm"
+            colorScheme="blue"
+            onClick={goNext}
+            isDisabled={current === steps.length - 1}
+          >
+            {current === 2 ? "Finish" : "Next"}
           </Button>
         </Flex>
       </Flex>

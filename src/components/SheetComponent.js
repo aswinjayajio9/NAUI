@@ -35,6 +35,7 @@ import {
   parseCsv,
   createCellEditPayload,
 } from "./o9Interfacehelper";
+import { editableMeasureList,measure_picklist } from "./payloads";
 const CELL_MIN_HEIGHT = 5;
 
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
@@ -317,7 +318,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
 
     return colsFromPayload.map((c, idx) => {
       const isDimension = dimHeaders.includes(c.dataIndex);
-      const editable = measureHeaders.includes(c.dataIndex) && enableEdit; // Only measures editable/draggable if enableEdit
+      const editable = enableEdit && editableMeasureList.includes(c.dataIndex); // Check editableMeasureList
 
       // store header text and flags; actual title node will be rendered at render-time so it can reflect current sort state
       return {
@@ -348,16 +349,18 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
 
     return keys.map((k, idx) => {
       const isDimension = dimHeaders.includes(k);
+      const editable = !isDimension && enableEdit && editableMeasureList.includes(k); // Check editableMeasureList
+
       // store headerText and flags; actual title node will be rendered at render-time
       return {
         headerText: String(k).toUpperCase(),
         dataIndex: k,
         key: k,
-        editable: !isDimension && enableEdit, // dimensions non-editable; only if enableEdit
+        editable,
         isDimension,
         render: (text, record) => {
           const isDuplicate = isDimension && (rowSpanMap[k]?.[record.key] === 0);
-          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, k, !isDimension && enableEdit);
+          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, k, editable);
           return { children };
         },
         onCell: (record) => ({
@@ -489,6 +492,23 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       alignItems: "center",
     };
     const id = `${record.key}:::${dataIndex}`;
+
+    // Check if the column has a picklist
+    const picklist = measure_picklist[dataIndex];
+
+    if (picklist) {
+      return (
+        <div style={commonStyle}>
+          <Select
+            value={value}
+            onChange={(selectedValue) => handleCellChange(selectedValue, record.key, dataIndex)}
+            options={picklist.map((option) => ({ label: option, value: option }))}
+            style={{ width: "100%" }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      );
+    }
 
     // If not editable (dimension or !enableEdit), render plain text with same wrapper so height stays consistent
     if (!editable) {
@@ -885,6 +905,12 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
       } else {
         className = "naui-meas-col";
       }
+
+      // Add a greyish background for non-editable measures
+      const columnStyle = !c.editable
+        ? { backgroundColor: "#f5f5f5" } // Greyish background for non-editable columns
+        : {};
+
       return {
         ...c,
         title: renderHeader(aliasHeader[c.dataIndex] || c.headerText || String(c.title || ""), c.dataIndex, isDim, idx),
@@ -898,7 +924,7 @@ export default function SheetComponent({ dataUrl, data, onFiltersChange, config,
             const children = duplicateInStandard
               ? <div style={{ minHeight: CELL_MIN_HEIGHT }} />
               : renderEditableCell(text, record, c.dataIndex, c.editable);
-            return { children };
+            return { children, props: { style: columnStyle } }; // Apply the style here
           }
 
           // Dimension column:
