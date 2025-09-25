@@ -16,7 +16,7 @@ export default function PlanTypeVersionBox({ srcPlan, srcVersion, tgtPlan, tgtVe
           <thead>
             <tr style={{ backgroundColor: "#f7f7f7" }}>
               <th style={{ padding: "6px", fontSize: "xs", color: "gray.800", borderBottom: "1px solid #e2e8f0" }}></th>
-              <th style={{ padding: "6px", fontSize: "xs", color: "gray.800", borderBottom: "1px solid #e2e8f0" }}>Plan Type</th>
+              <th style={{ padding: "6px", fontSize: "xs", color: "gray.800", borderBottom: "1px solid #e2e8f0" }}>Process Type</th>
               <th style={{ padding: "6px", fontSize: "xs", color: "gray.800", borderBottom: "1px solid #e2e8f0" }}>Version</th>
             </tr>
           </thead>
