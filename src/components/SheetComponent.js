@@ -35,7 +35,9 @@ import {
   parseCsv,
   createCellEditPayload,
 } from "./o9Interfacehelper";
-import { editableMeasureList,measure_picklist } from "./payloads";
+import { editableMeasureList, measure_picklist, measure_dimensions_mapper } from "./payloads";
+import { getPayloadFromUrl } from "./o9Interfacehelper";
+
 const CELL_MIN_HEIGHT = 5;
 
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
@@ -311,6 +313,12 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
   const [addRowVisible, setAddRowVisible] = useState(false);
   const [newRowData, setNewRowData] = useState({});
 
+  // CLEANUP refresh timer on unmount
+  useEffect(() => {
+    return () => {
+    };
+  }, []);
+
   // Helper: Build columns from payload (editable with highlighting and sticky dimensions)
   const buildColumnsFromPayload = (colsFromPayload, dims, enableEdit) => {
     const dimHeaders = dims.map(d => d.header); // Extract dimension headers
@@ -558,14 +566,12 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
 
   // Handler: Update cell value and trigger autosave
   const handleCellChange = (value, key, dataIndex) => {
-    if (!enableEdit) return; // Prevent changes if editing disabled
-    const updateData = (prev) => prev.map((row) => (row.key === key ? { ...row, [dataIndex]: value } : row));
-    setOriginalData(updateData);
+    if (!enableEdit) return;
+    const updateData = (prev) =>
+      prev.map((row) => (row.key === key ? { ...row, [dataIndex]: value } : row));
     setDataSource(updateData);
 
-    // Return the updated row for immediate use in saveRow
-    const updatedRow = updateData(originalData).find((r) => r.key === key);
-
+    const updatedRow = updateData(dataSource).find((r) => r.key === key);
     const initRow = initialDataRef.current.find((r) => r.key === key);
     const initVal = initRow?.[dataIndex];
     const nowDifferent = String(initVal ?? "") !== String(value ?? "");
@@ -575,14 +581,11 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
         editedKeysRef.current.add(key);
         setEditedKeys(Array.from(editedKeysRef.current));
       }
-      // Removed immediate save; now saves on blur for Input or onChange for Checkbox
     } else {
-      // Check if row matches original
-      const currentRow = updatedRow; // Use the updated row for accuracy
-      const stillDifferent = Object.keys(currentRow).some((k) => {
+      const stillDifferent = Object.keys(updatedRow).some((k) => {
         if (k === "key") return false;
-        const a = String(initialDataRef.current.find((ir) => ir.key === key)?.[k] ?? "");
-        const b = String(currentRow[k] ?? "");
+        const a = String(initRow?.[k] ?? "");
+        const b = String(updatedRow[k] ?? "");
         return a !== b;
       });
       if (!stillDifferent && editedKeysRef.current.has(key)) {
@@ -590,8 +593,7 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
         setEditedKeys(Array.from(editedKeysRef.current));
       }
     }
-
-    return updatedRow; // Return for use in saveRow
+    return updatedRow;
   };
 
   // Handler: Keyboard navigation and escape to revert
@@ -737,38 +739,72 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
   // Handler: Save a row (manual save for edited rows)
   const saveRow = async (key, updatedRow = null) => {
     if (!updatedRow) {
-      updatedRow = dataSource.find((r) => r.key === key);
+      updatedRow = dataSource.find(r => r.key === key);
     }
     if (!updatedRow) return;
 
     try {
-      const payload = createCellEditPayload(
-        updatedRow,
-        o9Measures,
-        o9Attributes,
-        o9Filters,
-        parseInt(key)
-      );
+      // Build mapping similar to AddRow
+      const all_colsDisplayNameMapping = {
+        ...colsDisplayNameMapping,
+        ...measure_dimensions_mapper
+      };
 
-      const response = await fetch('https://your-o9-endpoint.com/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      // Dimension / measure separation
+      const dimParts = [];
+      const measureParts = [];
+
+      Object.entries(updatedRow).forEach(([col, value]) => {
+        if (col === "key" || value === undefined) return;
+        const realName = all_colsDisplayNameMapping[col];
+        if (!realName) return;
+
+        if (realName.includes(".[")) {
+          // Dimension attribute
+          const [dim, attr] = realName.split(".[").map(p => p.replace(/\[|\]/g, ""));
+          dimParts.push(`[${dim}].[${attr}].[${value}]`);
+        } else {
+          // Measure
+          const formattedValue =
+            value === null || value === "" || value === undefined
+              ? "null"
+              : (!isNaN(Number(value)) && String(value).trim() !== "")
+                ? Number(value)
+                : `"${value}"`;
+          measureParts.push(`Measure.[${col}] = ${formattedValue}`);
+        }
       });
 
-      if (!response.ok) throw new Error(`Save failed: ${response.status}`);
+      if (dimParts.length === 0 || measureParts.length === 0) {
+        console.warn("Skipping row (no dimParts or measureParts)", key);
+        return;
+      }
 
-      // On success, remove from edited keys and update initial snapshot
+      const query = `scope: (${dimParts.join(" * ")}); ${measureParts.join("; ")}; end scope;`;
+
+      const payload = {
+        query,
+        Tenant: 6760,
+        ExecutionContext: "Kibo Debugging Workspace",
+        EnableMultipleResults: true
+      };
+
+      const response = await getPayloadFromUrl({ payload });
+      const responseData = typeof response === "string" ? JSON.parse(response) : response;
+
+      if (!responseData?.Results) {
+        throw new Error("Server returned invalid response");
+      }
+
+      // Mark row as saved
       editedKeysRef.current.delete(key);
       setEditedKeys(Array.from(editedKeysRef.current));
-      initialDataRef.current = initialDataRef.current.map((r) =>
+      initialDataRef.current = initialDataRef.current.map(r =>
         r.key === key ? { ...updatedRow } : r
       );
-
-      message.success(`Row ${key} saved successfully`);
-    } catch (error) {
-      console.error('Save error:', error);
-      message.error(`Save failed for row ${key}: ${error.message}`);
+    } catch (err) {
+      console.error("Save error row", key, err);
+      message.error(`Save failed for row ${key}: ${err.message}`);
     }
   };
 
@@ -778,17 +814,24 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
       message.info('No changes to save');
       return;
     }
-
     setSaveLoading(true);
     try {
       const promises = editedKeys.map((key) => saveRow(key));
       await Promise.all(promises);
       message.success('All changes saved successfully');
+      await loadData();
     } catch (error) {
       message.error('Some saves failed');
     } finally {
       setSaveLoading(false);
     }
+  };
+
+  // >>> ADD THIS FUNCTION <<>
+  const handleAddRowSuccess = () => {
+    // After a manual Add Row submission, refresh dataset
+    loadData();
+    setAddRowVisible(false);
   };
 
   // Build / refresh dimension group metadata whenever dimensions or dataSource change
@@ -1212,20 +1255,17 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
       </Modal>
       <AddRow
         visible={addRowVisible}
-        onCancel={() => setAddRowVisible(false)}
-        onAdd={(data) => {
-          // Optional: Handle local add if needed, but prioritize server sync
-          setDataSource((prev) => [...prev, { ...data, key: rowCounter + 1 }]);
-          setOriginalData((prev) => [...prev, { ...data, key: rowCounter + 1 }]);
-          setRowCounter((prev) => prev + 1);
+        onCancel={() => {
+          setAddRowVisible(false);
         }}
         src_tgt={src_tgt}
         dimensions={dimensions}
         columns={columns}
         newRowData={newRowData}
         setNewRowData={setNewRowData}
-        onSuccess={() => loadData()}
+        onSuccess={handleAddRowSuccess}
         colsDisplayNameMapping={colsDisplayNameMapping}
+        autoSubmit={false}   // force manual mode
       />
     </div>
   );
