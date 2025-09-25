@@ -36,18 +36,17 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
       const measures = [];
       const all_colsDisplayNameMapping = {
         ...colsDisplayNameMapping,
-        Version: HideDimensions['Version'],
-        PlanType: HideDimensions['o9NetworkAggregation Network Plan Type'],
-        DataObject: HideDimensions['Data Object'],
-        DMRule: '[DM Rule].[Rule]',
+        ...(src_tgt?.src && { Version: HideDimensions['Version'] }),
+        ...(src_tgt?.tgt && { PlanType: HideDimensions['o9NetworkAggregation Network Plan Type'] }),
+        ...(src_tgt?.data_object && { DataObject: HideDimensions['Data Object'] })
       };
 
       const updatedNewRowData = {
         ...newRowData,
-        Version: src_tgt?.src || '',
-        PlanType: src_tgt?.tgt || '',
-        DataObject: src_tgt?.data_object || '',
-        DMRule: newRule || 'Rule_01',
+        ...(src_tgt?.src && { Version: src_tgt.src }),
+        ...(src_tgt?.tgt && { PlanType: src_tgt.tgt }),
+        ...(src_tgt?.data_object && { DataObject: src_tgt.data_object }),
+        ...(Object.keys(all_colsDisplayNameMapping).includes('rule') && { DMRule: newRule }),
       };
 
       Object.entries(updatedNewRowData).forEach(([key, value]) => {
