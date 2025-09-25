@@ -59,7 +59,7 @@ const AddRow = ({
         ...(src_tgt?.data_object && { DataObject: HideDimensions['Data Object'] }),
         ...(newRule && { DMRule: '[DM Rule].[Rule]' }),
       };
-
+      
       const updatedNewRowData = {
         ...newRowData,
         ...(src_tgt?.src && { Version: src_tgt.src }),
@@ -67,7 +67,8 @@ const AddRow = ({
         ...(src_tgt?.data_object && { DataObject: src_tgt.data_object }),
         ...(newRule && { DMRule: newRule }),
       };
-
+      console.log('AddRow submitting data:', updatedNewRowData);
+      console.log('Using columns mapping:', all_colsDisplayNameMapping);
       Object.entries(updatedNewRowData).forEach(([key, value]) => {
         const realName = all_colsDisplayNameMapping[key];
         if (!realName) return;
