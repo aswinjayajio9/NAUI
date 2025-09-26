@@ -1,19 +1,19 @@
 import React from "react";
 import { Button, useToast } from "@chakra-ui/react";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-import { runExcludeMaterialNodeProcessPayload } from "./payloads";
+// import { runExcludeMaterialNodeProcessPayload } from "./payloads";
 
-export default function RunAbdmButton({ config, loadMaterialDetails }) {
+export default function RunAbdmButton({ config, onAbdmComplete }) {
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
-  const [abdmCompleted, setAbdmCompleted] = React.useState(false);
 
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
       // Use the correct payload for the ABDM process
+      console.log("Running ABDM with config:", config.abdmpayload);
       const resdata = await getPayloadFromUrl({
-        payload: config.abdm(config.src, config.tgt),
+        payload: config.abdmpayload,
       });
 
       // Check if the response is valid
@@ -25,9 +25,10 @@ export default function RunAbdmButton({ config, loadMaterialDetails }) {
       console.log("ABDM process response:", data);
       toast({ title: "ABDM started successfully", status: "success", duration: 3000 });
 
-      // Load Material Definition - Details after ABDM is started
-      await loadMaterialDetails();
-      setAbdmCompleted(true); // Set completed after successful ABDM and loading
+      // Notify parent component that ABDM is completed
+      if (onAbdmComplete) {
+        onAbdmComplete(true); // Call the callback with `true`
+      }
     } catch (err) {
       toast({
         title: "ABDM failed",
@@ -43,7 +44,7 @@ export default function RunAbdmButton({ config, loadMaterialDetails }) {
   return (
     <Button
       size="sm"
-      colorScheme="teal"
+      colorScheme="blue"
       onClick={runAbdm}
       isLoading={abdmRunning}
       aria-label="Run ABDM"
