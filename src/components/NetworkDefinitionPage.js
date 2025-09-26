@@ -57,6 +57,7 @@ export default function NetworkDefinitionPage({
 
   // Function to load material details
   const loadMaterialDetails = async () => {
+    console.log("loadMaterialDetails triggered");
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);
     try {
@@ -84,20 +85,11 @@ export default function NetworkDefinitionPage({
         );
       }
 
+      console.log("Material details data loaded:", data["Results"]["0"]);
       setMaterialDetailsData(data["Results"]["0"]);
-      toast({
-        title: "Material details loaded successfully",
-        status: "success",
-        duration: 3000,
-      });
     } catch (err) {
+      console.error("Error in loadMaterialDetails:", err);
       setMaterialDetailsError(err.message || String(err));
-      toast({
-        title: "Failed to load material details",
-        description: err.message,
-        status: "error",
-        duration: 5000,
-      });
     } finally {
       setMaterialDetailsLoading(false);
     }
@@ -105,10 +97,15 @@ export default function NetworkDefinitionPage({
 
   // Trigger `loadMaterialDetails` when `abdmCompleted` is set to true
   useEffect(() => {
+    console.log("abdmCompleted state changed:", abdmCompleted);
     if (abdmCompleted) {
-      loadMaterialDetails();
+      loadMaterialDetails().catch((err) => {
+        console.error("Failed to load material details:", err);
+      });
     }
   }, [abdmCompleted, srcVersion, tgtPlan]); // Dependencies include `abdmCompleted`, `srcVersion`, and `tgtPlan`
+
+  console.log("abdmCompleted in render:", abdmCompleted);
 
   // Load network material rules data on component mount
   useEffect(() => {
@@ -182,7 +179,7 @@ export default function NetworkDefinitionPage({
 
       {/* Summary of Material Definition */}
       {abdmCompleted && (
-        <Box w="100%" mb={6}>
+        <Box w="100%" mb={6} key={`summary-${abdmCompleted}`}>
           <Heading size="sm" mb={3}>
             Material Definition
           </Heading>
@@ -197,9 +194,10 @@ export default function NetworkDefinitionPage({
 
       {/* Material Definition - Details */}
       {abdmCompleted && (
-        <Box w="100%" mb={6}>
+        <Box w="100%" mb={6} key={`details-${abdmCompleted}`}>
           <Heading size="sm" mb={3}>
-            Material Definition - Details</Heading>
+            Material Definition - Details
+          </Heading>
           <SimpleGrid columns={1} spacing={6}>
             <SheetComponent
               src_tgt={src_tgt}
