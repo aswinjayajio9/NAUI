@@ -52,9 +52,9 @@ export const runExcludeResourceNodeProcessPayload = (srcVersion, srcPlan) => ({
     "EnableMultipleResults": true
 });
 
-export const getPayloadForParameters = (srcVersion) => ({
+export const getPayloadForParameters = (srcVersion, ComponentInstanceName) => ({
     "Tenant": 6760,
-    "Query": `Select ([Version].[Version Name].[${srcVersion}] * [o9PC Component].[Component Instance].[Network Aggregation Demo] * [o9PC Setting].[Setting] ) on row,({Measure.[PC Setting Is Enabled], Measure.[PC Setting Value - Aggregation Method],Measure.[PC Setting Value]}) on column;`,
+    "Query": `Select ([Version].[Version Name].[${srcVersion}] * [o9PC Component].[Component Instance].[${ComponentInstanceName}] * [o9PC Setting].[Setting] ) on row,({Measure.[PC Setting Is Enabled], Measure.[PC Setting Value - Aggregation Method],Measure.[PC Setting Value]}) on column;`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });

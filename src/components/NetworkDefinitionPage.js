@@ -97,7 +97,7 @@ export default function NetworkDefinitionPage({
     useState(true);
   const [summaryDefinition2Error, setSummaryDefinition2Error] = useState(null);
   const [data_object, setDataObject] = useState("Exclude Material Node");
-  const src_tgt = { src: srcVersion, tgt: tgtPlan, data_object: data_object };
+  const src_tgt = { 'Version':srcVersion, 'o9NetworkAggregation Network Plan Type': tgtPlan, 'Data Object': data_object };
   const loadMaterialDetails = async () => {
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);

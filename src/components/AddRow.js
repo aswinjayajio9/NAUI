@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Space, Input, Select, Row, Col } from 'antd';
+import Draggable from 'react-draggable'; // Import Draggable
 import { fetchDimensionDropdowns, getPayloadFromUrl } from './o9Interfacehelper';
 import { aliasHeader, measure_dimensions_mapper, add_row_orders, HideDimensions, measure_picklist } from './payloads';
 
@@ -10,6 +11,8 @@ const sortColumnsByOrder = (columns) =>
 const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, setNewRowData, onSuccess, colsDisplayNameMapping }) => {
   const [dimensionOptions, setDimensionOptions] = useState({});
   const [newRule, setNewRule] = useState('Rule_01');
+  const dragRef = useRef(null); // Ref for draggable modal
+  const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 }); // State to track modal position
 
   // Create updatedMapping globally within the component
   const updatedMapping = { ...colsDisplayNameMapping, ...measure_dimensions_mapper };
@@ -18,10 +21,13 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
     const fetchDimensions = async () => {
       try {
         const updatedMapping = { ...colsDisplayNameMapping, ...measure_dimensions_mapper };
+        
         let dropdowns = await fetchDimensionDropdowns(updatedMapping);
         dropdowns = { ...dropdowns, ...measure_picklist }; // Add fixed values
         setDimensionOptions(dropdowns);
-        setNewRule(findMissingOrNextRule(dimensions));
+        if (Object.keys(colsDisplayNameMapping).includes('Rule')) {
+          setNewRule(findMissingOrNextRule(dimensions));
+        }
       } catch (error) {
         console.error('Error fetching dimensions:', error);
       }
@@ -30,24 +36,23 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
     if (visible) fetchDimensions();
   }, [visible, src_tgt, colsDisplayNameMapping]);
 
+  const handleResetPosition = () => {
+    setModalPosition({ x: 0, y: 0 }); // Reset modal position to default
+  };
+
   const handleSubmit = async () => {
     try {
       const dimensions = [];
       const measures = [];
       const all_colsDisplayNameMapping = {
         ...colsDisplayNameMapping,
-        Version: HideDimensions['Version'],
-        PlanType: HideDimensions['o9NetworkAggregation Network Plan Type'],
-        DataObject: HideDimensions['Data Object'],
-        DMRule: '[DM Rule].[Rule]',
       };
-
+      if (newRule) {
+        src_tgt['DM Rule'] = newRule;
+      }
       const updatedNewRowData = {
         ...newRowData,
-        Version: src_tgt?.src || '',
-        PlanType: src_tgt?.tgt || '',
-        DataObject: src_tgt?.data_object || '',
-        DMRule: newRule || 'Rule_01',
+        ...src_tgt,
       };
 
       Object.entries(updatedNewRowData).forEach(([key, value]) => {
@@ -65,8 +70,9 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
           measures.push(`Measure.[${key}] = ${formattedValue}`);
         }
       });
+      console.log('Prepared dimensions and measures:', { dimensions, measures });
 
-      const query = `scope: (${dimensions.join(' * ')}); ${measures.join('; ')}; end scope;`;
+      const query = `cartesian scope: (${dimensions.join(' * ')}); ${measures.join('; ')}; end scope;`;
       const new_payload = { query, Tenant: 6760, ExecutionContext: 'Kibo Debugging Workspace', EnableMultipleResults: true };
       console.log('Submitting new payload:', new_payload);
 
@@ -76,6 +82,7 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
       if (responseData?.Results) {
         console.log('Row added successfully, reloading data...');
         onSuccess();
+        handleResetPosition(); // Reset modal position on submit
         onCancel();
       } else {
         throw new Error('API error: Invalid response from server.');
@@ -183,11 +190,46 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
   return (
     <Modal
       visible={visible}
-      title="Add New Row"
-      onCancel={onCancel}
+      title={
+        <div
+          className="draggable-modal-title"
+          style={{ cursor: 'move' }}
+        >
+          Add New Row
+        </div>
+      }
+      onCancel={() => {
+        handleResetPosition(); // Reset modal position on cancel
+        onCancel();
+      }}
+      modalRender={(modal) => (
+        <Draggable
+          handle=".draggable-modal-title" // Use a custom class for the draggable handle
+          nodeRef={dragRef}
+          position={modalPosition} // Bind modal position to state
+          onStop={(e, data) => setModalPosition({ x: data.x, y: data.y })} // Update position on drag stop
+        >
+          <div ref={dragRef}>{modal}</div>
+        </Draggable>
+      )}
       footer={
         <Space size="small">
-          <Button onClick={onCancel}>Cancel</Button>
+          <Button
+            onClick={() => {
+              handleResetPosition(); // Reset modal position on cancel
+              onCancel();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setNewRowData({}); // Reset newRowData to an empty object
+              handleResetPosition(); // Reset modal position on reset
+            }}
+          >
+            Reset
+          </Button>
           <Button type="primary" onClick={handleSubmit}>
             Submit
           </Button>

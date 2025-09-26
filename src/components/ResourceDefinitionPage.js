@@ -56,7 +56,7 @@ export default function ResourceDefinitionPage({
   const [summaryResource1Error, setSummaryResource1Error] = useState(null);
 
   const [data_object, setDataObject] = useState("Exclude Resource Node");
-  const src_tgt = { src: srcVersion, tgt: tgtPlan, data_object: data_object };
+  const src_tgt = { 'Version':srcVersion, 'o9NetworkAggregation Network Plan Type': tgtPlan, 'Data Object': data_object };
 
   const runAbdm = async () => {
     setAbdmRunning(true);

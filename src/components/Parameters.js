@@ -10,7 +10,7 @@ import PlanTypeVersionBox from "./PlanTypeVersionBox"; // Import the new compone
 import { API_BASE_URL } from "./HomePage"; // Import the constant
 import { getPayloadForParameters, HideDimensions } from "./payloads";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-
+import { new_component } from "./HomePage";
 /*
   ResourceDefinitionPage
   - Clean page: parent provides step control.
@@ -31,7 +31,7 @@ export default function ResourceDefinitionPage({
   const [summaryParameters, setSummaryParameters] = useState([]);
   const [summaryParametersLoading, setSummaryParametersLoading] = useState(true);
   const [summaryParametersError, setSummaryParametersError] = useState(null);
-
+  const src_tgt = { 'Version':srcVersion, 'o9NetworkAggregation Network Plan Type': tgtPlan, 'o9PC Component': new_component };
   useEffect(() => {
     const loadParameters = async () => {
       setSummaryParametersLoading(true);

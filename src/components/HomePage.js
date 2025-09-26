@@ -18,7 +18,7 @@ import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { getNetworkSummaryPayload } from "./payloads";
 
 export const API_BASE_URL = "http://localhost:8998";
-
+export const new_component = "Network Aggregation Demo";
 
 function NetworkAggHomePage() {
   const [firstSheetFilters, setFirstSheetFilters] = useState({});

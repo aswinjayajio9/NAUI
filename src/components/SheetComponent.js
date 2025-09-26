@@ -178,7 +178,6 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
       const finalConfig = {
         enabled: false,
         ...(config || {}),
-        hideDimensions: Array.isArray(hideDims) ? hideDims : (config?.hideDimensions || []),
       };
       
       if (data && typeof data === "object") {
@@ -313,62 +312,66 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
 
   // Helper: Build columns from payload (editable with highlighting and sticky dimensions)
   const buildColumnsFromPayload = (colsFromPayload, dims, enableEdit) => {
-    const dimHeaders = dims.map(d => d.header); // Extract dimension headers
-    const measureHeaders = measures.map(m => m.header); // Extract measure headers
+    const dimHeaders = dims.map((d) => d.header); // Extract dimension headers
+    const measureHeaders = measures.map((m) => m.header); // Extract measure headers
 
-    return colsFromPayload.map((c, idx) => {
-      const isDimension = dimHeaders.includes(c.dataIndex);
-      const editable = enableEdit && editableMeasureList.includes(c.dataIndex); // Check editableMeasureList
+    return colsFromPayload
+      .filter((c) => !hideDims.includes(c.dataIndex)) // Filter out hidden dimensions
+      .map((c, idx) => {
+        const isDimension = dimHeaders.includes(c.dataIndex);
+        const editable = enableEdit && editableMeasureList.includes(c.dataIndex); // Check editableMeasureList
 
-      // store header text and flags; actual title node will be rendered at render-time so it can reflect current sort state
-      return {
-        headerText: String(c.title).toUpperCase(),
-        dataIndex: c.dataIndex,
-        key: c.key,
-        editable,
-        isDimension,
-        // preserve render and onCell behavior; render a fixed-height placeholder for duplicate dimension rows
-        render: (text, record) => {
-          const isDuplicate = isDimension && (rowSpanMap[c.dataIndex]?.[record.key] === 0);
-          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, c.dataIndex, editable);
-          return { children };
-        },
-        onCell: (record) => ({
-          onMouseEnter: () => setHoveredCell(`${record.key}-${c.dataIndex}`),
-          onMouseLeave: () => setHoveredCell(null),
-        }),
-      };
-    });
+        // store header text and flags; actual title node will be rendered at render-time so it can reflect current sort state
+        return {
+          headerText: String(c.title).toUpperCase(),
+          dataIndex: c.dataIndex,
+          key: c.key,
+          editable,
+          isDimension,
+          // preserve render and onCell behavior; render a fixed-height placeholder for duplicate dimension rows
+          render: (text, record) => {
+            const isDuplicate = isDimension && (rowSpanMap[c.dataIndex]?.[record.key] === 0);
+            const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, c.dataIndex, editable);
+            return { children };
+          },
+          onCell: (record) => ({
+            onMouseEnter: () => setHoveredCell(`${record.key}-${c.dataIndex}`),
+            onMouseLeave: () => setHoveredCell(null),
+          }),
+        };
+      });
   };
 
   // Helper: Build editable columns from data keys (assume all are measures for non-O9 data)
   const buildEditableColumns = (rows, enableEdit) => {
     const first = rows?.[0] || {};
     const keys = Object.keys(first).filter((k) => k !== "key");
-    const dimHeaders = dimensions.map(d => d.header);
+    const dimHeaders = dimensions.map((d) => d.header);
 
-    return keys.map((k, idx) => {
-      const isDimension = dimHeaders.includes(k);
-      const editable = !isDimension && enableEdit && editableMeasureList.includes(k); // Check editableMeasureList
+    return keys
+      .filter((k) => !hideDims.includes(k)) // Filter out hidden dimensions
+      .map((k, idx) => {
+        const isDimension = dimHeaders.includes(k);
+        const editable = !isDimension && enableEdit && editableMeasureList.includes(k); // Check editableMeasureList
 
-      // store headerText and flags; actual title node will be rendered at render-time
-      return {
-        headerText: String(k).toUpperCase(),
-        dataIndex: k,
-        key: k,
-        editable,
-        isDimension,
-        render: (text, record) => {
-          const isDuplicate = isDimension && (rowSpanMap[k]?.[record.key] === 0);
-          const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, k, editable);
-          return { children };
-        },
-        onCell: (record) => ({
-          onMouseEnter: () => setHoveredCell(`${record.key}-${k}`),
-          onMouseLeave: () => setHoveredCell(null),
-        }),
-      };
-    });
+        // store headerText and flags; actual title node will be rendered at render-time
+        return {
+          headerText: String(k).toUpperCase(),
+          dataIndex: k,
+          key: k,
+          editable,
+          isDimension,
+          render: (text, record) => {
+            const isDuplicate = isDimension && (rowSpanMap[k]?.[record.key] === 0);
+            const children = isDuplicate ? <div style={{ minHeight: CELL_MIN_HEIGHT }} /> : renderEditableCell(text, record, k, editable);
+            return { children };
+          },
+          onCell: (record) => ({
+            onMouseEnter: () => setHoveredCell(`${record.key}-${k}`),
+            onMouseLeave: () => setHoveredCell(null),
+          }),
+        };
+      });
   };
 
   // New: header renderer that attaches sort icons (dimension-only), drag handlers and keyboard support
