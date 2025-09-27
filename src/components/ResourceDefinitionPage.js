@@ -1,112 +1,52 @@
-import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Flex,
-  Button,
-  Heading,
-  SimpleGrid,
-  Text,
-  Stack,
-  useToast,
-} from "@chakra-ui/react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Box, Flex, Button, Heading, SimpleGrid } from "@chakra-ui/react";
 import SheetComponent from "./SheetComponent";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-import { API_BASE_URL } from "./HomePage"; // Import the constant
-import {
-  getResourceDetailsPayload,
-  getResourceRulesPayload,
-  runExcludeResourceNodeProcessPayload,
-  HideDimensions,
-} from "./payloads";
-import PlanTypeVersionBox from "./PlanTypeVersionBox"; // Import the new component
-/*
-  ResourceDefinitionPage
-  - Clean page: parent provides step control.
-*/
+import { getResourceDetailsPayload, getResourceRulesPayload, HideDimensions } from "./payloads";
+import PlanTypeVersionBox from "./PlanTypeVersionBox";
 
 export default function ResourceDefinitionPage({
   srcPlan,
   srcVersion,
   tgtPlan,
   tgtVersion,
-  filters,
   onBack,
-  onNext, // injected by DefinitionWizard
-  onPrev, // injected by DefinitionWizard
-  isFirst, // injected by DefinitionWizard
-  isLast, // injected by DefinitionWizard
 }) {
-  const toast = useToast();
-  const [abdmRunning, setAbdmRunning] = useState(false);
-  const [abdmCompleted, setAbdmCompleted] = useState(false); // New state to track if ABDM has completed
+  const [abdmCompleted, setAbdmCompleted] = useState(false);
+  const [abdmRunKey, setAbdmRunKey] = useState(0);
+  const [sheetReloadKey, setSheetReloadKey] = useState(0);
 
-  // States for Resource Definition - Rules
-  const [resourceRulesData, setResourceRulesData] = useState(null);
-  const [resourceRulesLoading, setResourceRulesLoading] = useState(true);
-  const [resourceRulesError, setResourceRulesError] = useState(null);
-
-  // States for Resource Definition - Details (loaded after ABDM)
   const [resourceDetailsData, setResourceDetailsData] = useState(null);
   const [resourceDetailsLoading, setResourceDetailsLoading] = useState(false);
   const [resourceDetailsError, setResourceDetailsError] = useState(null);
 
-  // States for Summary Resources
-  const [summaryResource1Data, setSummaryResource1Data] = useState(null);
-  const [summaryResource1Loading, setSummaryResource1Loading] = useState(true);
-  const [summaryResource1Error, setSummaryResource1Error] = useState(null);
+  const [resourceRulesData, setResourceRulesData] = useState(null);
+  const [resourceRulesLoading, setResourceRulesLoading] = useState(true);
+  const [resourceRulesError, setResourceRulesError] = useState(null);
 
-  const [data_object, setDataObject] = useState("Exclude Resource Node");
-  const src_tgt = { 'Version':srcVersion, 'o9NetworkAggregation Network Plan Type': tgtPlan, 'Data Object': data_object };
-
-  const runAbdm = async () => {
-    setAbdmRunning(true);
-    try {
-      // Use the correct payload for the ABDM process
-      const resdata = await getPayloadFromUrl({
-        payload: runExcludeResourceNodeProcessPayload(srcVersion, tgtPlan),
-      });
-
-      // Check if the response is valid
-      const data = JSON.parse(resdata);
-      if (!data || typeof data !== "object") {
-        throw new Error("Invalid response from ABDM process");
-      }
-      console.log("ABDM process response:", data);
-      toast({ title: "ABDM started successfully", status: "success", duration: 3000 });
-
-      // Load Resource Definition - Details after ABDM is started
-      await loadResourceDetails();
-      setAbdmCompleted(true); // Set completed after successful ABDM and loading
-    } catch (err) {
-      toast({
-        title: "ABDM failed",
-        description: err.message,
-        status: "error",
-        duration: 5000,
-      });
-    } finally {
-      setAbdmRunning(false);
-    }
+  const src_tgt = {
+    Version: srcVersion,
+    "o9NetworkAggregation Network Plan Type": tgtPlan,
+    "Data Object": "Exclude Resource Node",
   };
 
+  // Load resource details
   const loadResourceDetails = async () => {
     setResourceDetailsLoading(true);
     setResourceDetailsError(null);
     try {
-      const data = await getPayloadFromUrl({
-        payload: getResourceDetailsPayload(srcVersion, tgtPlan),
-      });
-      const parsedData = typeof data === "string" ? JSON.parse(data) : data;
+      const payload = getResourceDetailsPayload(srcVersion, tgtPlan);
+      let data = await getPayloadFromUrl({ payload });
 
-      if (
-        !parsedData ||
-        !parsedData["Results"] ||
-        !Array.isArray(parsedData["Results"]) ||
-        parsedData["Results"].length === 0
-      ) {
+      if (typeof data === "string") {
+        data = JSON.parse(data);
+      }
+
+      if (!data?.Results?.[0]) {
         throw new Error("Invalid API response: Missing or empty 'Results' array");
       }
-      setResourceDetailsData(parsedData["Results"]["0"]);
+
+      setResourceDetailsData(data.Results[0]);
     } catch (err) {
       setResourceDetailsError(err.message || String(err));
     } finally {
@@ -114,29 +54,50 @@ export default function ResourceDefinitionPage({
     }
   };
 
+  // Trigger `loadResourceDetails` when `abdmCompleted` is set to true
   useEffect(() => {
-    setResourceRulesLoading(true);
-    getPayloadFromUrl({ payload: getResourceRulesPayload(srcVersion, tgtPlan) })
-      .then((data) => {
-        const parsedData = typeof data === "string" ? JSON.parse(data) : data;
+    if (abdmRunKey > 0 && abdmCompleted) {
+      loadResourceDetails().catch((err) => console.error("Failed to load resource details:", err));
+    }
+  }, [abdmRunKey, abdmCompleted, srcVersion, tgtPlan]);
 
-        if (
-          !parsedData ||
-          !parsedData["Results"] ||
-          !Array.isArray(parsedData["Results"]) ||
-          parsedData["Results"].length === 0
-        ) {
-          throw new Error("Invalid API response: Missing or empty 'Results' array");
-        }
-        setResourceRulesData(parsedData["Results"]["0"]);
-      })
-      .catch((error) => {
-        setResourceRulesError(error.message);
-      })
-      .finally(() => {
-        setResourceRulesLoading(false);
+  // Load resource rules data
+  const loadResourceRules = useCallback(async () => {
+    setResourceRulesLoading(true);
+    setResourceRulesError(null);
+    try {
+      let data = await getPayloadFromUrl({
+        payload: getResourceRulesPayload(srcVersion, tgtPlan),
       });
-  }, []);
+
+      if (typeof data === "string") {
+        data = JSON.parse(data);
+      }
+
+      if (!data?.Results?.[0]) {
+        throw new Error("Invalid API response: Missing or empty 'Results' array");
+      }
+
+      setResourceRulesData(data.Results[0]);
+    } catch (error) {
+      setResourceRulesError(error.message || String(error));
+    } finally {
+      setResourceRulesLoading(false);
+    }
+  }, [srcVersion, tgtPlan]);
+
+  useEffect(() => {
+    loadResourceRules();
+  }, [loadResourceRules]);
+
+  // Reload resource rules when sheetReloadKey changes
+  useEffect(() => {
+    if (sheetReloadKey > 0) {
+      loadResourceRules().catch((err) =>
+        console.error("Failed to reload resource rules (sheetReloadKey):", err)
+      );
+    }
+  }, [sheetReloadKey, loadResourceRules]);
 
   return (
     <Box p={6}>
@@ -146,84 +107,79 @@ export default function ResourceDefinitionPage({
             Back
           </Button>
           <Heading size="md">Resource Definition</Heading>
-          
         </Flex>
-        <PlanTypeVersionBox 
-                  srcPlan={srcPlan} 
-                  srcVersion={srcVersion} 
-                  tgtPlan={tgtPlan} 
-                  tgtVersion={tgtVersion} 
-                />
+        <PlanTypeVersionBox
+          srcPlan={srcPlan}
+          srcVersion={srcVersion}
+          tgtPlan={tgtPlan}
+          tgtVersion={tgtVersion}
+        />
       </Flex>
 
       {/* Resource Definition - Rules Section */}
       <Box w="100%" mb={6}>
-        <Flex justify="space-between" align="center" mb={3}>
-          <Heading size="sm">Resource Definition - Rules</Heading>
-          <Button
-            size="sm"
-            colorScheme="teal"
-            onClick={runAbdm}
-            isLoading={abdmRunning}
-            aria-label="Run ABDM"
-          >
-            Run ABDM
-          </Button>
-        </Flex>
         <SimpleGrid columns={1} spacing={6}>
           <SheetComponent
             data={resourceRulesData}
-            isLoading={resourceRulesLoading}
-            error={resourceRulesError}
             hideDims={Object.keys(HideDimensions)}
             src_tgt={src_tgt}
+            enableEdit={true}
+            executeButtons={{
+              button1: {
+                key: "Run ABDM",
+                config: {
+                  abdmpayload: "Exclude Resource Node",
+                },
+              },
+            }}
+            onRequestReload={(reason) => {
+              console.log("SheetComponent requested reload:", reason);
+              setSheetReloadKey((k) => k + 1);
+              loadResourceRules().catch((err) =>
+                console.error("Failed to reload resource rules:", err)
+              );
+            }}
+            onAbdmComplete={(completed) => {
+              setAbdmCompleted(completed);
+              if (completed) {
+                setAbdmRunKey((k) => k + 1);
+              }
+            }}
           />
         </SimpleGrid>
       </Box>
 
       {/* Summary of Resource Definition */}
-      {abdmCompleted &&(<Box w="100%" mb={6}>
-        <Heading size="sm" mb={3}>
-          Summary of Resource Definition
-        </Heading>
-
-          <SheetComponent
-            dataUrl={`${API_BASE_URL}/read/summary_resource1.csv`}
-            // data={summaryResource1Data}
-            isLoading={summaryResource1Loading}
-            error={summaryResource1Error}
-            enableEdit={false}
-            hideDims={Object.keys(HideDimensions)}
-          />
-      </Box>)}
-
-      {/* Resource Definition - Details (toggle Table / Network) - Only visible after ABDM */}
       {abdmCompleted && (
-        <Box w="100%" mb={6}>
-          <Flex justify="space-between" align="center" mb={3}>
-            <Heading size="sm">Resource Definition - Details</Heading>
-          </Flex>
+        <Box w="100%" mb={6} key={`summary-${abdmRunKey}`}>
+          <Heading size="sm" mb={3}>
+            Resource Definition
+          </Heading>
+          <SheetComponent
+            dataUrl="/read/summary_resource1.csv"
+            isLoading={false}
+            enableEdit={false}
+          />
+        </Box>
+      )}
+
+      {/* Resource Definition - Details */}
+      {abdmCompleted && (
+        <Box w="100%" mb={6} key={`details-${abdmRunKey}`}>
+          <Heading size="sm" mb={3}>
+            Resource Definition - Details
+          </Heading>
           <SimpleGrid columns={1} spacing={6}>
             <SheetComponent
+              src_tgt={src_tgt}
               data={resourceDetailsData}
               isLoading={resourceDetailsLoading}
               error={resourceDetailsError}
               hideDims={Object.keys(HideDimensions)}
-              src_tgt={src_tgt}
             />
           </SimpleGrid>
         </Box>
       )}
-
-      {/* Page-level navigation (restores Next/Previous buttons on the page) */}
-      <Flex mt={4} gap={2} justify="flex-end">
-        <Button size="sm" onClick={onPrev} isDisabled={isFirst}>
-          Previous
-        </Button>
-        <Button size="sm" colorScheme="blue" onClick={onNext}>
-          {isLast ? "Finish" : "Next"}
-        </Button>
-      </Flex>
     </Box>
   );
 }

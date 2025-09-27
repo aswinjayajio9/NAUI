@@ -30,9 +30,9 @@ export const getMaterialDetailsDataPayload = (tgtVersion, tgtPlan) => ({
     "EnableMultipleResults": true
 });
 
-export const getResourceRulesPayload = (tgtVersion) => ({
+export const getResourceRulesPayload = (tgtVersion, tgtPlan) => ({
     "Tenant": 6760,
-    "Query": `SELECT ([Version].[Version Name].[${tgtVersion}] * [Data Object].[Data Object].[Exclude Resource Node] * [DM Rule].[Rule]) ON ROW, ({Measure.[Network Aggregation Resource], Measure.[Network Aggregation Resource Type], Measure.[Network Aggregation Location], Measure.[Network Aggregation Location Region], Measure.[Network Aggregation Location Type], Measure.[Network Aggregation Include Resource Node]}) ON COLUMN;`,
+    "Query": `SELECT ([Version].[Version Name].[${tgtVersion}] * [Data Object].[Data Object].[Exclude Resource Node] * [DM Rule].[Rule] *[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].[${tgtPlan}]) ON ROW, ({Measure.[Network Aggregation Resource], Measure.[Network Aggregation Resource Type], Measure.[Network Aggregation Location], Measure.[Network Aggregation Location Region], Measure.[Network Aggregation Location Type], Measure.[Network Aggregation Include Resource Node]}) ON COLUMN;`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
