@@ -40,7 +40,17 @@ import RunAbdmButton from "./RunAbdmButton"; // Import the RunAbdmButton compone
 const CELL_MIN_HEIGHT = 5;
 
 // Main component: Handles data loading, editing, filtering, and rendering in table/chart modes
-export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange, config, enableEdit = true ,hideDims=[],executeButtons={}}) {
+export default function SheetComponent({
+  src_tgt,
+  dataUrl,
+  data,
+  onFiltersChange,
+  config,
+  enableEdit = true,
+  hideDims = [],
+  executeButtons = {},
+  onAbdmComplete, // <-- accept the callback from parent
+}) {
   // State for data and UI
   const [originalData, setOriginalData] = useState([]); // Master copy for filtering
   const [dataSource, setDataSource] = useState([]);
@@ -65,7 +75,6 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
   const [dimGroupsMap, setDimGroupsMap] = useState({});      // { dimHeader: [{ id, value, rowKeys, firstKey }] }
   const [collapsedGroups, setCollapsedGroups] = useState({}); // { dimHeader: Set(groupId) }
   const [saveLoading, setSaveLoading] = useState(false);
-  const [onAbdmComplete, setOnAbdmComplete] = React.useState(false); // New state to track if ABDM has completed
   // Add sort state for header keyboard/controls
   const [sortConfig, setSortConfig] = useState({ col: null, order: null });
 
@@ -1093,7 +1102,7 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
       <RunAbdmButton
         key={key}
         config={buttonConfig.config}
-        onAbdmComplete={onAbdmComplete} // Pass the callback to RunAbdmButton
+        onAbdmComplete={onAbdmComplete} // forward the callback function
       />
     ));
   };
@@ -1102,53 +1111,60 @@ export default function SheetComponent({ src_tgt,dataUrl, data, onFiltersChange,
     <div style={{ padding: 16, backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }}>
       {/* Styles for frozen dimension columns and hard divider after last dimension */}
       <style>{getSheetStyles()}</style>
-      <Space wrap style={{ marginBottom: 16 }}>
-        <Button type="primary" icon={<DownloadOutlined />} onClick={onDownload}>
-          Download CSV
-        </Button>
-        <Button type="default" icon={<EyeOutlined />} onClick={onView} disabled={selectedRowKeys.length === 0}>
-          View
-        </Button>
-        <Button type="default" icon={<FilterOutlined />} onClick={openFilter}>
-          Filter
-        </Button>
-        {enableEdit && (
-          <Button type="default" onClick={() => setAddRowVisible(true)}>
-            Add Row
+
+      {/* Toolbar: left controls + right-aligned execute buttons */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <Space wrap>
+          <Button type="primary" icon={<DownloadOutlined />} onClick={onDownload}>
+            Download CSV
           </Button>
-        )}
-        {enableEdit && (
-          <Button type="default" onClick={deleteRows} disabled={selectedRowKeys.length === 0}>
-            Delete Row
+          <Button type="default" icon={<EyeOutlined />} onClick={onView} disabled={selectedRowKeys.length === 0}>
+            View
           </Button>
-        )}
-        {enableEdit && (
-          <Button
-            type="primary"
-            onClick={saveAllEdited}
-            loading={saveLoading}
-            disabled={editedKeys.length === 0}
-          >
-            Save Changes ({editedKeys.length})
+          <Button type="default" icon={<FilterOutlined />} onClick={openFilter}>
+            Filter
           </Button>
-        )}
-        <Select
-          value={viewMode}
-          onChange={setViewMode}
-          options={enableEdit ? [
-            { label: "Table View", value: "table" },
-            { label: "Chart View", value: "chart" },
-            { label: "Nested View", value: "nested" },
-          ] : [
-            { label: "Table View", value: "table" },
-            { label: "Chart View", value: "chart" },
-            { label: "Nested View", value: "nested" },
-          ]}
-          style={{ width: 110 }}
-        />
-        {/* Render execute buttons */}
-        {renderExecuteButtons()}
-      </Space>
+          {enableEdit && (
+            <Button type="default" onClick={() => setAddRowVisible(true)}>
+              Add Row
+            </Button>
+          )}
+          {enableEdit && (
+            <Button type="default" onClick={deleteRows} disabled={selectedRowKeys.length === 0}>
+              Delete Row
+            </Button>
+          )}
+          {enableEdit && (
+            <Button
+              type="primary"
+              onClick={saveAllEdited}
+              loading={saveLoading}
+              disabled={editedKeys.length === 0}
+            >
+              Save Changes ({editedKeys.length})
+            </Button>
+          )}
+          <Select
+            value={viewMode}
+            onChange={setViewMode}
+            options={enableEdit ? [
+              { label: "Table View", value: "table" },
+              { label: "Chart View", value: "chart" },
+              { label: "Nested View", value: "nested" },
+            ] : [
+              { label: "Table View", value: "table" },
+              { label: "Chart View", value: "chart" },
+              { label: "Nested View", value: "nested" },
+            ]}
+            style={{ width: 110 }}
+          />
+        </Space>
+
+        {/* Right-aligned execute buttons */}
+        <Space wrap>
+          {renderExecuteButtons()}
+        </Space>
+      </div>
       {viewMode === "table" ? (
         <Table
           {...commonTableProps}
