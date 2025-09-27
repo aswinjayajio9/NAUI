@@ -169,13 +169,13 @@ export default function SheetComponent({
   }, []);
 
   // Helper: Load data (supports JSON, CSV, or pre-parsed objects) - now wrapped in useCallback
-  const loadData = useCallback(async () => {
-    console.log("loadData function triggered"); // Add this for debugging
-    let mounted = true;
-    setLoading(true);
-    setError(null);
-   
-    try {
+  const loadData = useCallback(async (forceServerReload = false) => {
+    console.log("loadData function triggered", { data, forceServerReload }); // Add this for debugging
+     let mounted = true;
+     setLoading(true);
+     setError(null);
+    
+     try {
       let rows = [];
       let colsFromPayload = null;
       let payload = null;
@@ -190,7 +190,8 @@ export default function SheetComponent({
         ...(config || {}),
       };
       
-      if (data && typeof data === "object") {
+      // If caller asked to force a server reload, skip the "data object provided" short-circuits
+      if (!forceServerReload && data && typeof data === "object") {
         if (data?.Meta && data?.Data) {
           payload = data;
           const parsed = parseMetaDataPayload(data, finalConfig);
@@ -203,7 +204,7 @@ export default function SheetComponent({
         } else {
           rows = parseGenericJson(data);
         }
-      } else if (dataUrl && typeof dataUrl === "object") {
+      } else if (!forceServerReload && dataUrl && typeof dataUrl === "object") {
         if (dataUrl?.Meta && dataUrl?.Data) {
           payload = dataUrl;
           const parsed = parseMetaDataPayload(dataUrl, finalConfig);
@@ -216,31 +217,66 @@ export default function SheetComponent({
         } else {
           rows = parseGenericJson(dataUrl);
         }
-
-      } else {
-        if (!dataUrl) throw new Error("No dataUrl or data provided");
-        const res = await fetch(dataUrl);
-        if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
-        const contentType = res.headers.get("content-type")?.toLowerCase() || "";
-
-        if (contentType.includes("json")) {
-          const json = await res.json();
-          if (json?.Meta && json?.Data) {
-            payload = json;
-            const parsed = parseMetaDataPayload(json, finalConfig);
+ 
+       } else {
+        // Force-reload path: accept either a URL (string) or a pre-fetched object
+        if (!dataUrl) {
+          // fallback to `data` object if provided
+          if (data && typeof data === "object") {
+            if (data?.Meta && data?.Data) {
+              payload = data;
+              const parsed = parseMetaDataPayload(data, finalConfig);
+              rows = parsed.rows;
+              colsFromPayload = parsed.cols;
+              dims = parsed.dimensions;
+              meas = parsed.measures;
+              tree = parsed.treeData;
+              setColsDisplayNameMapping(parsed.colsDisplayNameMapping);
+            } else {
+              rows = parseGenericJson(data);
+            }
+          } else {
+            throw new Error("No dataUrl or data provided");
+          }
+        } else if (typeof dataUrl === "object") {
+          // dataUrl is actually an object/payload
+          if (dataUrl?.Meta && dataUrl?.Data) {
+            payload = dataUrl;
+            const parsed = parseMetaDataPayload(dataUrl, finalConfig);
             rows = parsed.rows;
             colsFromPayload = parsed.cols;
             dims = parsed.dimensions;
             meas = parsed.measures;
             tree = parsed.treeData;
-            setColsDisplayNameMapping(parsed.colsDisplayNameMapping); // Set the mapping
+            setColsDisplayNameMapping(parsed.colsDisplayNameMapping);
           } else {
-            rows = parseGenericJson(json);
+            rows = parseGenericJson(dataUrl);
           }
         } else {
-          rows = await parseCsv(res);
+          // dataUrl is a string -> fetch remote
+          const res = await fetch(dataUrl);
+          if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+          const contentType = res.headers.get("content-type")?.toLowerCase() || "";
+ 
+          if (contentType.includes("json")) {
+            const json = await res.json();
+            if (json?.Meta && json?.Data) {
+              payload = json;
+              const parsed = parseMetaDataPayload(json, finalConfig);
+              rows = parsed.rows;
+              colsFromPayload = parsed.cols;
+              dims = parsed.dimensions;
+              meas = parsed.measures;
+              tree = parsed.treeData;
+              setColsDisplayNameMapping(parsed.colsDisplayNameMapping); // Set the mapping
+            } else {
+              rows = parseGenericJson(json);
+            }
+          } else {
+            rows = await parseCsv(res);
+          }
         }
-      }
+       }
       
       if (!mounted) return;
 
@@ -1286,7 +1322,7 @@ const getSelectedDimensionFilters = useCallback(() => {
         columns={columns}
         newRowData={newRowData}
         setNewRowData={setNewRowData}
-        onSuccess={() => loadData()}
+        onSuccess={() => loadData(true)}
         colsDisplayNameMapping={colsDisplayNameMapping}
       />
     </div>

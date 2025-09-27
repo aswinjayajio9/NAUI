@@ -166,7 +166,7 @@ export default function NetworkDefinitionPage({
       <Box w="100%" mb={6}>
         <SimpleGrid columns={1} spacing={6}>
           <SheetComponent
-            dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`}
+            // dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`}
             data={networkMaterialRulesData}
             hideDims={Object.keys(HideDimensions)}
             src_tgt={src_tgt}

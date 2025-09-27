@@ -25,7 +25,7 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
         let dropdowns = await fetchDimensionDropdowns(updatedMapping);
         dropdowns = { ...dropdowns, ...measure_picklist }; // Add fixed values
         setDimensionOptions(dropdowns);
-        if (Object.keys(colsDisplayNameMapping).includes('Rule')) {
+        if (Object.keys(colsDisplayNameMapping).includes("DM Rule")) {
           setNewRule(findMissingOrNextRule(dimensions));
         }
       } catch (error) {
@@ -248,17 +248,17 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
 
 // Helper function to find missing or next rule
 const findMissingOrNextRule = (dimensions) => {
+
   if (!dimensions?.[0]?.meta?.DimensionValues) {
     console.error('Invalid dimensions input');
     return null;
   }
-
-  const ruleNumbers = dimensions[0].meta.DimensionValues
+  const rule_dim = dimensions.find(dim => dim?.header === 'DM Rule' || dim.name === 'Rule');
+  const ruleNumbers = rule_dim?.meta?.DimensionValues
     .map((rule) => rule?.Name)
     .filter((name) => /^rule_\d+$/i.test(name))
     .map((name) => parseInt(name.split('_')[1], 10))
     .sort((a, b) => a - b);
-
   for (let i = 1; i <= ruleNumbers.length; i++) {
     if (!ruleNumbers.includes(i)) return `Rule_${String(i).padStart(2, '0')}`;
   }
