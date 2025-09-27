@@ -14,9 +14,8 @@ import {
   getMaterialDetailsDataPayload,
   getNetworkMaterialRulesDataPayload,
   HideDimensions,
-  runExcludeMaterialNodeProcessPayload,
 } from "./payloads";
-import { data } from "jquery";
+import PlanTypeVersionBox from "./PlanTypeVersionBox"; // Import the new component
 
 export default function NetworkDefinitionPage({
   srcPlan,
@@ -148,13 +147,20 @@ export default function NetworkDefinitionPage({
   return (
     <Box p={6}>
       <Flex mb={4} justify="space-between" align="center">
-        <Flex gap={3} align="center">
-          <Button size="sm" onClick={onBack}>
-            Back
-          </Button>
-          <Heading size="md">Network Model - Definition</Heading>
-        </Flex>
-      </Flex>
+              <Flex gap={3} align="center">
+                <Button size="sm" onClick={onBack}>
+                  Back
+                </Button>
+                <Heading size="md">Material Definition</Heading>
+                
+              </Flex>
+              <PlanTypeVersionBox 
+                        srcPlan={srcPlan} 
+                        srcVersion={srcVersion} 
+                        tgtPlan={tgtPlan} 
+                        tgtVersion={tgtVersion} 
+                      />
+            </Flex>
 
       {/* Material Definition - Rules Section */}
       <Box w="100%" mb={6}>
