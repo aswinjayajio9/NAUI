@@ -32,6 +32,7 @@ export default function NetworkDefinitionPage({
 }) {
   const toast = useToast();
   const [abdmCompleted, setAbdmCompleted] = useState(false); // Track if ABDM is completed
+  const [abdmRunKey, setAbdmRunKey] = useState(0); // increment to force reload when ABDM completes again
   const [materialDetailsData, setMaterialDetailsData] = useState(null);
   const [materialDetailsLoading, setMaterialDetailsLoading] = useState(false);
   const [materialDetailsError, setMaterialDetailsError] = useState(null);
@@ -98,13 +99,13 @@ export default function NetworkDefinitionPage({
 
   // Trigger `loadMaterialDetails` when `abdmCompleted` is set to true
   useEffect(() => {
-    console.log("abdmCompleted state changed:", abdmCompleted);
-    if (abdmCompleted) {
+    // run loadMaterialDetails whenever a successful ABDM run increments the key
+    if (abdmRunKey > 0 && abdmCompleted) {
       loadMaterialDetails().catch((err) => {
         console.error("Failed to load material details:", err);
       });
     }
-  }, [abdmCompleted, srcVersion, tgtPlan]); // Dependencies include `abdmCompleted`, `srcVersion`, and `tgtPlan`
+  }, [abdmRunKey, abdmCompleted, srcVersion, tgtPlan]); // depend on run key
 
   console.log("abdmCompleted in render:", abdmCompleted);
 
@@ -172,14 +173,17 @@ export default function NetworkDefinitionPage({
                 },
               },
             }}
-            onAbdmComplete={(completed) => setAbdmCompleted(completed)}
+            onAbdmComplete={(completed) => {
+              setAbdmCompleted(completed);
+              if (completed) setAbdmRunKey((k) => k + 1); // force effect and remounts
+            }}
                       />
         </SimpleGrid>
       </Box>
 
       {/* Summary of Material Definition */}
       {abdmCompleted && (
-        <Box w="100%" mb={6} key={`summary-${abdmCompleted}`}>
+        <Box w="100%" mb={6} key={`summary-${abdmRunKey}`}>
           <Heading size="sm" mb={3}>
             Material Definition
           </Heading>
@@ -194,7 +198,7 @@ export default function NetworkDefinitionPage({
 
       {/* Material Definition - Details */}
       {abdmCompleted && (
-        <Box w="100%" mb={6} key={`details-${abdmCompleted}`}>
+        <Box w="100%" mb={6} key={`details-${abdmRunKey}`}>
           <Heading size="sm" mb={3}>
             Material Definition - Details
           </Heading>
