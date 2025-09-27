@@ -4,7 +4,7 @@ import SheetComponent from "./SheetComponent";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { getResourceDetailsPayload, getResourceRulesPayload, HideDimensions } from "./payloads";
 import PlanTypeVersionBox from "./PlanTypeVersionBox";
-
+import { API_BASE_URL } from "./HomePage"; // Import the constant
 export default function ResourceDefinitionPage({
   srcPlan,
   srcVersion,
@@ -156,7 +156,7 @@ export default function ResourceDefinitionPage({
             Resource Definition
           </Heading>
           <SheetComponent
-            dataUrl="/read/summary_resource1.csv"
+            dataUrl={`${API_BASE_URL}/read/summary_resource1.csv`}
             isLoading={false}
             enableEdit={false}
           />

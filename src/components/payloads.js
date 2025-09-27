@@ -71,7 +71,7 @@ export const aliasHeader = {
     "DM Rule": "Rule",
     "o9PC Component": "PC Component",
     "o9PC Setting": "Parameters",
-    "o9NetworkAggregation Network Plan Type": "Network Plan Type",
+    "o9NetworkAggregation Network Plan Type": "Network Process Type",
     "Network Aggregation Resource": "Resource",
     "Network Aggregation Resource Type": "Resource Type",
     "Network Aggregation Location": "Location",
@@ -86,7 +86,7 @@ export const aliasHeader = {
     "Network Aggregation Item Type": "Item Type",
     "Network Aggregation Routing": "Routing",
     "Network Aggregation BOM Count": "No. of BOMs",
-    "Network Aggregation Base Plan Type": "Base Plan Type",
+    "Network Aggregation Base Plan Type": "Base Process Type",
     "Network Aggregation Item Count": "No. of Items",
     "Network Aggregation Resource Count": "No. of Resources",
     "Network Aggregation Target Version": "Target Version",
@@ -109,8 +109,6 @@ export const aliasHeader = {
 };
 
 export const editableMeasureList = [
-  "Network Aggregation Base Plan Type",
-  "Network Aggregation Target Version",
   "Network Aggregation Item",
   "Network Aggregation Item Type",
   "Network Aggregation Brand",
