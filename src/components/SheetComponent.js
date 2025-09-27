@@ -1072,23 +1072,30 @@ const deleteRows = () => {
   }, [dataSource, dimensions]);
 
   // Define all hooks at the top of the component
-  const getSelectedDimensionFilters = useCallback(() => {
-    if (!selectedRowKeys?.length || !dimensions?.length) return {};
-    const dimHeaders = dimensions.map((d) => d.header);
-    const selectedRows = dataSource.filter((r) => selectedRowKeys.includes(r.key));
-    const out = {};
-    dimHeaders.forEach((h) => {
-      const set = new Set();
-      selectedRows.forEach((r) => {
-        const v = r[h];
-        if (v !== null && v !== undefined && String(v).trim() !== "") {
-          set.add(String(v));
-        }
-      });
-      if (set.size > 0) out[h] = Array.from(set);
+const getSelectedDimensionFilters = useCallback(() => {
+  // If no rows are selected, use all rows
+  const rowsToFilter = selectedRowKeys?.length
+    ? dataSource.filter((r) => selectedRowKeys.includes(r.key))
+    : dataSource;
+
+  if (!rowsToFilter.length || !dimensions?.length) return {};
+
+  const dimHeaders = dimensions.map((d) => d.header);
+  const out = {};
+
+  dimHeaders.forEach((h) => {
+    const set = new Set();
+    rowsToFilter.forEach((r) => {
+      const v = r[h];
+      if (v !== null && v !== undefined && String(v).trim() !== "") {
+        set.add(String(v));
+      }
     });
-    return out;
-  }, [selectedRowKeys, dimensions, dataSource]);
+    if (set.size > 0) out[h] = Array.from(set);
+  });
+
+  return out;
+}, [selectedRowKeys, dimensions, dataSource]);
 
   // Render section
   if (loading) return <Spin size="large" />;

@@ -1,12 +1,16 @@
 import React from "react";
 import { Button, useToast } from "@chakra-ui/react";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-// import { runExcludeMaterialNodeProcessPayload } from "./payloads";
+import { runExcludeMaterialNodeProcessPayload,runExcludeResourceNodeProcessPayload } from "./payloads";
+import { convertListToFilterFormat } from "./SheetFunctions";
 
 export default function RunAbdmButton({ config, onAbdmComplete }) {
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
-
+  const abdms = {
+    "Exclude Material Node": runExcludeMaterialNodeProcessPayload,
+    "Exclude Resource Node": runExcludeResourceNodeProcessPayload,
+  };
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
@@ -14,8 +18,14 @@ export default function RunAbdmButton({ config, onAbdmComplete }) {
       // if (config.has.selectedFilters) {
       //   config.selectedFilters 
       // }
+      if (config.abdmpayload === "Exclude Material Node") {
+        config.abdmpayload = runExcludeMaterialNodeProcessPayload(convertListToFilterFormat(config.selectedFilters));
+      }
+      else if (config.abdmpayload === "Exclude Resource Node") {
+        config.abdmpayload = runExcludeResourceNodeProcessPayload(convertListToFilterFormat(config.selectedFilters));
+      }
       const resdata = await getPayloadFromUrl({
-        payload: config.abdmpayload,
+        payload: config.abdmpayload ,
       });
 
       // Check if the response is valid

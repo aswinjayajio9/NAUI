@@ -146,4 +146,27 @@ export function getSheetStyles() {
   `;
 }
 
-// Add other helper functions here as needed...
+/**
+ * Converts a list or object of lists into the filter format {"", ""}
+ * @param {Array|string|Object} input - The input to convert (array or object with arrays as values)
+ * @returns {string|Object} - The formatted string or object
+ */
+export const convertListToFilterFormat = (input) => {
+  if (Array.isArray(input)) {
+    // If input is an array, convert it to {"", ""}
+    return `{${input.map((item) => `"${item}"`).join(',')}}`;
+  } else if (typeof input === 'object' && input !== null) {
+    // If input is an object, convert each value (array) to {"", ""}
+    const formattedObject = {};
+    Object.keys(input).forEach((key) => {
+      const value = input[key];
+      if (Array.isArray(value) && value.length > 0) {
+        formattedObject[key] = `{${value.map((item) => `"${item}"`).join(',')}}`;
+      } else {
+        formattedObject[key] = '{}'; // Empty braces for invalid or empty arrays
+      }
+    });
+    return formattedObject;
+  }
+  return '{}'; // Return empty braces for invalid input
+};

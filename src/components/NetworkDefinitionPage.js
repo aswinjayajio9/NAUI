@@ -16,6 +16,7 @@ import {
   HideDimensions,
   runExcludeMaterialNodeProcessPayload,
 } from "./payloads";
+import { data } from "jquery";
 
 export default function NetworkDefinitionPage({
   srcPlan,
@@ -167,8 +168,7 @@ export default function NetworkDefinitionPage({
               button1: {
                 key: "Run ABDM",
                 config: {
-                  data_object: data_object,
-                  abdmpayload: runExcludeMaterialNodeProcessPayload(srcVersion, tgtPlan),
+                  abdmpayload: "Exclude Material Node" ,
                 },
               },
             }}

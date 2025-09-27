@@ -1,3 +1,8 @@
+export const Version = 'Version'
+export const DataObject = 'Data Object'
+export const DMRule = 'DM Rule'
+export const o9PCComponent = 'o9PC Component'
+export const NetworkPlanType = 'o9NetworkAggregation Network Plan Type'
 export const HideDimensions = {
   'Version': 'Version.[Version Name]',
   'Data Object': 'Data Object.[Data Object]',
@@ -39,15 +44,16 @@ export const getResourceDetailsPayload = (tgtVersion, tgtPlan) => ({
     "EnableMultipleResults": true
 });
 
-export const runExcludeMaterialNodeProcessPayload = (srcVersion, srcPlan) => ({
+export const runExcludeMaterialNodeProcessPayload = (filters) => ({
+
     "Tenant": 6760,
-    "Query": `exec plugin instance [ABDM_py_Exclude_Material_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in {"${srcVersion}"})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in {"${srcPlan}"})* [Data Object].[Data Object].filter(#.Name in {"Exclude Material Node"}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
+    "Query": `exec plugin instance [ABDM_py_Exclude_Material_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in ${filters[Version]})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in ${filters[NetworkPlanType]})* [Data Object].[Data Object].filter(#.Name in ${filters[DataObject]}) * [DM Rule].[Rule].filter(#.Name in ${filters[DMRule]})* [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
-export const runExcludeResourceNodeProcessPayload = (srcVersion, srcPlan) => ({
+export const runExcludeResourceNodeProcessPayload = (filters) => ({
     "Tenant": 6760,
-    "Query": `exec plugin instance [ABDM_py_Exclude_Resource_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in {"${srcVersion}"})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in {"${srcPlan}"})* [Data Object].[Data Object].filter(#.Name in {"Exclude Resource Node"}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
+    "Query": `exec plugin instance [ABDM_py_Exclude_Resource_Node] for measures {[Network Aggregation Location]} using scope ([Version].[Version Name].filter(#.Name in ${filters[Version]})* [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type].filter(#.Name in ${filters[NetworkPlanType]})* [Data Object].[Data Object].filter(#.Name in ${filters[DataObject]}) * [DM Rule].[Rule].filter(#.Name in ${filters[DMRule]}) * [Location].[Location] * [Resource].[Resource]) using arguments {("IncludeNullRows","False"),(ExecutionMode, “MediumWeight”),(DataTransferMode,"csv")};`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
