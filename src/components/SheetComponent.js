@@ -49,7 +49,7 @@ export default function SheetComponent({
   enableEdit = true,
   hideDims = [],
   executeButtons = {},
-  onAbdmComplete, // <-- accept the callback from parent
+  onAbdmComplete,
 }) {
   // State for data and UI
   const [originalData, setOriginalData] = useState([]); // Master copy for filtering
@@ -804,6 +804,19 @@ export default function SheetComponent({
     }
   };
 
+  // Define deleteRows function
+const deleteRows = () => {
+  if (selectedRowKeys.length === 0) {
+    message.info("No rows selected to delete");
+    return;
+  }
+  const remainingRows = dataSource.filter((row) => !selectedRowKeys.includes(row.key));
+  setDataSource(remainingRows);
+  setOriginalData(remainingRows);
+  setSelectedRowKeys([]);
+  message.success("Selected rows deleted successfully");
+};
+
   // Build / refresh dimension group metadata whenever dimensions or dataSource change
   useEffect(() => {
     if (!dimensions.length || !dataSource.length) {
@@ -1058,11 +1071,31 @@ export default function SheetComponent({
     setRowSpanMap(map);
   }, [dataSource, dimensions]);
 
+  // Define all hooks at the top of the component
+  const getSelectedDimensionFilters = useCallback(() => {
+    if (!selectedRowKeys?.length || !dimensions?.length) return {};
+    const dimHeaders = dimensions.map((d) => d.header);
+    const selectedRows = dataSource.filter((r) => selectedRowKeys.includes(r.key));
+    const out = {};
+    dimHeaders.forEach((h) => {
+      const set = new Set();
+      selectedRows.forEach((r) => {
+        const v = r[h];
+        if (v !== null && v !== undefined && String(v).trim() !== "") {
+          set.add(String(v));
+        }
+      });
+      if (set.size > 0) out[h] = Array.from(set);
+    });
+    return out;
+  }, [selectedRowKeys, dimensions, dataSource]);
+
   // Render section
   if (loading) return <Spin size="large" />;
   if (error) return <Alert message={error} type="error" showIcon />;
 
-  const commonTableProps = {
+  // Helper: Build common table props
+  const buildCommonTableProps = () => ({
     rowKey: "key",
     pagination: false,
     size: "small",
@@ -1071,40 +1104,27 @@ export default function SheetComponent({
       selectedRowKeys,
       onChange: (keys) => setSelectedRowKeys(keys),
     },
-    // Removed onRow to prevent row click selection; only checkbox selects
-  };
+  });
 
-  // Add this handler before the return statement
-  const deleteRows = () => {
-    if (selectedRowKeys.length === 0) {
-      message.info("No rows selected for deletion");
-      return;
-    }
-    Modal.confirm({
-      title: "Delete Selected Rows",
-      content: `Are you sure you want to delete ${selectedRowKeys.length} row(s)?`,
-      okText: "Delete",
-      okType: "danger",
-      cancelText: "Cancel",
-      onOk: async () => {
-        // If you want to delete on server, replace this with a fetch call
-        setDataSource((prev) => prev.filter((row) => !selectedRowKeys.includes(row.key)));
-        setOriginalData((prev) => prev.filter((row) => !selectedRowKeys.includes(row.key)));
-        setSelectedRowKeys([]);
-        message.success("Selected rows deleted");
-      },
-    });
-  };
+  const commonTableProps = buildCommonTableProps();
 
   // Render execute buttons dynamically
   const renderExecuteButtons = () => {
-    return Object.entries(executeButtons).map(([key, buttonConfig]) => (
-      <RunAbdmButton
-        key={key}
-        config={buttonConfig.config}
-        onAbdmComplete={onAbdmComplete} // forward the callback function
-      />
-    ));
+    const selectedFilters = getSelectedDimensionFilters();
+    return Object.entries(executeButtons).map(([key, buttonConfig]) => {
+      const mergedConfig = {
+        ...buttonConfig.config,
+        selectedFilters, // Include selection-aware filters for dimensions only
+        selectedRowKeys, // Raw selected row keys if needed
+      };
+      return (
+        <RunAbdmButton
+          key={key}
+          config={mergedConfig}
+          onAbdmComplete={onAbdmComplete} // Forward the callback function
+        />
+      );
+    });
   };
 
   return (
@@ -1165,6 +1185,8 @@ export default function SheetComponent({
           {renderExecuteButtons()}
         </Space>
       </div>
+
+      {/* Render table or chart based on view mode */}
       {viewMode === "table" ? (
         <Table
           {...commonTableProps}

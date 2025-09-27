@@ -11,7 +11,9 @@ export default function RunAbdmButton({ config, onAbdmComplete }) {
     setAbdmRunning(true);
     try {
       // Use the correct payload for the ABDM process
-      console.log("Running ABDM with config:", config.abdmpayload);
+      // if (config.has.selectedFilters) {
+      //   config.selectedFilters 
+      // }
       const resdata = await getPayloadFromUrl({
         payload: config.abdmpayload,
       });
