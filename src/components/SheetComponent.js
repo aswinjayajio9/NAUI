@@ -50,6 +50,8 @@ export default function SheetComponent({
   hideDims = [],
   executeButtons = {},
   onAbdmComplete,
+  reloadKey, // optional: value that forces reload when it changes
+  onRequestReload, // callback: child -> parent
 }) {
   // State for data and UI
   const [originalData, setOriginalData] = useState([]); // Master copy for filtering
@@ -169,8 +171,8 @@ export default function SheetComponent({
   }, []);
 
   // Helper: Load data (supports JSON, CSV, or pre-parsed objects) - now wrapped in useCallback
-  const loadData = useCallback(async (forceServerReload = false) => {
-    console.log("loadData function triggered", { data, forceServerReload }); // Add this for debugging
+  const loadData = useCallback(async (reloadKey = false) => {
+    console.log("loadData function triggered", { data, reloadKey }); // Add this for debugging
      let mounted = true;
      setLoading(true);
      setError(null);
@@ -191,7 +193,7 @@ export default function SheetComponent({
       };
       
       // If caller asked to force a server reload, skip the "data object provided" short-circuits
-      if (!forceServerReload && data && typeof data === "object") {
+      if (!reloadKey && data && typeof data === "object") {
         if (data?.Meta && data?.Data) {
           payload = data;
           const parsed = parseMetaDataPayload(data, finalConfig);
@@ -204,7 +206,7 @@ export default function SheetComponent({
         } else {
           rows = parseGenericJson(data);
         }
-      } else if (!forceServerReload && dataUrl && typeof dataUrl === "object") {
+      } else if (!reloadKey && dataUrl && typeof dataUrl === "object") {
         if (dataUrl?.Meta && dataUrl?.Data) {
           payload = dataUrl;
           const parsed = parseMetaDataPayload(dataUrl, finalConfig);
@@ -345,6 +347,22 @@ export default function SheetComponent({
   useEffect(() => {
     loadData();
   }, [loadData]);  // Now depend on loadData (stable due to useCallback)
+
+  // If parent requests a reload (e.g. after ABDM finishes), force a server reload
+  useEffect(() => {
+    if (typeof reloadKey !== "undefined" && reloadKey !== null) {
+      // call loadData with reloadKey = true
+      loadData(true).catch((err) => {
+        console.error("Forced reload failed:", err);
+      });
+    }
+  }, [reloadKey, loadData]);
+
+  // Helper to request a reload (local + parent) — must be above any early return
+  const requestReload = useCallback((reason) => {
+    loadData(true).catch((err) => console.error("Local reload failed:", err));
+    onRequestReload?.(reason);
+  }, [loadData, onRequestReload]);
 
   // Add state for hovered cell
   const [hoveredCell, setHoveredCell] = useState(null);
@@ -805,7 +823,7 @@ export default function SheetComponent({
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error(`Save failed: ${response.status}`);
+      if (!response.ok) { /* ...existing code... */ }
 
       // On success, remove from edited keys and update initial snapshot
       editedKeysRef.current.delete(key);
@@ -815,6 +833,7 @@ export default function SheetComponent({
       );
 
       message.success(`Row ${key} saved successfully`);
+      requestReload("row-saved");
     } catch (error) {
       console.error('Save error:', error);
       message.error(`Save failed for row ${key}: ${error.message}`);
@@ -1157,14 +1176,14 @@ const getSelectedDimensionFilters = useCallback(() => {
     return Object.entries(executeButtons).map(([key, buttonConfig]) => {
       const mergedConfig = {
         ...buttonConfig.config,
-        selectedFilters, // Include selection-aware filters for dimensions only
-        selectedRowKeys, // Raw selected row keys if needed
+        selectedFilters,
+        selectedRowKeys,
       };
       return (
         <RunAbdmButton
           key={key}
           config={mergedConfig}
-          onAbdmComplete={onAbdmComplete} // Forward the callback function
+          onAbdmComplete={onAbdmComplete}
         />
       );
     });
@@ -1322,7 +1341,9 @@ const getSelectedDimensionFilters = useCallback(() => {
         columns={columns}
         newRowData={newRowData}
         setNewRowData={setNewRowData}
-        onSuccess={() => loadData(true)}
+        onSuccess={() => {
+          requestReload("add-row-success");
+        }}
         colsDisplayNameMapping={colsDisplayNameMapping}
       />
     </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Flex,
@@ -32,6 +32,8 @@ export default function NetworkDefinitionPage({
   const toast = useToast();
   const [abdmCompleted, setAbdmCompleted] = useState(false); // Track if ABDM is completed
   const [abdmRunKey, setAbdmRunKey] = useState(0); // increment to force reload when ABDM completes again
+  // Separate reload key for refreshing the Rules Sheet only (distinct from ABDM run key)
+  const [sheetReloadKey, setSheetReloadKey] = useState(0);
   const [materialDetailsData, setMaterialDetailsData] = useState(null);
   const [materialDetailsLoading, setMaterialDetailsLoading] = useState(false);
   const [materialDetailsError, setMaterialDetailsError] = useState(null);
@@ -109,40 +111,42 @@ export default function NetworkDefinitionPage({
   console.log("abdmCompleted in render:", abdmCompleted);
 
   // Load network material rules data on component mount
-  useEffect(() => {
+  const loadNetworkMaterialRules = useCallback(async () => {
     setNetworkMaterialRulesDataLoading(true);
-    getPayloadFromUrl({
-      payload: getNetworkMaterialRulesDataPayload(srcVersion, tgtPlan),
-    })
-      .then((data) => {
-        if (typeof data === "string") {
-          try {
-            data = JSON.parse(data);
-          } catch (parseError) {
-            throw new Error(
-              "Failed to parse API response as JSON: " + parseError.message
-            );
-          }
-        }
-        if (
-          !data ||
-          !data["Results"] ||
-          !Array.isArray(data["Results"]) ||
-          data["Results"].length === 0
-        ) {
-          throw new Error(
-            "Invalid API response: Missing or empty 'Results' array"
-          );
-        }
-        setNetworkMaterialRulesData(data["Results"]["0"]);
-      })
-      .catch((error) => {
-        setNetworkMaterialRulesDataSummaryError(error.message);
-      })
-      .finally(() => {
-        setNetworkMaterialRulesDataLoading(false);
+    setNetworkMaterialRulesDataSummaryError(null);
+    try {
+      let data = await getPayloadFromUrl({
+        payload: getNetworkMaterialRulesDataPayload(srcVersion, tgtPlan),
       });
+      if (typeof data === "string") {
+        try { data = JSON.parse(data); } catch (parseError) {
+          throw new Error("Failed to parse API response as JSON: " + parseError.message);
+        }
+      }
+      if (!data || !data.Results || !Array.isArray(data.Results) || data.Results.length === 0) {
+        throw new Error("Invalid API response: Missing or empty 'Results' array");
+      }
+      setNetworkMaterialRulesData(data.Results[0]);
+    } catch (error) {
+      setNetworkMaterialRulesDataSummaryError(error.message || String(error));
+    } finally {
+      setNetworkMaterialRulesDataLoading(false);
+    }
   }, [srcVersion, tgtPlan]);
+
+  useEffect(() => {
+    loadNetworkMaterialRules();
+  }, [loadNetworkMaterialRules]);
+
+  // When sheetReloadKey changes (e.g. requested by SheetComponent or parent flow),
+  // reload the network material rules.
+  useEffect(() => {
+    if (sheetReloadKey > 0) {
+      loadNetworkMaterialRules().catch((err) =>
+        console.error("Failed to reload network rules (sheetReloadKey):", err)
+      );
+    }
+  }, [sheetReloadKey, loadNetworkMaterialRules]);
 
   return (
     <Box p={6}>
@@ -171,19 +175,28 @@ export default function NetworkDefinitionPage({
             hideDims={Object.keys(HideDimensions)}
             src_tgt={src_tgt}
             enableEdit={true}
-             executeButtons={{
+            executeButtons={{
               button1: {
                 key: "Run ABDM",
                 config: {
-                  abdmpayload: "Exclude Material Node" ,
+                  abdmpayload: "Exclude Material Node",
                 },
               },
             }}
+            onRequestReload={(reason) => {
+              console.log("SheetComponent requested reload:", reason);
+              setSheetReloadKey((k) => k + 1); // bump the key to trigger parent-side refresh
+              loadNetworkMaterialRules().catch((err) =>
+                console.error("Failed to reload network rules:", err)
+              );
+            }}
             onAbdmComplete={(completed) => {
               setAbdmCompleted(completed);
-              if (completed) setAbdmRunKey((k) => k + 1); // force effect and remounts
+              if (completed) {
+                setAbdmRunKey((k) => k + 1);
+              }
             }}
-                      />
+          />
         </SimpleGrid>
       </Box>
 
