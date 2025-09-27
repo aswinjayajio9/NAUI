@@ -176,6 +176,21 @@ export default function NetworkDefinitionPage({
               isLoading={materialDetailsLoading}
               error={materialDetailsError}
               hideDims={Object.keys(HideDimensions)}
+              executeButtons={{
+              button1: {
+                key: "Generate Material Exclusion",
+                config: {
+                  abdmpayload: "Generate Material Exclusion",
+                },
+              },
+            }}
+            onRequestReload={(reason) => {
+              console.log("SheetComponent requested reload:", reason);
+              setSheetReloadKey((k) => k + 1);
+              loadMaterialDetails().catch((err) =>
+                console.error("Failed to reload material details:", err)
+              );
+            }}
             />
           </SimpleGrid>
         </Box>

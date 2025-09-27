@@ -1,10 +1,10 @@
 import React from "react";
 import { Button, useToast } from "@chakra-ui/react";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-import { runExcludeMaterialNodeProcessPayload,runExcludeResourceNodeProcessPayload } from "./payloads";
+import { runExcludeMaterialNodeProcessPayload,runExcludeResourceNodeProcessPayload ,generateMaterialExclusionPayload} from "./payloads";
 import { convertListToFilterFormat } from "./SheetFunctions";
 
-export default function RunAbdmButton({ config, onAbdmComplete }) {
+export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
   const runAbdm = async () => {
@@ -20,6 +20,9 @@ export default function RunAbdmButton({ config, onAbdmComplete }) {
       else if (config.abdmpayload === "Exclude Resource Node") {
         config.abdmpayload = runExcludeResourceNodeProcessPayload(convertListToFilterFormat(config.selectedFilters));
       }
+      else if (config.abdmpayload === "Generate Material Exclusion") {
+        config.abdmpayload = generateMaterialExclusionPayload(src_tgt.Version,src_tgt["o9NetworkAggregation Network Plan Type"],src_tgt["o9PC Component"]);
+      }
       const resdata = await getPayloadFromUrl({
         payload: config.abdmpayload ,
       });
@@ -30,8 +33,8 @@ export default function RunAbdmButton({ config, onAbdmComplete }) {
       if (!data || typeof data !== "object") {
         throw new Error("Invalid response from ABDM process");
       }
-      console.log("ABDM process response:", data);
-      toast({ title: "ABDM started successfully", status: "success", duration: 3000 });
+      console.log(`"${Name} process response:`, data);
+      toast({ title: `${Name} Completed successfully`, status: "success", duration: 3000 });
 
       // Notify parent component that ABDM is completed
       if (onAbdmComplete) {
@@ -39,7 +42,7 @@ export default function RunAbdmButton({ config, onAbdmComplete }) {
       }
     } catch (err) {
       toast({
-        title: "ABDM failed",
+        title: `${Name} failed`,
         description: err.message,
         status: "error",
         duration: 5000,
@@ -57,7 +60,7 @@ export default function RunAbdmButton({ config, onAbdmComplete }) {
       isLoading={abdmRunning}
       aria-label="Run ABDM"
     >
-      Run ABDM
+      {Name}
     </Button>
   );
 }

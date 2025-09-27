@@ -44,6 +44,20 @@ export const getResourceDetailsPayload = (tgtVersion, tgtPlan) => ({
     "EnableMultipleResults": true
 });
 
+export const generateMaterialExclusionPayload = (srcVersion, tgtPlan) => ({
+    "Tenant": 6760,
+    "Query": `exec procedure [GenerateMaterialExclusion] {"Version":"${srcVersion}","DataObject":"Exclude Material Node","PlanType":"${tgtPlan}"};`,
+    "ExecutionContext": "Kibo Debugging Workspace",
+    "EnableMultipleResults": true
+});
+
+export const generateResourceExclusionPayload = (srcVersion, tgtPlan) => ({
+    "Tenant": 6760,
+    "Query": `exec procedure [GenerateResourceExclusion] {"Version":"${srcVersion}","DataObject":"Exclude Resource Node","PlanType":"${tgtPlan}"};`,
+    "ExecutionContext": "Kibo Debugging Workspace",
+    "EnableMultipleResults": true
+});
+
 export const runExcludeMaterialNodeProcessPayload = (filters) => ({
 
     "Tenant": 6760,

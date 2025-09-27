@@ -1173,9 +1173,12 @@ const getSelectedDimensionFilters = useCallback(() => {
         selectedFilters,
         selectedRowKeys,
       };
+      console.log("Render Execute Button:", key, buttonConfig, mergedConfig);
       return (
         <RunAbdmButton
           key={key}
+          src_tgt={src_tgt}
+          Name={buttonConfig.key}
           config={mergedConfig}
           onAbdmComplete={onAbdmComplete}
         />
