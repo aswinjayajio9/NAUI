@@ -1,66 +1,37 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Box,
-  Flex,
-  Button,
-  Heading,
-  SimpleGrid,
-  useToast,
-} from "@chakra-ui/react";
+import { Box, Flex, Button, Heading, SimpleGrid, useToast } from "@chakra-ui/react";
 import SheetComponent from "./SheetComponent";
-import { API_BASE_URL } from "./HomePage";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-import {
-  getMaterialDetailsDataPayload,
-  getNetworkMaterialRulesDataPayload,
-  HideDimensions,
-} from "./payloads";
-import PlanTypeVersionBox from "./PlanTypeVersionBox"; // Import the new component
+import { getMaterialDetailsDataPayload, getNetworkMaterialRulesDataPayload, HideDimensions } from "./payloads";
+import PlanTypeVersionBox from "./PlanTypeVersionBox";
 
 export default function NetworkDefinitionPage({
   srcPlan,
   srcVersion,
   tgtPlan,
   tgtVersion,
-  filters,
   onBack,
-  onNext,
-  onPrev,
-  isFirst,
-  isLast,
 }) {
-  const toast = useToast();
-  const [abdmCompleted, setAbdmCompleted] = useState(false); // Track if ABDM is completed
-  const [abdmRunKey, setAbdmRunKey] = useState(0); // increment to force reload when ABDM completes again
-  // Separate reload key for refreshing the Rules Sheet only (distinct from ABDM run key)
+  const [abdmCompleted, setAbdmCompleted] = useState(false);
+  const [abdmRunKey, setAbdmRunKey] = useState(0);
   const [sheetReloadKey, setSheetReloadKey] = useState(0);
+
   const [materialDetailsData, setMaterialDetailsData] = useState(null);
   const [materialDetailsLoading, setMaterialDetailsLoading] = useState(false);
   const [materialDetailsError, setMaterialDetailsError] = useState(null);
 
   const [networkMaterialRulesData, setNetworkMaterialRulesData] = useState(null);
-  const [networkMaterialRulesDataLoading, setNetworkMaterialRulesDataLoading] =
-    useState(true);
-  const [
-    networkMaterialRulesDataError,
-    setNetworkMaterialRulesDataSummaryError,
-  ] = useState(null);
+  const [networkMaterialRulesDataLoading, setNetworkMaterialRulesDataLoading] = useState(true);
+  const [networkMaterialRulesDataError, setNetworkMaterialRulesDataError] = useState(null);
 
-  const [summaryDefinition1Data, setSummaryDefinition1Data] = useState(null);
-  const [summaryDefinition1Loading, setSummaryDefinition1Loading] =
-    useState(true);
-  const [summaryDefinition1Error, setSummaryDefinition1Error] = useState(null);
-
-  const [data_object, setDataObject] = useState("Exclude Material Node");
   const src_tgt = {
     Version: srcVersion,
     "o9NetworkAggregation Network Plan Type": tgtPlan,
-    "Data Object": data_object,
+    "Data Object": "Exclude Material Node",
   };
 
-  // Function to load material details
+  // Load material details
   const loadMaterialDetails = async () => {
-    console.log("loadMaterialDetails triggered");
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);
     try {
@@ -68,30 +39,15 @@ export default function NetworkDefinitionPage({
       let data = await getPayloadFromUrl({ payload });
 
       if (typeof data === "string") {
-        try {
-          data = JSON.parse(data);
-        } catch (parseError) {
-          throw new Error(
-            "Failed to parse API response as JSON: " + parseError.message
-          );
-        }
+        data = JSON.parse(data);
       }
 
-      if (
-        !data ||
-        !data["Results"] ||
-        !Array.isArray(data["Results"]) ||
-        data["Results"].length === 0
-      ) {
-        throw new Error(
-          "Invalid API response: Missing or empty 'Results' array"
-        );
+      if (!data?.Results?.[0]) {
+        throw new Error("Invalid API response: Missing or empty 'Results' array");
       }
 
-      console.log("Material details data loaded:", data["Results"]["0"]);
-      setMaterialDetailsData(data["Results"]["0"]);
+      setMaterialDetailsData(data.Results[0]);
     } catch (err) {
-      console.error("Error in loadMaterialDetails:", err);
       setMaterialDetailsError(err.message || String(err));
     } finally {
       setMaterialDetailsLoading(false);
@@ -100,35 +56,31 @@ export default function NetworkDefinitionPage({
 
   // Trigger `loadMaterialDetails` when `abdmCompleted` is set to true
   useEffect(() => {
-    // run loadMaterialDetails whenever a successful ABDM run increments the key
     if (abdmRunKey > 0 && abdmCompleted) {
-      loadMaterialDetails().catch((err) => {
-        console.error("Failed to load material details:", err);
-      });
+      loadMaterialDetails().catch((err) => console.error("Failed to load material details:", err));
     }
-  }, [abdmRunKey, abdmCompleted, srcVersion, tgtPlan]); // depend on run key
+  }, [abdmRunKey, abdmCompleted, srcVersion, tgtPlan]);
 
-  console.log("abdmCompleted in render:", abdmCompleted);
-
-  // Load network material rules data on component mount
+  // Load network material rules data
   const loadNetworkMaterialRules = useCallback(async () => {
     setNetworkMaterialRulesDataLoading(true);
-    setNetworkMaterialRulesDataSummaryError(null);
+    setNetworkMaterialRulesDataError(null);
     try {
       let data = await getPayloadFromUrl({
         payload: getNetworkMaterialRulesDataPayload(srcVersion, tgtPlan),
       });
+
       if (typeof data === "string") {
-        try { data = JSON.parse(data); } catch (parseError) {
-          throw new Error("Failed to parse API response as JSON: " + parseError.message);
-        }
+        data = JSON.parse(data);
       }
-      if (!data || !data.Results || !Array.isArray(data.Results) || data.Results.length === 0) {
+
+      if (!data?.Results?.[0]) {
         throw new Error("Invalid API response: Missing or empty 'Results' array");
       }
+
       setNetworkMaterialRulesData(data.Results[0]);
     } catch (error) {
-      setNetworkMaterialRulesDataSummaryError(error.message || String(error));
+      setNetworkMaterialRulesDataError(error.message || String(error));
     } finally {
       setNetworkMaterialRulesDataLoading(false);
     }
@@ -138,8 +90,7 @@ export default function NetworkDefinitionPage({
     loadNetworkMaterialRules();
   }, [loadNetworkMaterialRules]);
 
-  // When sheetReloadKey changes (e.g. requested by SheetComponent or parent flow),
-  // reload the network material rules.
+  // Reload network material rules when sheetReloadKey changes
   useEffect(() => {
     if (sheetReloadKey > 0) {
       loadNetworkMaterialRules().catch((err) =>
@@ -151,26 +102,24 @@ export default function NetworkDefinitionPage({
   return (
     <Box p={6}>
       <Flex mb={4} justify="space-between" align="center">
-              <Flex gap={3} align="center">
-                <Button size="sm" onClick={onBack}>
-                  Back
-                </Button>
-                <Heading size="md">Material Definition</Heading>
-                
-              </Flex>
-              <PlanTypeVersionBox 
-                        srcPlan={srcPlan} 
-                        srcVersion={srcVersion} 
-                        tgtPlan={tgtPlan} 
-                        tgtVersion={tgtVersion} 
-                      />
-            </Flex>
+        <Flex gap={3} align="center">
+          <Button size="sm" onClick={onBack}>
+            Back
+          </Button>
+          <Heading size="md">Material Definition</Heading>
+        </Flex>
+        <PlanTypeVersionBox
+          srcPlan={srcPlan}
+          srcVersion={srcVersion}
+          tgtPlan={tgtPlan}
+          tgtVersion={tgtVersion}
+        />
+      </Flex>
 
       {/* Material Definition - Rules Section */}
       <Box w="100%" mb={6}>
         <SimpleGrid columns={1} spacing={6}>
           <SheetComponent
-            // dataUrl={`${API_BASE_URL}/read/material_definition_rules.csv`}
             data={networkMaterialRulesData}
             hideDims={Object.keys(HideDimensions)}
             src_tgt={src_tgt}
@@ -185,7 +134,7 @@ export default function NetworkDefinitionPage({
             }}
             onRequestReload={(reason) => {
               console.log("SheetComponent requested reload:", reason);
-              setSheetReloadKey((k) => k + 1); // bump the key to trigger parent-side refresh
+              setSheetReloadKey((k) => k + 1);
               loadNetworkMaterialRules().catch((err) =>
                 console.error("Failed to reload network rules:", err)
               );
@@ -207,9 +156,8 @@ export default function NetworkDefinitionPage({
             Material Definition
           </Heading>
           <SheetComponent
-            dataUrl={`${API_BASE_URL}/read/summary_definition1.csv`}
-            isLoading={summaryDefinition1Loading}
-            error={summaryDefinition1Error}
+            dataUrl="/read/summary_definition1.csv"
+            isLoading={false}
             enableEdit={false}
           />
         </Box>
