@@ -7,10 +7,6 @@ import { convertListToFilterFormat } from "./SheetFunctions";
 export default function RunAbdmButton({ config, onAbdmComplete }) {
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
-  const abdms = {
-    "Exclude Material Node": runExcludeMaterialNodeProcessPayload,
-    "Exclude Resource Node": runExcludeResourceNodeProcessPayload,
-  };
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {

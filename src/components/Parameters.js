@@ -37,7 +37,7 @@ export default function ResourceDefinitionPage({
       setSummaryParametersLoading(true);
       setSummaryParametersError(null);
       try {
-        const payload = getPayloadForParameters(srcVersion);
+        const payload = getPayloadForParameters(srcVersion,new_component);
         let data = await getPayloadFromUrl({ payload });
         if (typeof data === "string") {
           data = JSON.parse(data);

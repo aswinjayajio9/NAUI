@@ -6,7 +6,6 @@ import {
   Alert,
   Button,
   Space,
-  Tooltip,
   Modal,
   message,
   Select,
@@ -16,7 +15,6 @@ import {
   DownloadOutlined,
   EyeOutlined,
   FilterOutlined,
-  SearchOutlined,
   CaretUpOutlined,
   CaretDownOutlined,
 } from "@ant-design/icons";
@@ -25,8 +23,6 @@ import AddRow from "./AddRow";
 import { aliasHeader } from "./payloads";
 import {
   computeRowSpanMap,
-  computeOptionsMap,
-  downloadCSV,
   getSheetStyles
 } from "./SheetFunctions"; // Import functions from SheetFunctions.js
 import {
@@ -64,8 +60,6 @@ export default function SheetComponent({
   const [editedKeys, setEditedKeys] = useState([]); // Keys of edited rows
   const editedKeysRef = useRef(new Set());
   const initialDataRef = useRef([]); // Snapshot for edit detection
-  const saveTimersRef = useRef({}); // Debounce timers for autosave
-  const savingRef = useRef(false); // Flag to prevent multiple simultaneous saves
 
   // State for selection and modals
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
