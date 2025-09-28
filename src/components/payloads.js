@@ -83,7 +83,7 @@ export const getPayloadForParameters = (srcVersion, ComponentInstanceName) => ({
 export const aliasHeader = {
     "[Version].[Version Name]": "Version",
     "[Data Object].[Data Object]": "Data Object",
-    "[DM Rule].[Rule]": "Rule",
+    "[DM Rule].[Rule]": "Rules",
     "[o9PC Component].[Component]": "PC Component",
     "[o9PC Setting].[Setting]": "Parameters",
     "[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]": "Network Process Type",

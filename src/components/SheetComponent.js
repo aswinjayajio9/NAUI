@@ -761,20 +761,18 @@ export default function SheetComponent({
   // Handler: Apply filters (only on dimensions if present, else all columns)
   const applyFilters = () => {
     let filtered = originalData.slice();
-    Object.entries(filters).forEach(([col, q]) => {
-      if (!q) return;
-      if (dimensions.length > 0 && !dimensions.some(d => d.header === col)) return;  // Only filter dimensions if present
-      const qq = String(q).toLowerCase();
-      filtered = filtered.filter((r) => String(r[col] ?? "").toLowerCase() === qq);  // Change to exact match
+    Object.entries(filters).forEach(([col, selectedValues]) => {
+      if (!selectedValues || selectedValues.length === 0) return;
+      if (dimensions.length > 0 && !dimensions.some(d => d.header === col)) return; // Only filter dimensions if present
+      filtered = filtered.filter((row) => selectedValues.includes(String(row[col] ?? "")));
     });
     setDataSource(filtered);
     setFilterOptions(computeOptionsMap(filtered, [], columns));
     setSelectedRowKeys([]);
     setFilterVisible(false);
-    const activeFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v?.trim()));
-    const optionsMap = computeOptionsMap(filtered);  // Use filtered data for options
-    setFilterOptions(optionsMap);  // Update filter options
-    // only expose dimension options as above
+    const activeFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v?.length > 0));
+    const optionsMap = computeOptionsMap(filtered); // Use filtered data for options
+    setFilterOptions(optionsMap); // Update filter options
     const dimHeaders = (dimensions && dimensions.length) ? dimensions.map(d => d.header) : Object.keys(optionsMap);
     const dimOptions = {};
     dimHeaders.forEach(h => { if (optionsMap[h]) dimOptions[h] = optionsMap[h]; });
@@ -1290,6 +1288,7 @@ const getSelectedDimensionFilters = useCallback(() => {
           columns={columnsWithTitles}
         />
       </Modal>
+      {/* Filter Modal */}
       <Modal
         visible={filterVisible}
         title="Apply Filters"
@@ -1306,21 +1305,25 @@ const getSelectedDimensionFilters = useCallback(() => {
         }
         width={600}
       >
-        {(dimensions.length > 0 ? dimensions : columns.map(c => ({ header: c.dataIndex }))).map((col) => (
-          <div key={col.header} style={{ marginBottom: 16 }}>
-            <div style={{ fontWeight: "bold", marginBottom: 8 }}>{col.header}</div>
-            <Select
-              value={filters[col.header]}
-              onChange={(value) => setFilters({ ...filters, [col.header]: value })}
-              placeholder={`Filter ${col.header}`}
-              allowClear
-              showSearch
-              style={{ width: '100%' }}
-              options={filterOptions[col.header]?.map(v => ({ label: v, value: v })) || []}
-              filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-            />
-          </div>
-        ))}
+        {(dimensions.length > 0 ? dimensions : columns.map(c => ({ header: c.dataIndex }))).map((col) => {
+          const displayName = aliasHeader[col.header] || col.header; // Use aliasHeader or fallback to original header
+          return (
+            <div key={col.header} style={{ marginBottom: 16 }}>
+              <div style={{ fontWeight: "bold", marginBottom: 8 }}>{displayName}</div>
+              <Select
+                mode="multiple" // Enable multiselect
+                value={filters[col.header] || []} // Ensure filters are an array
+                onChange={(selectedValues) => setFilters({ ...filters, [col.header]: selectedValues })}
+                placeholder={`Filter ${displayName}`}
+                allowClear
+                showSearch
+                style={{ width: '100%' }}
+                options={filterOptions[col.header]?.map(v => ({ label: v, value: v })) || []}
+                filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+              />
+            </div>
+          );
+        })}
       </Modal>
       <AddRow
         visible={addRowVisible}
