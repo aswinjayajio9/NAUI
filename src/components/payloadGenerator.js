@@ -87,3 +87,78 @@ export const generateGetDataPayload = (query) => {
     // If the query doesn't match "exec" or "SELECT", return null or throw an error
     throw new Error("Unsupported query format. Query must start with 'exec' or 'SELECT'.");
 };
+/**
+ * Generates a payload for cell editing based on the provided data.
+ * @param {Object} updatedRow - The updated row data.
+ * @param {Object} modelDefinition - The model definition containing measures and level attributes.
+ * @param {Object} filters - The filters applied to the data.
+ * @returns {Object} - The generated payload.
+ */
+export const generateCellEditPayload = (updatedRow, modelDefinition, filters) => {
+    const payload = {
+        Meta: [],
+        UpdatedRows: [],
+        ModelDefinition: {
+            RegularMeasures: modelDefinition.RegularMeasures || [],
+            LevelAttributes: modelDefinition.LevelAttributes || []
+        },
+        Filters: []
+    };
+
+    // Add Meta data
+    modelDefinition.LevelAttributes.forEach(attr => {
+        const metaEntry = {
+            DimensionName: attr.DimensionName,
+            Alias: attr.Alias || attr.Name,
+            Name: attr.Name
+        };
+
+        if (attr.IsFilter) {
+            metaEntry.DimensionValues = attr.SelectedMembers.map(member => ({
+                Name: member.Name,
+                MemberIndex: 0 // Default index, can be adjusted based on actual data
+            }));
+        }
+
+        payload.Meta.push(metaEntry);
+    });
+
+    modelDefinition.RegularMeasures.forEach(measure => {
+        payload.Meta.push({
+            DataType: "number", // Assuming measures are numeric
+            Name: measure.Name,
+            Alias: measure.Name
+        });
+    });
+
+    // Add UpdatedRows
+    const updatedRowEntry = {
+        MemberCells: updatedRow.MemberCells.map(cell => ({
+            Alias: cell.Alias,
+            MemberIndex: cell.MemberIndex
+        })),
+        DataCells: updatedRow.DataCells.map(cell => ({
+            Alias: cell.Alias,
+            Value: cell.Value
+        }))
+    };
+
+    payload.UpdatedRows.push(updatedRowEntry);
+
+    // Add Filters
+    filters.forEach(filter => {
+        payload.Filters.push({
+            IsFilter: true,
+            Axis: "none",
+            AllSelection: false,
+            SelectedMembers: filter.SelectedMembers.map(member => ({
+                Name: member.Name
+            })),
+            Name: filter.Name,
+            DimensionName: filter.DimensionName
+        });
+    });
+
+    return payload;
+};
+
