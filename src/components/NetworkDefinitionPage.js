@@ -74,7 +74,6 @@ export default function NetworkDefinitionPage({
         setNetworkMaterialRulesData(data.Results[0]);
       }
       else{
-        console.log("Network material rules data:", data);
         setNetworkMaterialRulesData(data);
       }
     

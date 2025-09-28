@@ -1,9 +1,10 @@
 import React from "react";
 import { Button, useToast } from "@chakra-ui/react";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-import { runExcludeMaterialNodeProcessPayload,runExcludeResourceNodeProcessPayload ,generateMaterialExclusionPayload} from "./payloads";
+import {Version, NetworkPlanType} from "./payloads";
+import { runExcludeMaterialNodeProcessPayload,runExcludeResourceNodeProcessPayload ,generateMaterialExclusionPayload,generateResourceExclusionPayload} from "./payloads";
 import { convertListToFilterFormat } from "./SheetFunctions";
-import { generateGetDataPayload } from "./payloadGenerator";
+import { executeIBPL } from "./o9Interfacehelper";
 export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
@@ -21,11 +22,13 @@ export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
         config.abdmpayload = runExcludeResourceNodeProcessPayload(convertListToFilterFormat(config.selectedFilters));
       }
       else if (config.abdmpayload === "Generate Material Exclusion") {
-        config.abdmpayload = generateMaterialExclusionPayload(src_tgt.Version,src_tgt["o9NetworkAggregation Network Plan Type"],src_tgt["o9PC Component"]);
+        config.abdmpayload = generateMaterialExclusionPayload(src_tgt[Version],src_tgt[NetworkPlanType]);
       }
-      const abdmExecPayload = generateGetDataPayload(config.abdmpayload?.Query);
-      var resdata = await getPayloadFromUrl({
-        payload: abdmExecPayload,
+      else if (config.abdmpayload === "Generate Resource Exclusion") {
+        config.abdmpayload = generateResourceExclusionPayload(src_tgt[Version],src_tgt[NetworkPlanType]);
+      }
+      var resdata = await executeIBPL({
+        payload: config.abdmpayload,
       });
       if (typeof resdata === "string") {
         // Attempt to parse the response as JSON
@@ -37,7 +40,6 @@ export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
       } else {
         resdata = resdata;
       }
-      console.log(`"${Name} process response:`, resdata);
       toast({ title: `${Name} Completed successfully`, status: "success", duration: 3000 });
 
       // Notify parent component that ABDM is completed
@@ -68,3 +70,4 @@ export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
     </Button>
   );
 }
+

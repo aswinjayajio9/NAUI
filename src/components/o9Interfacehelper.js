@@ -1,6 +1,6 @@
 import o9Interface from "./o9Interface";
 import { generatePayloadForDimensions } from "./payloads";
-import { API_BASE_URL } from "./HomePage"; // Import the constant
+import { API_BASE_URL, tenantID } from "./HomePage"; // Import the constant
 // Load API key from environment variable
 const API_KEY = process.env.API_KEYGEN || "hkj7ja11.v37hrv9jxv6g38n7sp297gz";
 // Helper: Parse Meta/Data payload into rows and columns
@@ -276,9 +276,53 @@ export const createCellEditPayload = (
 };
 
 // Helper: Fetch payload from URL and return JSON
+export const executeIBPL = (
+  params = {
+    url: `/api/ibplquery/${tenantID}/ExecuteCompactJsonQuery?traceDdl=true`,
+    payload: {},
+    apiKey: API_KEY,
+    method: "POST",
+  }
+) => {
+  const url = params.url || `/api/ibplquery/${tenantID}/ExecuteCompactJsonQuery?traceDdl=true`;
+  const payload = params.payload && typeof params.payload === "object" ? params.payload : {};
+  const apiKey = params.apiKey || API_KEY;
+  const method = params.method || "POST";
+
+  const headers = {
+    accept: "application/json",
+    "content-type": "application/json",
+    
+  };
+
+  if (apiKey) {
+    headers["Authorization"] = `ApiKey ${apiKey}`;
+  }
+
+  const total_payload = {
+    method,
+    headers,
+    body: method === "POST" ? JSON.stringify(payload) : undefined,
+  };
+
+  return fetch(url, total_payload)
+    .then((response) => {
+      if (!response.ok) {
+        return response.text().then((text) => {
+          throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+        });
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      console.error("Error fetching payload:", error);
+      throw error;
+    });
+};
+
 export const getPayloadFromUrl = (
   params = {
-    url: "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true",
+    url: `${API_BASE_URL}/getData`,
     payload: {},
     apiKey: API_KEY,
   }
@@ -290,13 +334,9 @@ export const getPayloadFromUrl = (
   const headers = {
     accept: "application/json",
     "content-type": "application/json",
-    // "o9-request-ttid": "6760",
-    // "sec-fetch-mode": "cors",
-    // "sec-fetch-site": "same-origin",
   };
   try {
     const data = o9Interface.getData(payload, undefined);
-    console.log("Fetched data from O9 interface:", data);
     if (data?.Meta && data?.Data) {
       return Promise.resolve(data);
     }

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { API_BASE_URL } from "./HomePage";
+import { generateCellEditPayload } from "./payloadGenerator";
 import {
   Table,
   Input,
@@ -28,8 +30,7 @@ import {
 import {
   parseMetaDataPayload,
   parseGenericJson,
-  parseCsv,
-  createCellEditPayload,
+  parseCsv
 } from "./o9Interfacehelper";
 import { editableMeasureList,measure_picklist } from "./payloads";
 import RunAbdmButton from "./RunAbdmButton"; // Import the RunAbdmButton component
@@ -279,17 +280,40 @@ export default function SheetComponent({
       if (payload) {
         setO9OriginalPayload(payload);
         const modelDef = payload.ModelDefinition || {};
-        setO9Measures(modelDef.RegularMeasures?.map(m => m.Name) || []);
+        
+        // Measures: use ModelDefinition if present, else fall back to parsed measures (column headers)
+        const regularMeasures =
+          (modelDef.RegularMeasures?.map((m) => m.Name)) ||
+          (meas?.map((m) => m.header)) ||
+          [];
+        setO9Measures(regularMeasures);
+
+        // Attributes: use ModelDefinition if present; else derive from dimensions
         const levelAttrs = modelDef.LevelAttributes || [];
+        // Build meta map by Name (NOT Alias) to fetch DimensionValues
         const attrMap = {};
-        payload.Meta?.forEach(meta => {
-          attrMap[meta.Alias] = meta;  // Use Alias as key for mapping
+        payload.Meta?.forEach((meta) => {
+          if (meta?.Name) attrMap[meta.Name] = meta;
         });
-        const attrs = levelAttrs.filter(a => !a.IsFilter).map(a => ({
-          ...a,
-          DimensionValues: attrMap[a.Name]?.DimensionValues || [],  // Map by Name
-        }));
+        let attrs;
+        if (levelAttrs.length) {
+          attrs = levelAttrs
+            .filter((a) => !a.IsFilter)
+            .map((a) => ({
+              ...a,
+              DimensionValues: attrMap[a.Name]?.DimensionValues || [],
+            }));
+        } else {
+          // Fallback: derive attributes from dimensions array
+          attrs = (dims || []).map((d) => ({
+            Axis: "row",
+            Name: d.header,
+            DimensionName: d.dimensionName || d.dimension || d.header,
+          }));
+        }
         setO9Attributes(attrs);
+
+        // Filters
         setO9Filters(payload.Filters || []);
         setDimensions(dims);
         setMeasures(meas);
@@ -792,45 +816,6 @@ export default function SheetComponent({
     if (onFiltersChange) onFiltersChange({ activeFilters: {}, options: dimOptions });
   };
 
-  // Handler: Save a row (manual save for edited rows)
-  const saveRow = async (key, updatedRow = null) => {
-    if (!updatedRow) {
-      updatedRow = dataSource.find((r) => r.key === key);
-    }
-    if (!updatedRow) return;
-
-    try {
-      const payload = createCellEditPayload(
-        updatedRow,
-        o9Measures,
-        o9Attributes,
-        o9Filters,
-        parseInt(key)
-      );
-
-      const response = await fetch('https://your-o9-endpoint.com/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) { /* ...existing code... */ }
-
-      // On success, remove from edited keys and update initial snapshot
-      editedKeysRef.current.delete(key);
-      setEditedKeys(Array.from(editedKeysRef.current));
-      initialDataRef.current = initialDataRef.current.map((r) =>
-        r.key === key ? { ...updatedRow } : r
-      );
-
-      message.success(`Row ${key} saved successfully`);
-      requestReload("row-saved");
-    } catch (error) {
-      console.error('Save error:', error);
-      message.error(`Save failed for row ${key}: ${error.message}`);
-    }
-  };
-
   // Handler: Save all edited rows
   const saveAllEdited = async () => {
     if (editedKeys.length === 0) {
@@ -840,10 +825,51 @@ export default function SheetComponent({
 
     setSaveLoading(true);
     try {
-      const promises = editedKeys.map((key) => saveRow(key));
+      const promises = editedKeys.map((key) => {
+        const updatedRow = dataSource.find((r) => r.key === key);
+        if (!updatedRow) return Promise.resolve();
+
+        // Use full model: fall back to parsed dimensions/measures if o9* are empty
+        const fullMeasureNames =
+          (Array.isArray(o9Measures) && o9Measures.length ? o9Measures : (measures || []).map(m => m.header));
+
+        const fullLevelAttributes =
+          (Array.isArray(o9Attributes) && o9Attributes.length ? o9Attributes : (dimensions || []).map(d => ({
+            Axis: "row",
+            Name: d.header,
+            DimensionName: d.dimensionName || d.dimension || d.header
+          })));
+
+        const modelDef = {
+          RegularMeasures: fullMeasureNames.map(n => ({ Name: n })),
+          LevelAttributes: fullLevelAttributes
+        };
+
+        const filters = Array.isArray(o9Filters) ? o9Filters : [];
+
+        const payload = generateCellEditPayload(updatedRow, modelDef, filters);
+     
+        return fetch(`${API_BASE_URL}/updateCellEdit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }).then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to save row ${key}`);
+          }
+          editedKeysRef.current.delete(key);
+          setEditedKeys(Array.from(editedKeysRef.current));
+          initialDataRef.current = initialDataRef.current.map((r) =>
+            r.key === key ? { ...updatedRow } : r
+          );
+        });
+      });
+
       await Promise.all(promises);
       message.success('All changes saved successfully');
+      requestReload('all-rows-saved');
     } catch (error) {
+      console.error('Save error:', error);
       message.error('Some saves failed');
     } finally {
       setSaveLoading(false);
@@ -1163,13 +1189,15 @@ const getSelectedDimensionFilters = useCallback(() => {
 
   // Render execute buttons dynamically
   const renderExecuteButtons = () => {
-    const selectedFilters = getSelectedDimensionFilters();
+    const selectedFilters = {...src_tgt, ...getSelectedDimensionFilters()};
+    
     return Object.entries(executeButtons).map(([key, buttonConfig]) => {
       const mergedConfig = {
         ...buttonConfig.config,
         selectedFilters,
         selectedRowKeys,
       };
+
       return (
         <RunAbdmButton
           key={key}

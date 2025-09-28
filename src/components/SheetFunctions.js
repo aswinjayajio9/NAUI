@@ -154,19 +154,25 @@ export function getSheetStyles() {
 export const convertListToFilterFormat = (input) => {
   if (Array.isArray(input)) {
     // If input is an array, convert it to {"", ""}
-    return `{${input.map((item) => `"${item}"`).join(',')}}`;
-  } else if (typeof input === 'object' && input !== null) {
-    // If input is an object, convert each value (array) to {"", ""}
+    return `{${input.map((item) => `"${item}"`).join(",")}}`;
+  } else if (typeof input === "object" && input !== null) {
+    // If input is an object, convert each value (array or string) to {"", ""}
     const formattedObject = {};
     Object.keys(input).forEach((key) => {
       const value = input[key];
       if (Array.isArray(value) && value.length > 0) {
-        formattedObject[key] = `{${value.map((item) => `"${item}"`).join(',')}}`;
+        formattedObject[key] = `{${value.map((item) => `"${item}"`).join(",")}}`;
+      } else if (typeof value === "string" && value.trim() !== "") {
+        // Handle string values
+        formattedObject[key] = `{"${value}"}`;
       } else {
-        formattedObject[key] = '{}'; // Empty braces for invalid or empty arrays
+        formattedObject[key] = "{}"; // Empty braces for invalid or empty values
       }
     });
     return formattedObject;
+  } else if (typeof input === "string" && input.trim() !== "") {
+    // Handle single string input
+    return `{"${input}"}`;
   }
-  return '{}'; // Return empty braces for invalid input
+  return "{}"; // Return empty braces for invalid input
 };
