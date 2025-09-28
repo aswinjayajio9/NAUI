@@ -46,8 +46,13 @@ export const parseMetaDataPayload = (
   const aliasHeader = {};
   aliases.forEach((a) => {
     const m = metaByAlias[a];
-    aliasHeader[a] =
-      m?.DimensionName || m?.Translation || m?.Name || `col_${a}`;
+    if (m?.DimensionName) {
+      // Format for dimensions: [Dimension].[Name]
+      aliasHeader[a] = `[${m.DimensionName}].[${m.Name}]`;
+    } else {
+      // Format for measures: Name only
+      aliasHeader[a] = m?.Name || `col_${a}`;
+    }
   });
 
   // Classify dimensions and measures
@@ -86,11 +91,11 @@ export const parseMetaDataPayload = (
         const dimensionValue = meta.DimensionValues[raw];
         return dimensionValue?.DisplayName || dimensionValue?.Name;
       }
-      // If no match is found, return an empty string
+      // If no match is found, return raw
       return raw;
     }
 
-    // Always return an empty string if no DimensionValues are present
+    // Always return raw if no DimensionValues are present
     return raw;
   };
 
@@ -119,16 +124,13 @@ export const parseMetaDataPayload = (
   // Build colsDisplayNameMapping: display name -> real column name
   const colsDisplayNameMapping = {};
   keepAliases.forEach((a) => {
-    const displayName = aliasHeader[a];
     const meta = metaByAlias[a];
     if (meta?.DimensionName) {
-      const firstpart = meta.DimensionName.includes(" ")
-        ? `[${meta.DimensionName}]`
-        : meta.DimensionName;
-      colsDisplayNameMapping[displayName] = `${firstpart}.[${meta.Name}]`;
+      // For dimensions: [Dimension].[Name]
+      colsDisplayNameMapping[aliasHeader[a]] = `[${meta.DimensionName}].[${meta.Name}]`;
     } else {
-      // For measures: just the display name
-      colsDisplayNameMapping[displayName] = displayName;
+      // For measures: Name only
+      colsDisplayNameMapping[aliasHeader[a]] = meta?.Name || aliasHeader[a];
     }
   });
 
@@ -193,74 +195,6 @@ export const parseCsv = async (res) => {
   });
 };
 
-// Helper: Create a payload object for O9 queries
-export const createPayload = (
-  regularMeasures = [],
-  levelAttributes = [],
-  dataProperties = {}
-) => {
-  // Default data properties if not provided
-  const defaultDataProperties = {
-    IncludeInactiveMembers: false,
-    IncludeNulls: false,
-    NullsForFinerGrainSelect: false,
-    NullsForUnrelatedAttrSelect: false,
-    RequireEditValidation: false,
-    SubTotalsType: "NoSubtotals",
-    IncludeNullsForSeries: "",
-    MaxRecordLimit: "2000",
-    ...dataProperties, // Merge with provided overrides
-  };
-
-  // Build RegularMeasures
-  const measures = regularMeasures.map((name) => ({ Name: name }));
-
-  // Build LevelAttributes (includes both regular attributes and filters)
-  const attributes = levelAttributes.map((attr) => ({
-    Name: attr.Name,
-    DimensionName: attr.DimensionName,
-    Axis: attr.Axis || "row", // Default to "row" if not specified
-    ...(attr.IsFilter && {
-      IsFilter: true,
-      AllSelection: attr.AllSelection || false,
-      SelectedMembers: attr.SelectedMembers || [],
-    }),
-  }));
-
-  return {
-    RegularMeasures: measures,
-    LevelAttributes: attributes,
-    DataProperties: defaultDataProperties,
-  };
-};
-
-/**
- * Creates a cell edit payload for O9 based on an updated row.
- * @param {object} updatedRow - The updated row object (e.g., { ProductLine: "PG_1000", SCPBaseForecastQty: 1000 }).
- * @param {string[]} measures - Array of measure names (e.g., ["SCPBaseForecastQty"]).
- * @param {object[]} attributes - Array of attribute objects with Name, DimensionName, DimensionValues (array of { Name, MemberIndex }).
- * @param {object[]} filters - Array of filter objects with Name, DimensionName, SelectedMembers, etc.
- * @param {number} rowIndex - The index of the row being updated (default: 0).
- * @returns {object} The constructed cell edit payload.
- *
- * @example
- * const payload = createCellEditPayload(
- *   { ProductLine: "PG_1000", Item: "P_1000_1", Location: "ShipTo_1", FiscalQuarter: "Q2-2019", FiscalMonth: "M05-2019", SCPBaseForecastQty: 1000 },
- *   ["SCPBaseForecastQty"],
- *   [
- *     { Name: "ProductLine", DimensionName: "SCSItem", DimensionValues: [{ Name: "PG_1000", MemberIndex: 0 }] },
- *     { Name: "Item", DimensionName: "SCSItem", DimensionValues: [{ Name: "P_1000_1", MemberIndex: 0 }] },
- *     { Name: "Location", DimensionName: "SCSLocation", DimensionValues: [{ Name: "ShipTo_1", MemberIndex: 0 }] },
- *     { Name: "FiscalQuarter", DimensionName: "Time", DimensionValues: [{ Name: "Q2-2019", MemberIndex: 0 }] },
- *     { Name: "FiscalMonth", DimensionName: "Time", DimensionValues: [{ Name: "M05-2019", MemberIndex: 0 }] }
- *   ],
- *   [
- *     { Name: "ProductLine", DimensionName: "SCSItem", SelectedMembers: [{ Name: "PG_1000" }] },
- *     { Name: "Version Name", DimensionName: "Version", SelectedMembers: [{ Name: "CurrentWorkingView" }] }
- *   ],
- *   0
- * );
- */
 export const createCellEditPayload = (
   meta, // Meta passed as a parameter
   updatedRow, // Row data to update
@@ -372,19 +306,12 @@ export const getPayloadFromUrl = (
   if (apiKey) {
     headers["Authorization"] = `ApiKey ${apiKey}`; // Adjust header name/format if needed for O9 API
   }
-  console.log("API Key and payload used:", apiKey,payload);
   if (payload && Object.keys(payload).length > 0) {
     const total_payload = {
       method: "POST", // Assuming POST for fetching data
       headers: headers,
       body: JSON.stringify(payload),
     };
-    // console.log(
-    //   "Fetching response from URL with payload:",
-    //   url,
-    //   payload,
-    //   apiKey
-    // );
 
     return fetch(url, total_payload)
       .then((response) => {
@@ -398,7 +325,7 @@ export const getPayloadFromUrl = (
         throw error;
       });
   } else {
-    console.log("Fetching response from local:", url);
+
     return fetch(url, {
       method: "GET", // Assuming GET for fetching data
       headers: headers,
@@ -423,22 +350,22 @@ export const fetchDimensionDropdowns = async (colsDisplayNameMapping) => {
   try {
     const cacheKey = JSON.stringify(colsDisplayNameMapping); // Use mapping as the cache key
     if (dropdownCache[cacheKey]) {
-      console.log("Returning cached dropdowns for:", cacheKey);
+
       return dropdownCache[cacheKey]; // Return cached data if available
     }
 
     const dimension_dropdowns = {};
     const payload_for_dims = generatePayloadForDimensions(colsDisplayNameMapping);
-
     for (const [displayName, payload] of Object.entries(payload_for_dims)) {
       dimension_dropdowns[displayName] = [];
       const data = await getPayloadFromUrl({ payload: payload });
+      
       if (typeof data === "string") {
         try {
           const parsedData = JSON.parse(data);
           const resultData = parsedData["Results"]["0"];
           const { rows, dimensions } = parseMetaDataPayload(resultData);
-          console.log("Rows fetched for", displayName, rows);
+
           dimension_dropdowns[displayName] = [
             ...new Set(rows.map((row) => row[displayName] || row[dimensions[0]?.header])),
           ];
@@ -450,11 +377,11 @@ export const fetchDimensionDropdowns = async (colsDisplayNameMapping) => {
       } else {
         // Assuming data is already an object
         try {
-          const resultData = data;
-          console.log("Result data fetched for", displayName, resultData);
-          const { rows } = parseMetaDataPayload(resultData);
+          const resultData = data
+          const { rows, dimensions } = parseMetaDataPayload(resultData);
+
           dimension_dropdowns[displayName] = [
-            ...new Set(rows.map((row) => row[displayName])),
+            ...new Set(rows.map((row) => row[displayName] || row[dimensions[0]?.header])),
           ];
         } catch (parseError) {
           throw new Error(

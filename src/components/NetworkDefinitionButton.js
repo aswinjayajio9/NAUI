@@ -17,7 +17,7 @@ import {
 import { generatePayloadForDimensions } from "./payloads";
 import { getPayloadFromUrl, parseMetaDataPayload } from "./o9Interfacehelper";
 import { HideDimensions } from "./payloads";
-
+import { Version , NetworkPlanType} from "./payloads";
 const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [srcPlan, setSrcPlan] = useState("");
@@ -35,7 +35,7 @@ const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
 
       try {
         // Fetch Versions
-        const versionPayload = payloads['Version'];
+        const versionPayload = payloads[Version];
         let versionData = await getPayloadFromUrl({ payload: versionPayload });
         if (typeof versionData === 'string') {
             versionData = JSON.parse(versionData);
@@ -44,10 +44,10 @@ const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
         const { rows: versionRows } = parseMetaDataPayload(
             versionData.Results ? versionData.Results[0] : versionData
         );
-        const versions = [...new Set(versionRows.map(r => r['Version']))];
+        const versions = [...new Set(versionRows.map(r => r[Version]))];
 
         // Fetch Plan Types
-        const planTypePayload = payloads['o9NetworkAggregation Network Plan Type'];
+        const planTypePayload = payloads[NetworkPlanType];
         let planTypeData = await getPayloadFromUrl({ payload: planTypePayload });
         if (typeof planTypeData === 'string') {
             planTypeData = JSON.parse(planTypeData);
@@ -56,7 +56,7 @@ const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
         const { rows: planTypeRows } = parseMetaDataPayload(
             planTypeData.Results ? planTypeData.Results[0] : planTypeData
         );
-        const planTypes = [...new Set(planTypeRows.map(r => r['o9NetworkAggregation Network Plan Type']))];
+        const planTypes = [...new Set(planTypeRows.map(r => r[NetworkPlanType]))];
         
         setOptions({ versions, planTypes });
 

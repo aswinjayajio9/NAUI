@@ -6,7 +6,7 @@ import { generateGetDataPayload } from "./payloadGenerator";
 import { getResourceDetailsPayload, getResourceRulesPayload, HideDimensions } from "./payloads";
 import PlanTypeVersionBox from "./PlanTypeVersionBox";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
-
+import { Version , NetworkPlanType,DataObject} from "./payloads";
 export default function ResourceDefinitionPage({
   srcPlan,
   srcVersion,
@@ -26,11 +26,11 @@ export default function ResourceDefinitionPage({
   const [resourceRulesLoading, setResourceRulesLoading] = useState(true);
   const [resourceRulesError, setResourceRulesError] = useState(null);
 
-  const src_tgt = {
-    Version: srcVersion,
-    "o9NetworkAggregation Network Plan Type": tgtPlan,
-    "Data Object": "Exclude Resource Node",
-  };
+   const src_tgt = {
+     [Version]: srcVersion,
+     [NetworkPlanType]: tgtPlan,
+     [DataObject]: "Exclude Resource Node",
+   };
 
   // Load resource details
   const loadResourceDetails = async () => {

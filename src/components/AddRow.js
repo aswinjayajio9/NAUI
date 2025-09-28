@@ -3,7 +3,7 @@ import { Modal, Button, Space, Input, Select, Row, Col } from 'antd';
 import Draggable from 'react-draggable'; // Import Draggable
 import { fetchDimensionDropdowns, getPayloadFromUrl } from './o9Interfacehelper';
 import { aliasHeader, measure_dimensions_mapper, add_row_orders, HideDimensions, measure_picklist } from './payloads';
-
+import { DMRule } from './payloads';
 // Helper function to sort columns based on add_row_orders
 const sortColumnsByOrder = (columns) =>
   [...columns].sort((a, b) => (add_row_orders[a.dataIndex] || Infinity) - (add_row_orders[b.dataIndex] || Infinity));
@@ -13,19 +13,14 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
   const [newRule, setNewRule] = useState('Rule_01');
   const dragRef = useRef(null); // Ref for draggable modal
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 }); // State to track modal position
-
-  // Create updatedMapping globally within the component
-  const updatedMapping = { ...colsDisplayNameMapping, ...measure_dimensions_mapper };
-
   useEffect(() => {
     const fetchDimensions = async () => {
       try {
         const updatedMapping = { ...colsDisplayNameMapping, ...measure_dimensions_mapper };
-        
         let dropdowns = await fetchDimensionDropdowns(updatedMapping);
         dropdowns = { ...dropdowns, ...measure_picklist }; // Add fixed values
         setDimensionOptions(dropdowns);
-        if (Object.keys(colsDisplayNameMapping).includes("DM Rule")) {
+        if (Object.keys(colsDisplayNameMapping).includes(DMRule)) {
           setNewRule(findMissingOrNextRule(dimensions));
         }
       } catch (error) {
@@ -48,7 +43,7 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
         ...colsDisplayNameMapping,
       };
       if (newRule) {
-        src_tgt['DM Rule'] = newRule;
+        src_tgt[DMRule] = newRule;
       }
       const updatedNewRowData = {
         ...newRowData,
@@ -70,17 +65,17 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
           measures.push(`Measure.[${key}] = ${formattedValue}`);
         }
       });
-      console.log('Prepared dimensions and measures:', { dimensions, measures });
+
 
       const query = `cartesian scope: (${dimensions.join(' * ')}); ${measures.join('; ')}; end scope;`;
       const new_payload = { query, Tenant: 6760, ExecutionContext: 'Kibo Debugging Workspace', EnableMultipleResults: true };
-      console.log('Submitting new payload:', new_payload);
+
 
       const response = await getPayloadFromUrl({ payload: new_payload });
       const responseData = typeof response === 'string' ? JSON.parse(response) : response;
 
       if (responseData?.Results) {
-        console.log('Row added successfully, reloading data...');
+
         onSuccess();
         handleResetPosition(); // Reset modal position on submit
         onCancel();
@@ -253,7 +248,7 @@ const findMissingOrNextRule = (dimensions) => {
     console.error('Invalid dimensions input');
     return null;
   }
-  const rule_dim = dimensions.find(dim => dim?.header === 'DM Rule' || dim.name === 'Rule');
+  const rule_dim = dimensions.find(dim => dim?.header === DMRule || dim.name.includes('Rule'));
   const ruleNumbers = rule_dim?.meta?.DimensionValues
     .map((rule) => rule?.Name)
     .filter((name) => /^rule_\d+$/i.test(name))

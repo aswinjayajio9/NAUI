@@ -1,14 +1,14 @@
 import { generateGetDataPayload } from "./payloadGenerator";
-export const Version = 'Version'
-export const DataObject = 'Data Object'
-export const DMRule = 'DM Rule'
-export const o9PCComponent = 'o9PC Component'
-export const NetworkPlanType = 'o9NetworkAggregation Network Plan Type'
+export const Version = '[Version].[Version Name]'
+export const DataObject = '[Data Object].[Data Object]'
+export const DMRule = '[DM Rule].[Rule]'
+export const o9PCComponent = '[o9PC Component].[Component]'
+export const NetworkPlanType = '[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]'
 export const HideDimensions = {
-  'Version': 'Version.[Version Name]',
-  'Data Object': 'Data Object.[Data Object]',
-  'o9PC Component': 'o9PC Component.[o9PC Component]',
-  'o9NetworkAggregation Network Plan Type': 'o9NetworkAggregation Network Plan Type.[o9NetworkAggregation Network Plan Type]'
+  '[Version].[Version Name]': '[Version].[Version Name]',
+  '[Data Object].[Data Object]': '[Data Object].[Data Object]',
+  '[o9PC Component].[Component]': '[o9PC Component].[Component]',
+  '[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]': '[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]'
 };
 export const getNetworkSummaryPayload = () => ({
     "Tenant": 6760,
@@ -81,12 +81,14 @@ export const getPayloadForParameters = (srcVersion, ComponentInstanceName) => ({
 });
 
 export const aliasHeader = {
-    "Version": "Version",
-    "Data Object": "Data Object",
-    "DM Rule": "Rule",
-    "o9PC Component": "PC Component",
-    "o9PC Setting": "Parameters",
-    "o9NetworkAggregation Network Plan Type": "Network Process Type",
+    "[Version].[Version Name]": "Version",
+    "[Data Object].[Data Object]": "Data Object",
+    "[DM Rule].[Rule]": "Rule",
+    "[o9PC Component].[Component]": "PC Component",
+    "[o9PC Setting].[Setting]": "Parameters",
+    "[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]": "Network Process Type",
+    "[Item].[Item]": "Item",
+    "[Location].[Location]": "Location",
     "Network Aggregation Resource": "Resource",
     "Network Aggregation Resource Type": "Resource Type",
     "Network Aggregation Location": "Location",
@@ -149,15 +151,15 @@ export const editableMeasureList = [
   "PC Setting Value - Aggregation Method"
 ];
 export const measure_dimensions_mapper = {
-  "Network Aggregation Item": "Item.[Item]",
-  "Network Aggregation Item Type": "Item.[Item Type]",
-  "Network Aggregation Location": "Location.[Location]",
-  "Network Aggregation Location Region": "Location.[Location Region]",
-  "Network Aggregation Location Type": "Location.[Location Type]",
-  "Network Aggregation Sub Brand": "Item.[L1]",
-  "Network Aggregation Brand": "Item.[L2]",
-  "Network Aggregation Resource": "Resource.[Resource]",
-  "Network Aggregation Resource Type": "Resource.[Resource Type]",
+  "Network Aggregation Item": "[Item].[Item]",
+  "Network Aggregation Item Type": "[Item].[Item Type]",
+  "Network Aggregation Location": "[Location].[Location]",
+  "Network Aggregation Location Region": "[Location].[Location Region]",
+  "Network Aggregation Location Type": "[Location].[Location Type]",
+  "Network Aggregation Sub Brand": "[Item].[L1]",
+  "Network Aggregation Brand": "[Item].[L2]",
+  "Network Aggregation Resource": "[Resource].[Resource]",
+  "Network Aggregation Resource Type": "[Resource].[Resource Type]",
 };
 
 export const measure_picklist = {

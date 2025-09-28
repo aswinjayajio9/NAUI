@@ -6,6 +6,7 @@ import { generateGetDataPayload } from "./payloadGenerator";
 import { getMaterialDetailsDataPayload, getNetworkMaterialRulesDataPayload, HideDimensions } from "./payloads";
 import PlanTypeVersionBox from "./PlanTypeVersionBox";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
+import { Version , NetworkPlanType,DataObject} from "./payloads";
 export default function NetworkDefinitionPage({
   srcPlan,
   srcVersion,
@@ -26,9 +27,9 @@ export default function NetworkDefinitionPage({
   const [networkMaterialRulesDataError, setNetworkMaterialRulesDataError] = useState(null);
 
   const src_tgt = {
-    Version: srcVersion,
-    "o9NetworkAggregation Network Plan Type": tgtPlan,
-    "Data Object": "Exclude Material Node",
+    [Version]: srcVersion,
+    [NetworkPlanType]: tgtPlan,
+    [DataObject]: "Exclude Material Node",
   };
 
   // Load material details
