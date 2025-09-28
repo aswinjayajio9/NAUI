@@ -166,7 +166,6 @@ export default function SheetComponent({
 
   // Helper: Load data (supports JSON, CSV, or pre-parsed objects) - now wrapped in useCallback
   const loadData = useCallback(async (reloadKey = false) => {
-    console.log("loadData function triggered", { data, reloadKey }); // Add this for debugging
      let mounted = true;
      setLoading(true);
      setError(null);
@@ -1173,7 +1172,6 @@ const getSelectedDimensionFilters = useCallback(() => {
         selectedFilters,
         selectedRowKeys,
       };
-      console.log("Render Execute Button:", key, buttonConfig, mergedConfig);
       return (
         <RunAbdmButton
           key={key}

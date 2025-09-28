@@ -37,15 +37,25 @@ const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
         // Fetch Versions
         const versionPayload = payloads['Version'];
         let versionData = await getPayloadFromUrl({ payload: versionPayload });
-        if (typeof versionData === 'string') versionData = JSON.parse(versionData);
-        const { rows: versionRows } = parseMetaDataPayload(versionData.Results[0]);
+        if (typeof versionData === 'string') {
+            versionData = JSON.parse(versionData);
+        }
+
+        const { rows: versionRows } = parseMetaDataPayload(
+            versionData.Results ? versionData.Results[0] : versionData
+        );
         const versions = [...new Set(versionRows.map(r => r['Version']))];
 
         // Fetch Plan Types
         const planTypePayload = payloads['o9NetworkAggregation Network Plan Type'];
         let planTypeData = await getPayloadFromUrl({ payload: planTypePayload });
-        if (typeof planTypeData === 'string') planTypeData = JSON.parse(planTypeData);
-        const { rows: planTypeRows } = parseMetaDataPayload(planTypeData.Results[0]);
+        if (typeof planTypeData === 'string') {
+            planTypeData = JSON.parse(planTypeData);
+        }
+
+        const { rows: planTypeRows } = parseMetaDataPayload(
+            planTypeData.Results ? planTypeData.Results[0] : planTypeData
+        );
         const planTypes = [...new Set(planTypeRows.map(r => r['o9NetworkAggregation Network Plan Type']))];
         
         setOptions({ versions, planTypes });

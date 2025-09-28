@@ -93,6 +93,25 @@ async def get_data(request: Request):
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/getRules")
+async def get_rules(request: Request):
+    url = "https://mygcppmm.o9solutions.com/api/ibplrules/bindkendomodel?includeMeta=undefined"
+    json_payload = await request.json()
+
+    # forward most headers except those that cause conflicts
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"ApiKey hkj7ja11.v37hrv9jxv6g38n7sp297gz",
+        "Accept": "application/json",
+    }
+    print(json_payload)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(url, headers=headers, json=json_payload)
+            return resp.json()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 @app.post("/updateCellEdit")
 async def update_cell_edit(request: Request):
     url = "https://mygcppmm.o9solutions.com/api/v2/widget/update/CellEdit"

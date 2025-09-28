@@ -17,7 +17,7 @@ import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { getNetworkSummaryPayload } from "./payloads";
 export const API_BASE_URL = "http://localhost:8998";
 export const new_component = "Network Aggregation Demo";
-
+export const tenantID = 6760; // Replace with your actual tenant ID
 function NetworkAggHomePage() {
   const [firstSheetFilters, setFirstSheetFilters] = useState({});
   const [currentPage, setCurrentPage] = useState("home"); // "home" | "networkDefinition"
@@ -38,7 +38,7 @@ function NetworkAggHomePage() {
   // Effect: Fetch data on mount
   useEffect(() => {
     setNetworkSummaryLoading(true);
-    getPayloadFromUrl({payload: generateGetDataPayload(getNetworkSummaryPayload("Operational Plan", "MP")?.Query)})
+    getPayloadFromUrl({payload: generateGetDataPayload(getNetworkSummaryPayload()?.Query)})
       .then((data) => {
         // console.log("Network summary data:",data );
         if (typeof data === 'string') {

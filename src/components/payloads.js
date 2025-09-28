@@ -1,3 +1,4 @@
+import { generateGetDataPayload } from "./payloadGenerator";
 export const Version = 'Version'
 export const DataObject = 'Data Object'
 export const DMRule = 'DM Rule'
@@ -9,9 +10,9 @@ export const HideDimensions = {
   'o9PC Component': 'o9PC Component.[o9PC Component]',
   'o9NetworkAggregation Network Plan Type': 'o9NetworkAggregation Network Plan Type.[o9NetworkAggregation Network Plan Type]'
 };
-export const getNetworkSummaryPayload = (srcVersion, srcPlan) => ({
+export const getNetworkSummaryPayload = () => ({
     "Tenant": 6760,
-    "Query": `Select ([Version].[Version Name].[${srcVersion}] * [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type] ) on row, \n({Measure.[Network Aggregation BOM Count], Measure.[Network Aggregation Base Plan Type], Measure.[Network Aggregation Item Count], Measure.[Network Aggregation Resource Count], Measure.[Network Aggregation Routing Count], Measure.[Network Aggregation Target Version]}) on column;`,
+    "Query": `Select ([Version].[Version Name] * [o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type] ) on row, \n({Measure.[Network Aggregation BOM Count], Measure.[Network Aggregation Base Plan Type], Measure.[Network Aggregation Item Count], Measure.[Network Aggregation Resource Count], Measure.[Network Aggregation Routing Count], Measure.[Network Aggregation Target Version]}) on column;`,
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
@@ -116,6 +117,11 @@ export const aliasHeader = {
     "Aggregation Simultaneous Resource": "Aggregation Simultaneous Resource",
     "Applied Resource ABDM Rule": "Applied Resource ABDM Rule",
     "Item": "Item",
+    "Item Type": "Item Type",
+    "Location Region": "Location Region",
+    "Location Type": "Location Type",
+    "Resource": "Resource",
+    "Resource Type": "Resource Type",
     "Location": "Location",
     "PC Setting Is Enabled": "Is Enabled",
     "PC Setting Value - Aggregation Method": "Aggregation Method",
@@ -183,12 +189,7 @@ export const generatePayloadForDimensions = (colsDisplayNameMapping = {}) => {
       if (parts.length === 2) {
         const dimensionName = parts[0].replace(/^\[|\]$/g, ""); // Remove beginning and trailing brackets
         const name = parts[1].replace(/^\[|\]$/g, ""); // Remove beginning and trailing brackets
-        payloads[displayName] = {
-          "Tenant": 6760,
-          "Query": `SELECT ([${dimensionName}].[${name}]);`,
-          "ExecutionContext": "Kibo Debugging Workspace",
-          "EnableMultipleResults": true
-        };
+        payloads[displayName] = generateGetDataPayload(`SELECT ([${dimensionName}].[${name}]);`)
       }
     }
   });

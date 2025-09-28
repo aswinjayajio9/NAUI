@@ -3,7 +3,7 @@ import { Button, useToast } from "@chakra-ui/react";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { runExcludeMaterialNodeProcessPayload,runExcludeResourceNodeProcessPayload ,generateMaterialExclusionPayload} from "./payloads";
 import { convertListToFilterFormat } from "./SheetFunctions";
-
+import { generateGetDataPayload } from "./payloadGenerator";
 export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
@@ -23,17 +23,21 @@ export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
       else if (config.abdmpayload === "Generate Material Exclusion") {
         config.abdmpayload = generateMaterialExclusionPayload(src_tgt.Version,src_tgt["o9NetworkAggregation Network Plan Type"],src_tgt["o9PC Component"]);
       }
-      const resdata = await getPayloadFromUrl({
-        payload: config.abdmpayload ,
+      const abdmExecPayload = generateGetDataPayload(config.abdmpayload?.Query);
+      var resdata = await getPayloadFromUrl({
+        payload: abdmExecPayload,
       });
-
-      // Check if the response is valid
-      const data = JSON.parse(resdata);
-
-      if (!data || typeof data !== "object") {
-        throw new Error("Invalid response from ABDM process");
+      if (typeof resdata === "string") {
+        // Attempt to parse the response as JSON
+        try { 
+          resdata = JSON.parse(resdata);
+        } catch (parseError) {
+          throw new Error(`Failed to parse ${Name} process response as JSON: ` + parseError.message);
+        }
+      } else {
+        resdata = resdata;
       }
-      console.log(`"${Name} process response:`, data);
+      console.log(`"${Name} process response:`, resdata);
       toast({ title: `${Name} Completed successfully`, status: "success", duration: 3000 });
 
       // Notify parent component that ABDM is completed

@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import SheetComponent from "./SheetComponent";
 import PlanTypeVersionBox from "./PlanTypeVersionBox"; // Import the new component
-import { API_BASE_URL } from "./HomePage"; // Import the constant
+import { generateGetDataPayload } from "./payloadGenerator";
 import { getPayloadForParameters, HideDimensions } from "./payloads";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { new_component } from "./HomePage";
@@ -38,12 +38,16 @@ export default function ResourceDefinitionPage({
       setSummaryParametersLoading(true);
       setSummaryParametersError(null);
       try {
-        const payload = getPayloadForParameters(srcVersion,new_component);
+        const payload = generateGetDataPayload(getPayloadForParameters(srcVersion,new_component)?.Query);
         let data = await getPayloadFromUrl({ payload });
         if (typeof data === "string") {
           data = JSON.parse(data);
+          setSummaryParameters(data.Results[0]);
         }
-        setSummaryParameters(data["Results"]["0"]);
+        else{
+          setSummaryParameters(data);
+        }
+        
         console.log("Parameters data:", data);
       } catch (error) {
         console.error("Error loading parameters:", error);
@@ -74,7 +78,6 @@ export default function ResourceDefinitionPage({
         Parameters
       </Heading>
       <SheetComponent 
-        dataUrl={`${API_BASE_URL}/read/parameters.csv`}
         data={summaryParameters}
         isLoading={summaryParametersLoading}
         error={summaryParametersError}

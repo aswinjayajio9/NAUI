@@ -449,11 +449,18 @@ export const fetchDimensionDropdowns = async (colsDisplayNameMapping) => {
         }
       } else {
         // Assuming data is already an object
-        const resultData = data;
-        const { rows } = parseMetaDataPayload(resultData);
-        dimension_dropdowns[displayName] = [
-          ...new Set(rows.map((row) => row[displayName])),
-        ];
+        try {
+          const resultData = data;
+          console.log("Result data fetched for", displayName, resultData);
+          const { rows } = parseMetaDataPayload(resultData);
+          dimension_dropdowns[displayName] = [
+            ...new Set(rows.map((row) => row[displayName])),
+          ];
+        } catch (parseError) {
+          throw new Error(
+            "Failed to parse API response as JSON: " + parseError.message
+          );
+        }
       }
     }
 

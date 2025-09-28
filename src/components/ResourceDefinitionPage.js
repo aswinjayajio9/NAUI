@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Box, Flex, Button, Heading, SimpleGrid } from "@chakra-ui/react";
 import SheetComponent from "./SheetComponent";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
+import { generateGetDataPayload } from "./payloadGenerator";
 import { getResourceDetailsPayload, getResourceRulesPayload, HideDimensions } from "./payloads";
 import PlanTypeVersionBox from "./PlanTypeVersionBox";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
+
 export default function ResourceDefinitionPage({
   srcPlan,
   srcVersion,
@@ -35,18 +37,15 @@ export default function ResourceDefinitionPage({
     setResourceDetailsLoading(true);
     setResourceDetailsError(null);
     try {
-      const payload = getResourceDetailsPayload(srcVersion, tgtPlan);
+      const payload = generateGetDataPayload(getResourceDetailsPayload(srcVersion, tgtPlan)?.Query);
       let data = await getPayloadFromUrl({ payload });
 
       if (typeof data === "string") {
         data = JSON.parse(data);
+        setResourceDetailsData(data.Results[0]);
+      } else {
+        setResourceDetailsData(data);
       }
-
-      if (!data?.Results?.[0]) {
-        throw new Error("Invalid API response: Missing or empty 'Results' array");
-      }
-
-      setResourceDetailsData(data.Results[0]);
     } catch (err) {
       setResourceDetailsError(err.message || String(err));
     } finally {
@@ -66,19 +65,15 @@ export default function ResourceDefinitionPage({
     setResourceRulesLoading(true);
     setResourceRulesError(null);
     try {
-      let data = await getPayloadFromUrl({
-        payload: getResourceRulesPayload(srcVersion, tgtPlan),
-      });
+      const payload = generateGetDataPayload(getResourceRulesPayload(srcVersion, tgtPlan)?.Query);
+      let data = await getPayloadFromUrl({ payload });
 
       if (typeof data === "string") {
         data = JSON.parse(data);
+        setResourceRulesData(data.Results[0]);
+      } else {
+        setResourceRulesData(data);
       }
-
-      if (!data?.Results?.[0]) {
-        throw new Error("Invalid API response: Missing or empty 'Results' array");
-      }
-
-      setResourceRulesData(data.Results[0]);
     } catch (error) {
       setResourceRulesError(error.message || String(error));
     } finally {
@@ -176,6 +171,21 @@ export default function ResourceDefinitionPage({
               isLoading={resourceDetailsLoading}
               error={resourceDetailsError}
               hideDims={Object.keys(HideDimensions)}
+              executeButtons={{
+                button1: {
+                  key: "Generate Resource Exclusion",
+                  config: {
+                    abdmpayload: "Generate Resource Exclusion",
+                  },
+                },
+              }}
+              onRequestReload={(reason) => {
+                console.log("SheetComponent requested reload:", reason);
+                setSheetReloadKey((k) => k + 1);
+                loadResourceDetails().catch((err) =>
+                  console.error("Failed to reload resource details:", err)
+                );
+              }}
             />
           </SimpleGrid>
         </Box>

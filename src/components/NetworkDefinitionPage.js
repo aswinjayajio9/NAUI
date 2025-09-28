@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Box, Flex, Button, Heading, SimpleGrid } from "@chakra-ui/react";
 import SheetComponent from "./SheetComponent";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
+import { generateGetDataPayload } from "./payloadGenerator";
 import { getMaterialDetailsDataPayload, getNetworkMaterialRulesDataPayload, HideDimensions } from "./payloads";
 import PlanTypeVersionBox from "./PlanTypeVersionBox";
 import { API_BASE_URL } from "./HomePage"; // Import the constant
@@ -35,18 +36,15 @@ export default function NetworkDefinitionPage({
     setMaterialDetailsLoading(true);
     setMaterialDetailsError(null);
     try {
-      const payload = getMaterialDetailsDataPayload(srcVersion, tgtPlan);
+      const payload = generateGetDataPayload(getMaterialDetailsDataPayload(srcVersion, tgtPlan)?.Query);
       let data = await getPayloadFromUrl({ payload });
-
       if (typeof data === "string") {
         data = JSON.parse(data);
+        setMaterialDetailsData(data.Results[0]);
       }
-
-      if (!data?.Results?.[0]) {
-        throw new Error("Invalid API response: Missing or empty 'Results' array");
+      else{
+        setMaterialDetailsData(data);
       }
-
-      setMaterialDetailsData(data.Results[0]);
     } catch (err) {
       setMaterialDetailsError(err.message || String(err));
     } finally {
@@ -67,18 +65,20 @@ export default function NetworkDefinitionPage({
     setNetworkMaterialRulesDataError(null);
     try {
       let data = await getPayloadFromUrl({
-        payload: getNetworkMaterialRulesDataPayload(srcVersion, tgtPlan),
+        payload: generateGetDataPayload(getNetworkMaterialRulesDataPayload(srcVersion, tgtPlan)?.Query),
       });
 
       if (typeof data === "string") {
         data = JSON.parse(data);
+        setNetworkMaterialRulesData(data.Results[0]);
       }
-
-      if (!data?.Results?.[0]) {
-        throw new Error("Invalid API response: Missing or empty 'Results' array");
+      else{
+        console.log("Network material rules data:", data);
+        setNetworkMaterialRulesData(data);
       }
+    
 
-      setNetworkMaterialRulesData(data.Results[0]);
+      
     } catch (error) {
       setNetworkMaterialRulesDataError(error.message || String(error));
     } finally {
