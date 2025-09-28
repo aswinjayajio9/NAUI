@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   ChakraProvider,
   Container,
   Heading,
   SimpleGrid,
   Box,
-  Flex,
-  Button,
+  Flex
 } from "@chakra-ui/react";
 import SheetComponent from "./SheetComponent";
 import DashboardComponent from "./DashboardComponent";
 // replaced NetworkDefinitionPage with DefinitionWizard
 import DefinitionWizard from "./DefinitionWizard";
 import NetworkDefinitionButton from "./NetworkDefinitionButton";
-
+import { generateGetDataPayload } from "./payloadGenerator";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { getNetworkSummaryPayload } from "./payloads";
-
 export const API_BASE_URL = "http://localhost:8998";
 export const new_component = "Network Aggregation Demo";
 
@@ -40,20 +38,20 @@ function NetworkAggHomePage() {
   // Effect: Fetch data on mount
   useEffect(() => {
     setNetworkSummaryLoading(true);
-    getPayloadFromUrl({payload: getNetworkSummaryPayload("Operational Plan", "MP")})
+    getPayloadFromUrl({payload: generateGetDataPayload(getNetworkSummaryPayload("Operational Plan", "MP")?.Query)})
       .then((data) => {
         // console.log("Network summary data:",data );
         if (typeof data === 'string') {
           try {
             data = JSON.parse(data);
+
           } catch (parseError) {
             throw new Error("Failed to parse API response as JSON: " + parseError.message);
           }
         }
-        if (!data || !data["Results"] || !Array.isArray(data["Results"]) || data["Results"].length === 0) {
-          throw new Error("Invalid API response: Missing or empty 'Results' array");
+        else {
+          setNetworkSummaryData(data)
         }
-        setNetworkSummaryData(data["Results"]["0"]);
       })
       .catch((error) => {
         setNetworkSummaryError(error.message);

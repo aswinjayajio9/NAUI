@@ -1,5 +1,6 @@
 import o9Interface from "./o9Interface";
 import { generatePayloadForDimensions } from "./payloads";
+import { API_BASE_URL } from "./HomePage"; // Import the constant
 // Load API key from environment variable
 const API_KEY = process.env.API_KEYGEN || "hkj7ja11.v37hrv9jxv6g38n7sp297gz";
 // Helper: Parse Meta/Data payload into rows and columns
@@ -348,8 +349,8 @@ export const getPayloadFromUrl = (
     apiKey: API_KEY,
   }
 ) => {
-  const url =
-    params.url || "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true";
+  const url = `${API_BASE_URL}/getData`;
+      // params.url || "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true";
   const payload = params.payload || {};
   const apiKey = params.apiKey || API_KEY;
   const headers = {

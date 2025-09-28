@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import os
-from typing import Dict, Any
+import httpx
 import numpy as np
 app = FastAPI()
 
@@ -72,3 +72,42 @@ async def write_csv(filename: str, request: Request):
         return {"status": "success", "file": filename}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/getData")
+async def get_data(request: Request):
+    url = "https://mygcppmm.o9solutions.com/api/v2/widget/getdata"
+    json_payload = await request.json()
+
+    # forward most headers except those that cause conflicts
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"ApiKey hkj7ja11.v37hrv9jxv6g38n7sp297gz",
+        "Accept": "application/json",
+    }
+    print(json_payload)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(url, headers=headers, json=json_payload)
+            return resp.json()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/updateCellEdit")
+async def update_cell_edit(request: Request):
+    url = "https://mygcppmm.o9solutions.com/api/v2/widget/update/CellEdit"
+    json_payload = await request.json()
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"ApiKey hkj7ja11.v37hrv9jxv6g38n7sp297gz",
+        "Accept": "application/json",
+    }
+
+    # verify=False only if you're using a self-signed cert on localhost
+    async with httpx.AsyncClient(verify=False) as client:
+        try:
+            resp = await client.post(url, headers=headers, json=json_payload)
+            return resp.json()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))

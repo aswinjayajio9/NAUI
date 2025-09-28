@@ -11,6 +11,7 @@ import { API_BASE_URL } from "./HomePage"; // Import the constant
 import { getPayloadForParameters, HideDimensions } from "./payloads";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
 import { new_component } from "./HomePage";
+
 /*
   ResourceDefinitionPage
   - Clean page: parent provides step control.
