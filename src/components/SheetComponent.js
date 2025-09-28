@@ -848,7 +848,7 @@ export default function SheetComponent({
         const filters = Array.isArray(o9Filters) ? o9Filters : [];
 
         const payload = generateCellEditPayload(updatedRow, modelDef, filters);
-     
+
         return fetch(`${API_BASE_URL}/updateCellEdit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -867,7 +867,9 @@ export default function SheetComponent({
 
       await Promise.all(promises);
       message.success('All changes saved successfully');
-      requestReload('all-rows-saved');
+
+      // Trigger a smooth reload of the sheet
+      requestReload('save-all-edited-success');
     } catch (error) {
       console.error('Save error:', error);
       message.error('Some saves failed');
