@@ -89,6 +89,7 @@ export const aliasHeader = {
     "[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]": "Network Process Type",
     "[Item].[Item]": "Item",
     "[Location].[Location]": "Location",
+    "[Resource].[Resource]":"Resource",
     "Network Aggregation Resource": "Resource",
     "Network Aggregation Resource Type": "Resource Type",
     "Network Aggregation Location": "Location",
