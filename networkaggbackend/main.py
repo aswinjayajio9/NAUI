@@ -130,3 +130,23 @@ async def update_cell_edit(request: Request):
             return resp.json()
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/runActionButton")
+async def run_action_button(action_button:str,request: Request):
+    url = rf"https://mygcppmm.o9solutions.com/api/ibplrules/executeaction/{action_button}"
+    json_payload = await request.json()
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"ApiKey hkj7ja11.v37hrv9jxv6g38n7sp297gz",
+        "Accept": "application/json",
+    }
+
+    # verify=False only if you're using a self-signed cert on localhost
+    async with httpx.AsyncClient(verify=False) as client:
+        try:
+            resp = await client.post(url, headers=headers, json=json_payload)
+            return resp.json()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
