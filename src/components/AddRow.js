@@ -244,21 +244,35 @@ const AddRow = ({ visible, onCancel, src_tgt, dimensions, columns, newRowData, s
 // Helper function to find missing or next rule
 const findMissingOrNextRule = (dimensions) => {
 
-  if (!dimensions?.[0]?.meta?.DimensionValues) {
+  if (!dimensions || !Array.isArray(dimensions) || dimensions.length === 0) {
     console.error('Invalid dimensions input');
     return null;
   }
-  const rule_dim = dimensions.find(dim => dim?.header === DMRule || dim.name.includes('Rule'));
-  const ruleNumbers = rule_dim?.meta?.DimensionValues
+
+  // Find a dimension whose header matches DMRule or whose name contains 'Rule' (safely)
+  const rule_dim = dimensions.find(
+    (dim) =>
+      dim?.header === DMRule || (typeof dim?.name === 'string' && dim.name.includes('Rule'))
+  );
+
+  const dimensionValues = rule_dim?.meta?.DimensionValues;
+  if (!Array.isArray(dimensionValues) || dimensionValues.length === 0) {
+    console.error('No rule dimension values found');
+    return null;
+  }
+
+  const ruleNumbers = dimensionValues
     .map((rule) => rule?.Name)
-    .filter((name) => /^rule_\d+$/i.test(name))
+    .filter((name) => typeof name === 'string' && /^rule_\d+$/i.test(name))
     .map((name) => parseInt(name.split('_')[1], 10))
     .sort((a, b) => a - b);
-  for (let i = 1; i <= ruleNumbers.length; i++) {
+
+  for (let i = 1; i <= (ruleNumbers.length || 0); i++) {
     if (!ruleNumbers.includes(i)) return `Rule_${String(i).padStart(2, '0')}`;
   }
 
-  return `Rule_${String(ruleNumbers.length ? ruleNumbers[ruleNumbers.length - 1] + 1 : 1).padStart(2, '0')}`;
+  const next = ruleNumbers.length ? ruleNumbers[ruleNumbers.length - 1] + 1 : 1;
+  return `Rule_${String(next).padStart(2, '0')}`;
 };
 
 export default AddRow;

@@ -68,12 +68,12 @@ export const generateGetDataPayload = (query) => {
 
             if (selectedMembersFilter && selectedMembersFilter.length > 0) {
                 levelAttribute.IsFilter = true;
-                levelAttribute.Axis = "none";
+                levelAttribute.Axis = "row";
                 levelAttribute.AllSelection = false;
                 levelAttribute.SelectedMembers = selectedMembersFilter.map(member => ({ Name: member }));
             } else if (singleSelectedMember) {
                 levelAttribute.IsFilter = true;
-                levelAttribute.Axis = "none";
+                levelAttribute.Axis = "row";
                 levelAttribute.AllSelection = false;
                 levelAttribute.SelectedMembers = [{ Name: singleSelectedMember }];
             }
@@ -93,107 +93,113 @@ export const generateGetDataPayload = (query) => {
  * - modelDefinition: { RegularMeasures: (string[]|{Name:string}[]), LevelAttributes: ({Name, DimensionName, Axis, IsFilter?}[]) }
  * - filters: optional array of filter objects in o9 format, or empty
  */
-export const generateCellEditPayload = (updatedRow, modelDefinition = {}, filters = []) => {
-    if (!updatedRow || typeof updatedRow !== "object") {
-        throw new Error("generateCellEditPayload: updatedRow must be a row object");
-    }
+export const generateCellEditPayload = (o9Meta, updatedRow, Filters=[]) => {
+    // Build Meta array: transform each meta entry that has DimensionValues into a
+    // lightweight object { DimensionName, Alias, Name, DimensionValues: [{ Name, MemberIndex }] }.
+    // Preserve array positions; entries without DimensionValues become empty objects.
+    const Meta = Array.isArray(o9Meta) ? o9Meta.map((item) => {
+        if (!item) {
+            return {};
+        }
 
-    // Normalize Measures -> array of names
-    const regularMeasureNames = (modelDefinition.RegularMeasures || [])
-        .map(m => typeof m === "string" ? m : m?.Name)
-        .filter(Boolean);
-
-    // Normalize LevelAttributes
-    const allLevelAttrs = (modelDefinition.LevelAttributes || []).filter(Boolean);
-    const nonFilterAttrs = allLevelAttrs.filter(a => !a.IsFilter);
-    const filterAttrs = allLevelAttrs.filter(a => a.IsFilter);
-
-    // Build Meta
-    const Meta = [];
-    const aliasByAttrName = {};
-    const aliasByMeasureName = {};
-    let aliasCounter = 0;
-
-    // Dimension Meta (non-filter attributes only)
-    nonFilterAttrs.forEach(attr => {
-        const attrName = attr.Name;
-        const dimName = attr.DimensionName || attr.Dimension || attrName;
-        const alias = String(aliasCounter++);
-        aliasByAttrName[attrName] = alias;
-
-        const memberName = updatedRow[attrName] != null ? String(updatedRow[attrName]) : "";
-        Meta.push({
-            DimensionName: dimName,
-            Alias: alias,
-            Name: attrName,
-            DimensionValues: [
-                {
-                    Name: memberName,
-                    MemberIndex: 0
-                }
-            ]
-        });
-    });
-
-    // Measure Meta (include all measures)
-    regularMeasureNames.forEach(mName => {
-        const alias = String(aliasCounter++);
-        aliasByMeasureName[mName] = alias;
-        Meta.push({
-            DataType: "number",
-            Name: mName,
-            Alias: alias
-        });
-    });
-
-    // UpdatedRows: take full row -> MemberCells for all non-filter dims, DataCells for all measures
-    const MemberCells = nonFilterAttrs.map(attr => ({
-        Alias: aliasByAttrName[attr.Name],
-        MemberIndex: 0
-    }));
-
-    const toNumberIfPossible = (v) => {
-        if (v === "" || v === undefined || v === null) return null;
-        const num = Number(String(v).replace(/,/g, ""));
-        return Number.isNaN(num) ? v : num;
-    };
-
-    const DataCells = regularMeasureNames.map(mName => ({
-        Alias: aliasByMeasureName[mName],
-        Value: toNumberIfPossible(updatedRow[mName])
-    }));
-
-    const UpdatedRows = [
-        { MemberCells, DataCells }
-    ];
-
-    // ModelDefinition: keep full measures and level attributes (including filter attributes)
-    const ModelDefinition = {
-        RegularMeasures: regularMeasureNames.map(n => ({ Name: n })),
-        LevelAttributes: allLevelAttrs.map(a => ({
-            ...a,
-            Name: a.Name,
-            DimensionName: a.DimensionName || a.Dimension || a.Name
-        }))
-    };
-
-    // Filters: accept array; if not array, try to convert a mapping object
-    let Filters = Array.isArray(filters) ? filters : [];
-    if (!Array.isArray(filters) && filters && typeof filters === "object") {
-        // Convert { AttrName: [values] } to filter objects, best-effort DimensionName from attrs
-        Filters = Object.entries(filters).map(([name, values]) => {
-            const la = allLevelAttrs.find(a => a.Name === name);
+        // If this entry is a Measure, include only Name and Alias
+        if (item.MeasureId) {
             return {
-                IsFilter: true,
-                Axis: "none",
-                AllSelection: !Array.isArray(values) || values.length === 0,
-                SelectedMembers: Array.isArray(values) ? values.map(v => ({ Name: String(v) })) : [],
-                Name: name,
-                DimensionName: la?.DimensionName || name
+                Name: item.Name,
+                Alias: item.Alias
             };
-        });
-    }
+        }
 
-    return { Meta, UpdatedRows, ModelDefinition, Filters };
+        if (!Array.isArray(item.DimensionValues) || item.DimensionValues.length === 0) {
+            return {};
+        }
+
+        return {
+            DimensionName: item.DimensionName,
+            Alias: item.Alias,
+            Name: item.Name,
+            DimensionValues: item.DimensionValues.map((v, idx) => ({
+                Name: v.Name,
+                MemberIndex: (v.MemberIndex != null ? v.MemberIndex : idx)
+            }))
+        };
+    }) : [];
+
+    // Build ModelDefinition from original o9Meta (only include actual measures/attributes; remove empty placeholders)
+    const ModelDefinition = {
+        RegularMeasures: Array.isArray(o9Meta)
+            ? o9Meta
+                  .filter(item => item && item.MeasureId)
+                  .map(item => ({ Name: item.Name }))
+            : [],
+        LevelAttributes: Array.isArray(o9Meta)
+            ? o9Meta
+                  .filter(item => item && item.DimensionName && Array.isArray(item.DimensionValues) && item.DimensionValues.length > 0)
+                  .map(item => ({
+                      Axis: "row",
+                      Name: item.Name,
+                      DimensionName: item.DimensionName
+                  }))
+            : []
+    };
+
+    // Build UpdatedCells: single object with MemberCells (dimensions) and DataCells (measures)
+    const MemberCells = [];
+    const DataCells = [];
+
+    Meta.forEach((m) => {
+        if (!m || Object.keys(m).length === 0) return;
+
+        // Dimension entry -> key is "[DimensionName].[Name]"
+        if (m.DimensionName) {
+            const key = `[${m.DimensionName}].[${m.Name}]`;
+            if (Object.prototype.hasOwnProperty.call(updatedRow, key)) {
+                const val = updatedRow[key];
+                let memberIndex = null;
+                if (val != null && Array.isArray(m.DimensionValues)) {
+                    const found = m.DimensionValues.find(dv => dv.Name === val);
+                    if (found) {
+                        memberIndex = found.MemberIndex;
+                    } else {
+                        memberIndex = null;
+                    }
+                }
+                MemberCells.push({
+                    Alias: m.Alias,
+                    MemberIndex: memberIndex
+                });
+            }
+            return;
+        }
+
+        // Measure entry -> key is "Name"
+        if (m.Name) {
+            const key = m.Name;
+            if (Object.prototype.hasOwnProperty.call(updatedRow, key)) {
+                const val = updatedRow[key];
+                // Only include measures that have a non-null/undefined value to avoid generating
+                // malformed update statements like "... = ,"
+                if (val !== null && val !== undefined) {
+                    DataCells.push({
+                        Alias: m.Alias,
+                        Value: val
+                    });
+                }
+            }
+            return;
+        }
+    });
+
+    return {
+        Meta,
+        ModelDefinition,
+        UpdatedRows: [
+            {
+                MemberCells,
+                DataCells
+            }
+        ],
+        Filters
+    };
 };
 

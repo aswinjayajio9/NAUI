@@ -1,3 +1,5 @@
+import { levels } from "slate";
+
 // Function to compute row span map for dimension columns
 export function computeRowSpanMap(dataSource, dimensions) {
   const map = {};

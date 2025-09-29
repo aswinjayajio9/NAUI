@@ -25,7 +25,9 @@ import AddRow from "./AddRow";
 import { aliasHeader } from "./payloads";
 import {
   computeRowSpanMap,
-  getSheetStyles
+getSheetStyles,
+  parseBracketedHeader,
+  deriveAttributes
 } from "./SheetFunctions"; // Import functions from SheetFunctions.js
 import {
   parseMetaDataPayload,
@@ -78,7 +80,7 @@ export default function SheetComponent({
   // Add state for O9 payload components (to avoid conflict with existing filters)
   const [o9OriginalPayload, setO9OriginalPayload] = useState(null);
   const [o9Measures, setO9Measures] = useState([]);
-  const [o9Attributes, setO9Attributes] = useState([]);
+  const [o9Meta, setO9Meta] = useState([]);
   const [o9Filters, setO9Filters] = useState([]);
   const [dimensions, setDimensions] = useState([]); // New: Dimension columns
   const [measures, setMeasures] = useState([]); // New: Measure columns
@@ -287,32 +289,7 @@ export default function SheetComponent({
           (meas?.map((m) => m.header)) ||
           [];
         setO9Measures(regularMeasures);
-
-        // Attributes: use ModelDefinition if present; else derive from dimensions
-        const levelAttrs = modelDef.LevelAttributes || [];
-        // Build meta map by Name (NOT Alias) to fetch DimensionValues
-        const attrMap = {};
-        payload.Meta?.forEach((meta) => {
-          if (meta?.Name) attrMap[meta.Name] = meta;
-        });
-        let attrs;
-        if (levelAttrs.length) {
-          attrs = levelAttrs
-            .filter((a) => !a.IsFilter)
-            .map((a) => ({
-              ...a,
-              DimensionValues: attrMap[a.Name]?.DimensionValues || [],
-            }));
-        } else {
-          // Fallback: derive attributes from dimensions array
-          attrs = (dims || []).map((d) => ({
-            Axis: "row",
-            Name: d.header,
-            DimensionName: d.dimensionName || d.dimension || d.header,
-          }));
-        }
-        setO9Attributes(attrs);
-
+        setO9Meta(payload.Meta || []);
         // Filters
         setO9Filters(payload.Filters || []);
         setDimensions(dims);
@@ -321,7 +298,6 @@ export default function SheetComponent({
       } else {
         setO9OriginalPayload(null);
         setO9Measures([]);
-        setO9Attributes([]);
         setO9Filters([]);
         setDimensions([]);
         setMeasures([]);
@@ -828,27 +804,12 @@ export default function SheetComponent({
       const promises = editedKeys.map((key) => {
         const updatedRow = dataSource.find((r) => r.key === key);
         if (!updatedRow) return Promise.resolve();
-
-        // Use full model: fall back to parsed dimensions/measures if o9* are empty
-        const fullMeasureNames =
-          (Array.isArray(o9Measures) && o9Measures.length ? o9Measures : (measures || []).map(m => m.header));
-
-        const fullLevelAttributes =
-          (Array.isArray(o9Attributes) && o9Attributes.length ? o9Attributes : (dimensions || []).map(d => ({
-            Axis: "row",
-            Name: d.header,
-            DimensionName: d.dimensionName || d.dimension || d.header
-          })));
-
-        const modelDef = {
-          RegularMeasures: fullMeasureNames.map(n => ({ Name: n })),
-          LevelAttributes: fullLevelAttributes
-        };
+        console.log('Using modelDef for save:', o9Meta, updatedRow);
 
         const filters = Array.isArray(o9Filters) ? o9Filters : [];
 
-        const payload = generateCellEditPayload(updatedRow, modelDef, filters);
-
+        const payload = generateCellEditPayload(o9Meta, updatedRow, filters);
+        console.log('Saving payload for row', key, payload);
         return fetch(`${API_BASE_URL}/updateCellEdit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
