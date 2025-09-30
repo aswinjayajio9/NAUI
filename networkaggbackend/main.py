@@ -116,7 +116,7 @@ async def get_rules(request: Request):
 async def update_cell_edit(request: Request):
     url = "https://mygcppmm.o9solutions.com/api/v2/widget/update/CellEdit"
     json_payload = await request.json()
-
+    print(json_payload)
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"ApiKey hkj7ja11.v37hrv9jxv6g38n7sp297gz",

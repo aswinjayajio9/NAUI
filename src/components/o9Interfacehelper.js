@@ -275,6 +275,76 @@ export const createCellEditPayload = (
   return payload;
 };
 
+// Generic HTTP request helper with o9Interface integration
+const httpRequest = async ({ url, method = 'GET', payload = {}, headers = {}, apiKey = API_KEY, api_method = null }) => {
+  try {
+
+    // If api_method is provided, attempt to delegate the call to o9Interface
+    if (api_method && typeof o9Interface[api_method] === 'function') {
+      try {
+        console.log(`Delegating to o9Interface.${api_method} with payload:`, payload);
+        const data = o9Interface[api_method](payload, undefined);
+        if (data?.Meta && data?.Data) {
+          return Promise.resolve(data); // Return resolved data if valid
+        } else {
+          throw new Error(`o9Interface.${api_method} returned invalid data`);
+        }
+      } catch (error) {
+        console.warn(`o9Interface.${api_method} failed, falling back to default HTTP request. Error:`, error);
+      }
+    }
+    const defaultHeaders = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+    };
+
+    if (apiKey) {
+      defaultHeaders['Authorization'] = `ApiKey ${apiKey}`;
+    }
+
+    const options = {
+      method,
+      headers: { ...defaultHeaders, ...headers },
+    };
+
+    if (method === 'POST' || method === 'PUT') {
+      options.body = JSON.stringify(payload);
+    }
+
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Error in HTTP request to ${url}:`, error);
+    throw error;
+  }
+};
+
+// Refactored getPayloadFromUrl
+export const getPayloadFromUrl = async ({
+  url = `${API_BASE_URL}/getData`,
+  payload = {},
+  apiKey = API_KEY,
+  api_method = "getData", // Default to "getData"
+}) => {
+  return await httpRequest({ url, method: 'POST', payload, apiKey, api_method });
+};
+
+// Refactored cellEditSubmit
+export const cellEditSubmit = async ({
+   url = `${API_BASE_URL}/updateCellEdit`,
+   payload = {},
+   apiKey = API_KEY,
+   api_method = "cellEdit"
+  }) => {
+  return await httpRequest({ url, method: 'POST', payload, apiKey, api_method });
+};
+
 // Helper: Fetch payload from URL and return JSON
 export const executeIBPL = (
   params = {
@@ -318,69 +388,6 @@ export const executeIBPL = (
       console.error("Error fetching payload:", error);
       throw error;
     });
-};
-
-export const getPayloadFromUrl = (
-  params = {
-    url: `${API_BASE_URL}/getData`,
-    payload: {},
-    apiKey: API_KEY,
-  }
-) => {
-  const url = `${API_BASE_URL}/getData`;
-      // params.url || "/api/ibplquery/6760/ExecuteCompactJsonQuery?traceDdl=true";
-  const payload = params.payload || {};
-  const apiKey = params.apiKey || API_KEY;
-  const headers = {
-    accept: "application/json",
-    "content-type": "application/json",
-  };
-  try {
-    const data = o9Interface.getData(payload, undefined);
-    if (data?.Meta && data?.Data) {
-      return Promise.resolve(data);
-    }
-  } catch (error) {
-    console.error("Error fetching data from O9 interface:", error);
-  }
-  if (apiKey) {
-    headers["Authorization"] = `ApiKey ${apiKey}`; // Adjust header name/format if needed for O9 API
-  }
-  if (payload && Object.keys(payload).length > 0) {
-    const total_payload = {
-      method: "POST", // Assuming POST for fetching data
-      headers: headers,
-      body: JSON.stringify(payload),
-    };
-
-    return fetch(url, total_payload)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .catch((error) => {
-        console.error("Error fetching payload:", error);
-        throw error;
-      });
-  } else {
-
-    return fetch(url, {
-      method: "GET", // Assuming GET for fetching data
-      headers: headers,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .catch((error) => {
-        console.error("Error fetching payload:", error);
-        throw error;
-      });
-  }
 };
 
 const dropdownCache = {}; // Cache object to store fetched dropdowns

@@ -32,7 +32,8 @@ getSheetStyles,
 import {
   parseMetaDataPayload,
   parseGenericJson,
-  parseCsv
+  parseCsv,
+  cellEditSubmit,
 } from "./o9Interfacehelper";
 import { editableMeasureList,measure_picklist } from "./payloads";
 import RunAbdmButton from "./RunAbdmButton"; // Import the RunAbdmButton component
@@ -801,29 +802,33 @@ export default function SheetComponent({
 
     setSaveLoading(true);
     try {
-      const promises = editedKeys.map((key) => {
+      const promises = editedKeys.map(async (key) => {
         const updatedRow = dataSource.find((r) => r.key === key);
         if (!updatedRow) return Promise.resolve();
+
         console.log('Using modelDef for save:', o9Meta, updatedRow);
 
         const filters = Array.isArray(o9Filters) ? o9Filters : [];
-
         const payload = generateCellEditPayload(o9Meta, updatedRow, filters);
+
         console.log('Saving payload for row', key, payload);
-        return fetch(`${API_BASE_URL}/updateCellEdit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }).then((response) => {
-          if (!response.ok) {
-            throw new Error(`Failed to save row ${key}`);
-          }
-          editedKeysRef.current.delete(key);
-          setEditedKeys(Array.from(editedKeysRef.current));
-          initialDataRef.current = initialDataRef.current.map((r) =>
-            r.key === key ? { ...updatedRow } : r
-          );
+
+        // Await the response from cellEditSubmit
+        const response = await cellEditSubmit({
+          payload,
         });
+        console.log('Save response for row', response);
+
+        // Handle response
+        if (!response || !response.Meta || !response.Data) {
+          throw new Error('Invalid response structure from the API');
+        }
+
+        editedKeysRef.current.delete(key);
+        setEditedKeys(Array.from(editedKeysRef.current));
+        initialDataRef.current = initialDataRef.current.map((r) =>
+          r.key === key ? { ...updatedRow } : r
+        );
       });
 
       await Promise.all(promises);
@@ -1326,6 +1331,7 @@ const getSelectedDimensionFilters = useCallback(() => {
           setRowCounter((prev) => prev + 1);
         }}
         src_tgt={src_tgt}
+        meta={o9Meta}
         dimensions={dimensions}
         columns={columns}
         newRowData={newRowData}
