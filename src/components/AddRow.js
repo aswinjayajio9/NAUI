@@ -11,7 +11,7 @@ const sortColumnsByOrder = (columns) =>
 
 const AddRow = ({ visible, onCancel, src_tgt, meta, dimensions, columns, newRowData, setNewRowData, onSuccess, colsDisplayNameMapping }) => {
   const [dimensionOptions, setDimensionOptions] = useState({});
-  const [newRule, setNewRule] = useState({ Name: 'Rule_01', MemberIndex: 0 }); // Corrected initialization format
+  const [newRule, setNewRule] = useState({}); // Corrected initialization format
   const dragRef = useRef(null); // Ref for draggable modal
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 }); // State to track modal position
 

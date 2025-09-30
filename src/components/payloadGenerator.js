@@ -1,110 +1,127 @@
 import tenantID from './HomePage';
+
+/**
+ * Build payload for "exec" templates or SELECT-style queries.
+ * - query: string starting with "exec" or "SELECT"
+ */
 export const generateGetDataPayload = (query) => {
-    // Check if the query starts with "exec" (case-insensitive)
-    if (/^exec/i.test(query)) {
-        return {
-            tenantId: tenantID,
-            schema: {
-                model: {
-                    fields: {}
-                }
-            },
-            data: {},
-            ibplrules: [
-                {
-                    template: query
-                }
-            ]
-        };
+  if (typeof query !== 'string') {
+    throw new Error("Unsupported query format. Query must be a string.");
+  }
+
+  const q = query.trim();
+
+  // "exec ..." template (case-insensitive)
+  if (/^exec/i.test(q)) {
+    return {
+      tenantId: tenantID,
+      schema: { model: { fields: {} } },
+      data: {},
+      ibplrules: [{ template: q }],
+    };
+  }
+
+  // "SELECT ..." (case-insensitive)
+  if (/^select/i.test(q)) {
+    const payload = {
+      RegularMeasures: [],
+      LevelAttributes: [],
+      DataProperties: {
+        IncludeInactiveMembers: false,
+        IncludeNulls: false,
+        NullsForFinerGrainSelect: false,
+        NullsForUnrelatedAttrSelect: false,
+        RequireEditValidation: false,
+        SubTotalsType: "NoSubtotals",
+        IncludeNullsForSeries: "",
+        MaxRecordLimit: "2000",
+      },
+    };
+
+    // Extract Measures (deduped, case-insensitive)
+    const measureRegex = /measure\.\[([^\]]+)\]/gi;
+    const measureSet = new Set();
+    let m;
+    while ((m = measureRegex.exec(q)) !== null) {
+      const name = (m[1] || '').trim();
+      if (name && !measureSet.has(name.toLowerCase())) {
+        measureSet.add(name.toLowerCase());
+        payload.RegularMeasures.push({ Name: name });
+      }
     }
 
-    // If the query starts with "SELECT" (case-insensitive)
-    if (/^select/i.test(query)) {
-        const payload = {
-            RegularMeasures: [],
-            LevelAttributes: [],
-            DataProperties: {
-                IncludeInactiveMembers: false,
-                IncludeNulls: false,
-                NullsForFinerGrainSelect: false,
-                NullsForUnrelatedAttrSelect: false,
-                RequireEditValidation: false,
-                SubTotalsType: "NoSubtotals",
-                IncludeNullsForSeries: "",
-                MaxRecordLimit: "2000"
-            }
-        };
+    // Extract Level Attributes (supports optional filters/single member; deduped)
+    // Matches:
+    //   [Dimension].[Attribute]
+    //   [Dimension].[Attribute].filter(#.Name in {"A","B"})
+    //   [Dimension].[Attribute].[SingleMember]
+    const levelAttributeRegex =
+      /\[([^\]]+)\]\.\[([^\]]+)\](?:\.filter\(#\.Name in \{([^\}]+)\}\))?(?:\.\[([^\]]+)\])?/gi;
 
-        // Extract Measures
-        const measureRegex = /Measure\.\[([^\]]+)\]/g;
-        let measureMatch;
-        while ((measureMatch = measureRegex.exec(query)) !== null) {
-            if (measureMatch[1].trim() !== "") {
-                payload.RegularMeasures.push({ Name: measureMatch[1] });
-            }
-        }
+    const laKey = (dim, name) => `${dim.toLowerCase()}||${name.toLowerCase()}`;
+    const laSet = new Set();
 
-        // Extract Level Attributes
-        const levelAttributeRegex = /\[([^\]]+)\]\.\[([^\]]+)\](?:\.filter\(#\.Name in \{([^\}]+)\}\))?(?:\.\[([^\]]+)\])?/g;
-        let levelAttributeMatch;
-        while ((levelAttributeMatch = levelAttributeRegex.exec(query)) !== null) {
-            const dimensionName = levelAttributeMatch[1];
-            const name = levelAttributeMatch[2];
-            const selectedMembersFilter = levelAttributeMatch[3]
-                ? levelAttributeMatch[3]
-                      .split(',')
-                      .map(member => member.trim().replace(/"/g, ''))
-                      .filter(member => member !== "") // Filter out empty strings
-                : null;
-            const singleSelectedMember = levelAttributeMatch[4] && levelAttributeMatch[4].trim() !== ""
-                ? levelAttributeMatch[4].trim()
-                : null;
+    let la;
+    while ((la = levelAttributeRegex.exec(q)) !== null) {
+      const dimensionName = (la[1] || '').trim();
+      const name = (la[2] || '').trim();
+      if (!dimensionName || !name) continue;
 
-            const levelAttribute = {
-                Name: name,
-                DimensionName: dimensionName,
-                Axis: "row"
-            };
+      const key = laKey(dimensionName, name);
+      // Collect filters
+      const selectedMembersFilter = la[3]
+        ? la[3]
+            .split(',')
+            .map(s => s.trim().replace(/"/g, ''))
+            .filter(Boolean)
+        : null;
 
-            if (selectedMembersFilter && selectedMembersFilter.length > 0) {
-                levelAttribute.IsFilter = true;
-                levelAttribute.Axis = "row";
-                levelAttribute.AllSelection = false;
-                levelAttribute.SelectedMembers = selectedMembersFilter.map(member => ({ Name: member }));
-            } else if (singleSelectedMember) {
-                levelAttribute.IsFilter = true;
-                levelAttribute.Axis = "row";
-                levelAttribute.AllSelection = false;
-                levelAttribute.SelectedMembers = [{ Name: singleSelectedMember }];
-            }
+      const singleSelectedMember = la[4] && la[4].trim() !== '' ? la[4].trim() : null;
 
-            payload.LevelAttributes.push(levelAttribute);
-        }
+      const levelAttribute = {
+        Name: name,
+        DimensionName: dimensionName,
+        Axis: "row",
+      };
 
-        return payload;
+      if (selectedMembersFilter && selectedMembersFilter.length > 0) {
+        levelAttribute.IsFilter = true;
+        levelAttribute.AllSelection = false;
+        levelAttribute.SelectedMembers = selectedMembersFilter.map(Name => ({ Name }));
+      } else if (singleSelectedMember) {
+        levelAttribute.IsFilter = true;
+        levelAttribute.AllSelection = false;
+        levelAttribute.SelectedMembers = [{ Name: singleSelectedMember }];
+      }
+
+      // Deduplicate by Dimension+Name
+      if (!laSet.has(key)) {
+        laSet.add(key);
+        payload.LevelAttributes.push(levelAttribute);
+      }
     }
 
-    // If the query doesn't match "exec" or "SELECT", return null or throw an error
-    throw new Error("Unsupported query format. Query must start with 'exec' or 'SELECT'.");
+    return payload;
+  }
+
+  throw new Error("Unsupported query format. Query must start with 'exec' or 'SELECT'.");
 };
+
 /**
  * Build a Cell Edit payload from a plain table row object.
- * - updatedRow: an object with keys for all dimension/measure headers plus "key"
- * - modelDefinition: { RegularMeasures: (string[]|{Name:string}[]), LevelAttributes: ({Name, DimensionName, Axis, IsFilter?}[]) }
- * - filters: optional array of filter objects in o9 format, or empty
+ * - o9Meta: array of meta rows for dims and measures
+ * - updatedRow: object keyed by "[Dim].[Attr]" and measure names
+ * - Filters: optional array of o9 filters
+ * - CreatedMember: optional map like { "[Dim].[Attr]": { Name, MemberIndex } } or wrapped { CreatedMember: {...} }
  */
 export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], CreatedMember = {}) => {
-  console.log('generateCellEditPayload - o9Meta:', o9Meta);
-  console.log('generateCellEditPayload - updatedRow:', updatedRow);
-  console.log('generateCellEditPayload - CreatedMember:', CreatedMember);
-
   const unwrap = (cm) => (cm && cm.CreatedMember) ? cm.CreatedMember : (cm || {});
   const toKey = (k) => (k || '').trim().toLowerCase();
+
   const createdMemberMap = Object.fromEntries(
     Object.entries(unwrap(CreatedMember)).map(([k, v]) => [toKey(k), v])
   );
 
-  // -- helpers (unchanged) --
   const parseNumberLike = (val) => {
     if (typeof val === 'number') return Number.isFinite(val) ? val : undefined;
     if (typeof val !== 'string') return undefined;
@@ -116,6 +133,7 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
     const n = Number(s);
     return Number.isFinite(n) ? sign * n : undefined;
   };
+
   const parseBooleanLike = (val) => {
     if (typeof val === 'boolean') return val;
     if (typeof val === 'number') return val !== 0;
@@ -125,18 +143,25 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
     if (s === 'false' || s === '0' || s === 'no' || s === 'n') return false;
     return undefined;
   };
+
   const toISODate = (val) => {
     const d = (val instanceof Date) ? val : new Date(val);
     if (Number.isNaN(d.getTime())) return undefined;
     return d.toISOString().slice(0, 10);
   };
+
   const toISODateTime = (val) => {
     const d = (val instanceof Date) ? val : new Date(val);
     if (Number.isNaN(d.getTime())) return undefined;
     return d.toISOString();
   };
-  const looksLikeDateFormat = (fmt) => typeof fmt === 'string' && /[yY].*[mM].*[dD]|[dD].*[mM].*[yY]/.test(fmt);
-  const looksLikeNumericFormat = (fmt) => typeof fmt === 'string' && /[#0]/.test(fmt);
+
+  const looksLikeDateFormat = (fmt) =>
+    typeof fmt === 'string' && /[yY].*[mM].*[dD]|[dD].*[mM].*[yY]/.test(fmt);
+
+  const looksLikeNumericFormat = (fmt) =>
+    typeof fmt === 'string' && /[#0]/.test(fmt);
+
   const coerceByTypeOrFormat = (dataType, formatString, val) => {
     if (val === null || val === undefined) return undefined;
 
@@ -166,9 +191,7 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
       }
     }
 
-    // No DataType: infer from FormatString
     if (looksLikeDateFormat(formatString)) {
-      // Best-effort: output ISO date
       return toISODate(val) ?? toISODateTime(val);
     }
     if (looksLikeNumericFormat(formatString)) {
@@ -191,25 +214,22 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
       if (s.startsWith('[') && s.endsWith(']')) return s; // already bracketed
       return `[${s}]`;
     }
-    // numbers, booleans, dates -> stringify then bracket
     return `[${String(val)}]`;
   };
 
-  // 1) Dimensions Meta (with CreatedMember)
+  // 1) Dimensions Meta (+CreatedMember) — filter valid, build stable structure
   const dimensionMeta = (Array.isArray(o9Meta) ? o9Meta : [])
-    .filter((item) => item && !item.MeasureId && Array.isArray(item.DimensionValues))
+    .filter((item) => item && !item.MeasureId && item.DimensionName && item.Name && Array.isArray(item.DimensionValues))
     .map((item) => {
-      if (!item.DimensionName || !item.Name) return {};
       const dimensionKey = `[${item.DimensionName}].[${item.Name}]`;
       const dv = Array.isArray(item.DimensionValues) ? [...item.DimensionValues] : [];
       const cm = createdMemberMap[toKey(dimensionKey)];
       if (cm) {
         const exists = dv.some(
-          (x) => (x?.Name || '').trim().toLowerCase() === (cm.Name || '').trim().toLowerCase()
+          (x) => toKey(x?.Name) === toKey(cm.Name)
         );
         if (!exists) {
           dv.push({ Name: cm.Name, MemberIndex: cm.MemberIndex });
-          console.log(`Added CreatedMember to Meta: ${dimensionKey} ->`, cm);
         }
       }
       return {
@@ -221,20 +241,16 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
           MemberIndex: (v.MemberIndex ?? idx),
         })),
       };
-    })
-    .filter((m) => Object.keys(m).length);
+    });
 
   // 2) DataCells: include all measures present on updatedRow (even when null), with bracket formatting
   const DataCells = [];
   const includedMeasures = [];
 
   (Array.isArray(o9Meta) ? o9Meta : [])
-    .filter((item) => item && item.MeasureId)
+    .filter((item) => item && item.MeasureId && item.Name && Object.prototype.hasOwnProperty.call(updatedRow || {}, item.Name))
     .forEach((item) => {
-      if (!Object.prototype.hasOwnProperty.call(updatedRow, item.Name)) return;
-
       const rawVal = updatedRow[item.Name];
-      // Try type coercion first (for numbers/dates/etc). If undefined (e.g., null), we still output "[]".
       const coerced = coerceByTypeOrFormat(item.DataType, item.FormatString, rawVal);
       const valueOut = toBracketValue(coerced !== undefined ? coerced : rawVal);
 
@@ -242,13 +258,13 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
       includedMeasures.push({ Name: item.Name, Alias: item.Alias });
     });
 
-  // 3) Measures Meta: include all we added to DataCells
-  const measuresMeta = includedMeasures.map((m) => ({ Name: m.Name, Alias: m.Alias }));
+  // 3) Final Meta = dimensions + included measures
+  const Meta = [
+    ...dimensionMeta,
+    ...includedMeasures.map((m) => ({ Name: m.Name, Alias: m.Alias })),
+  ];
 
-  // 4) Final Meta = dimensions + included measures
-  const Meta = [...dimensionMeta, ...measuresMeta];
-
-  // 5) ModelDefinition
+  // 4) ModelDefinition
   const ModelDefinition = {
     RegularMeasures: includedMeasures.map((m) => ({ Name: m.Name })),
     LevelAttributes: dimensionMeta.map((d) => ({
@@ -258,21 +274,20 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
     })),
   };
 
-  // 6) MemberCells (resolve by Name; fallback to CreatedMember)
+  // 5) MemberCells (resolve by Name; fallback to CreatedMember)
   const MemberCells = [];
-  dimensionMeta.forEach((m) => {
+  for (const m of dimensionMeta) {
     const key = `[${m.DimensionName}].[${m.Name}]`;
     const cm = createdMemberMap[toKey(key)];
 
-    if (Object.prototype.hasOwnProperty.call(updatedRow, key)) {
+    if (Object.prototype.hasOwnProperty.call(updatedRow || {}, key)) {
       const val = updatedRow[key];
       let memberIndex = null;
 
-      if (val != null && Array.isArray(m.DimensionValues)) {
-        const found = m.DimensionValues.find(
-          (dv) => (dv?.Name || '').trim().toLowerCase() === String(val).trim().toLowerCase()
-        );
-        memberIndex = found ? found.MemberIndex : null;
+      if (val != null && Array.isArray(m.DimensionValues) && m.DimensionValues.length) {
+        // Build a fast lookup map once per dimension row
+        const lookup = new Map(m.DimensionValues.map(dv => [toKey(dv?.Name), dv.MemberIndex]));
+        memberIndex = lookup.get(toKey(String(val))) ?? null;
       }
       if (memberIndex === null && cm) memberIndex = cm.MemberIndex;
 
@@ -280,7 +295,7 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
     } else if (cm) {
       MemberCells.push({ Alias: m.Alias, MemberIndex: cm.MemberIndex });
     }
-  });
+  }
 
   return {
     Meta,

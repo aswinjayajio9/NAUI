@@ -86,19 +86,37 @@ export function downloadCSV(rows, columns, filename) {
 // Function to return styles for frozen dimension columns and hard divider
 export function getSheetStyles() {
   return `
-    /* subtle background for all measure columns (reversed coloring) */
+    /* Slightly darker measure column background */
     .naui-meas-col .ant-table-cell,
     .naui-meas-col.ant-table-cell {
-      background: #fffaf0;
+      background: #f0dfb5ff; /* keep, but standard 6-digit hex */
     }
-    /* NEW: highlight for maximized (expanded group) rows in Nested View */
+
+    /* Highlight for maximized (expanded group) rows in Nested View */
     .naui-expanded-row > td {
-      background: #e6f7ff !important;
+      background: #d7ecfaff !important;
     }
-    /* strong vertical separator after the last dimension column (header + body) */
+
+    /* Make vertical column separators visible across the table (header + body) */
+    .ant-table-wrapper table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .ant-table-thead > tr > th,
+    .ant-table-tbody > tr > td {
+      border-right: 1px solid #afafafff; /* stronger vertical grid line */
+      background-clip: padding-box;     /* keep border visible over cell bg */
+    }
+    /* Do not draw a right border on the last column of each row */
+    .ant-table-thead > tr > th:last-child,
+    .ant-table-tbody > tr > td:last-child {
+      border-right: none;
+    }
+
+    /* Strong vertical separator after the last dimension column (header + body) */
     .ant-table-thead > tr > th.naui-dim-last,
     .ant-table-tbody > tr > td.naui-dim-last {
-      border-right: 3px solid #d9d9d9 !important;
+      border-right: 3px solid #585858ff !important; /* make divider more visible */
     }
 
     /* Ensure fixed-left (dimension) columns render above scroll area so the divider stays visible */
@@ -120,8 +138,7 @@ export function getSheetStyles() {
       box-shadow: none;
     }
 
-    /* Resizer handle: narrow vertical hit area centered on the column edge.
-       Right is negative so the handle sits exactly over the divider line for precise dragging. */
+    /* Resizer handle */
     .naui-resizer {
       position: absolute;
       top: 0;
@@ -135,13 +152,10 @@ export function getSheetStyles() {
       -webkit-user-select: none;
       user-select: none;
     }
-    /* subtle visible hover to show the shrink/expand area */
     .ant-table-thead > tr > th:hover .naui-resizer,
     .ant-table-thead > tr > th .naui-resizer:hover {
       background: rgba(0,0,0,0.05);
     }
-
-    /* when columns are fixed-left ensure the header resizer remains clickable above the body */
     .ant-table-fixed-left .naui-resizer {
       z-index: 20;
     }
