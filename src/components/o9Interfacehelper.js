@@ -276,14 +276,14 @@ export const createCellEditPayload = (
 };
 
 // Generic HTTP request helper with o9Interface integration
-const httpRequest = async ({ url, method = 'GET', payload = {}, headers = {}, apiKey = API_KEY, api_method = null }) => {
+const httpRequest = async ({ url, method = 'GET', payload = {}, headers = {}, apiKey = API_KEY, api_method = null ,actionButton=''}) => {
   try {
 
     // If api_method is provided, attempt to delegate the call to o9Interface
     if (api_method && typeof o9Interface[api_method] === 'function') {
       try {
         console.log(`Delegating to o9Interface.${api_method} with payload:`, payload);
-        const data = o9Interface[api_method](payload, undefined);
+        const data = o9Interface[api_method]({actionButtonName:actionButton,payloadData: payload,requestParams:undefined});
         if (data?.Meta && data?.Data) {
           return Promise.resolve(data); // Return resolved data if valid
         } else {
@@ -310,7 +310,9 @@ const httpRequest = async ({ url, method = 'GET', payload = {}, headers = {}, ap
     if (method === 'POST' || method === 'PUT') {
       options.body = JSON.stringify(payload);
     }
-
+    if (actionButton) {
+      url += `?action_button=${encodeURIComponent(actionButton)}`;
+    }
     const response = await fetch(url, options);
 
     if (!response.ok) {
@@ -343,6 +345,16 @@ export const cellEditSubmit = async ({
    api_method = "cellEdit"
   }) => {
   return await httpRequest({ url, method: 'POST', payload, apiKey, api_method });
+};
+
+export const executeActionButton = async ({
+   url = `${API_BASE_URL}/runActionButton`,
+   payload = {},
+   apiKey = API_KEY,
+   api_method = "executeAction",
+   actionButton = ""
+  }) => {
+  return await httpRequest({ url, method: 'POST', payload, apiKey, api_method, actionButton });
 };
 
 // Helper: Fetch payload from URL and return JSON

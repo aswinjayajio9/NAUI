@@ -26,8 +26,7 @@ import { aliasHeader } from "./payloads";
 import {
   computeRowSpanMap,
 getSheetStyles,
-  parseBracketedHeader,
-  deriveAttributes
+  RowsToDelete
 } from "./SheetFunctions"; // Import functions from SheetFunctions.js
 import {
   parseMetaDataPayload,
@@ -851,10 +850,14 @@ const deleteRows = () => {
     return;
   }
   const remainingRows = dataSource.filter((row) => !selectedRowKeys.includes(row.key));
-  setDataSource(remainingRows);
-  setOriginalData(remainingRows);
-  setSelectedRowKeys([]);
-  message.success("Selected rows deleted successfully");
+  if (RowsToDelete(dataSource.filter((row) => selectedRowKeys.includes(row.key)))) {
+    setDataSource(remainingRows);
+    setOriginalData(remainingRows);
+    setSelectedRowKeys([]);
+    message.success("Selected rows deleted successfully");
+  } else{
+    message.error("Failed to delete selected rows");
+  }
 };
 
   // Build / refresh dimension group metadata whenever dimensions or dataSource change

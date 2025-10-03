@@ -1,5 +1,5 @@
-import { levels } from "slate";
-
+import { executeActionButton } from "./o9Interfacehelper";
+import { Version,DMRule,NetworkPlanType,DataObject } from "./payloads";
 // Function to compute row span map for dimension columns
 export function computeRowSpanMap(dataSource, dimensions) {
   const map = {};
@@ -191,4 +191,39 @@ export const convertListToFilterFormat = (input) => {
     return `{"${input}"}`;
   }
   return "{}"; // Return empty braces for invalid input
+};
+
+export const RowsToDelete = (rows_to_delete) => {
+  if (!rows_to_delete?.length) return 0;
+
+  const result = rows_to_delete.reduce(
+    (acc, row) => {
+      if (row["[DM Rule].[Rule]"]) {
+        acc.Version = row["[Version].[Version Name]"] || acc.Version;
+        acc.Data_Object = row["[Data Object].[Data Object]"] || acc.Data_Object;
+        acc.PlanType = row["[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]"] || acc.PlanType;
+        acc.Rule.push(row["[DM Rule].[Rule]"]);
+      }
+      return acc;
+    },
+    { Version: "", Data_Object: "", PlanType: "", Rule: [] }
+  );
+
+  const actionMap = {
+    "Exclude Material Node": "SupplyPlan0016DeleteAggregationMaterialSkipRule",
+    "Exclude Resource Node": "SupplyPlan0019DeleteAggregationResourceSkipRule",
+  };
+
+  const actionButton = actionMap[result.Data_Object];
+  if (actionButton) {
+    try {
+      executeActionButton({ actionButton, payload: result });
+      return 1;
+    } catch (e) {
+      console.error(e);
+      return 0;
+    }
+  }
+
+  return 0;
 };

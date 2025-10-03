@@ -136,7 +136,7 @@ async def update_cell_edit(request: Request):
 async def run_action_button(action_button:str,request: Request):
     url = rf"https://mygcppmm.o9solutions.com/api/ibplrules/executeaction/{action_button}"
     json_payload = await request.json()
-
+    print(json_payload)
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"ApiKey hkj7ja11.v37hrv9jxv6g38n7sp297gz",
