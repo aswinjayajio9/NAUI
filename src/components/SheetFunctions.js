@@ -198,11 +198,11 @@ export const RowsToDelete = (rows_to_delete) => {
 
   const result = rows_to_delete.reduce(
     (acc, row) => {
-      if (row["[DM Rule].[Rule]"]) {
-        acc.Version = row["[Version].[Version Name]"] || acc.Version;
-        acc.Data_Object = row["[Data Object].[Data Object]"] || acc.Data_Object;
-        acc.PlanType = row["[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]"] || acc.PlanType;
-        acc.Rule.push(row["[DM Rule].[Rule]"]);
+      if (row[DMRule]) {
+        acc.Version = row[Version] || acc.Version;
+        acc.Data_Object = row[DataObject] || acc.Data_Object;
+        acc.PlanType = row[NetworkPlanType] || acc.PlanType;
+        acc.Rule.push(row[DMRule]);
       }
       return acc;
     },

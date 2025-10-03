@@ -118,8 +118,19 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
   const unwrap = (cm) => (cm && cm.CreatedMember) ? cm.CreatedMember : (cm || {});
   const toKey = (k) => (k || '').trim().toLowerCase();
 
+  // Normalize created member values: accept {Name, MemberIndex} or {message, rule}
+  const normalizeCMVal = (v) => {
+    if (!v) return undefined;
+    if (v.rule && (v.rule.Name || v.rule.MemberIndex !== undefined)) return v.rule;
+    return v;
+  };
+
+  // Keep entries even if Name is missing so MemberCells can still fall back to MemberIndex,
+  // but only append to DV when Name exists.
   const createdMemberMap = Object.fromEntries(
-    Object.entries(unwrap(CreatedMember)).map(([k, v]) => [toKey(k), v])
+    Object.entries(unwrap(CreatedMember))
+      .map(([k, v]) => [toKey(k), normalizeCMVal(v)])
+      .filter(([_, v]) => v) // keep truthy values
   );
 
   const parseNumberLike = (val) => {
@@ -224,7 +235,7 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
       const dimensionKey = `[${item.DimensionName}].[${item.Name}]`;
       const dv = Array.isArray(item.DimensionValues) ? [...item.DimensionValues] : [];
       const cm = createdMemberMap[toKey(dimensionKey)];
-      if (cm) {
+      if (cm && cm.Name) {
         const exists = dv.some(
           (x) => toKey(x?.Name) === toKey(cm.Name)
         );
@@ -285,15 +296,17 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
       let memberIndex = null;
 
       if (val != null && Array.isArray(m.DimensionValues) && m.DimensionValues.length) {
-        // Build a fast lookup map once per dimension row
         const lookup = new Map(m.DimensionValues.map(dv => [toKey(dv?.Name), dv.MemberIndex]));
         memberIndex = lookup.get(toKey(String(val))) ?? null;
       }
-      if (memberIndex === null && cm) memberIndex = cm.MemberIndex;
+      if (memberIndex === null && cm && cm.MemberIndex !== undefined) memberIndex = cm.MemberIndex;
 
       MemberCells.push({ Alias: m.Alias, MemberIndex: memberIndex });
-    } else if (cm) {
+    } else if (cm && cm.MemberIndex !== undefined) {
       MemberCells.push({ Alias: m.Alias, MemberIndex: cm.MemberIndex });
+    } else {
+      // Preserve shape: include Alias even if no member index resolved
+      MemberCells.push({ Alias: m.Alias });
     }
   }
 

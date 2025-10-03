@@ -14,7 +14,7 @@ const AddRow = ({ visible, onCancel, src_tgt, meta, dimensions, columns, newRowD
   const [newRule, setNewRule] = useState({}); // Corrected initialization format
   const dragRef = useRef(null); // Ref for draggable modal
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 }); // State to track modal position
-
+  const [newMeta, setMeta] = useState(meta);
   useEffect(() => {
     const fetchDimensions = async () => {
       try {
@@ -24,11 +24,13 @@ const AddRow = ({ visible, onCancel, src_tgt, meta, dimensions, columns, newRowD
         setDimensionOptions(dropdowns);
 
         if (Object.keys(colsDisplayNameMapping).includes(DMRule)) {
-          const rule = findMissingOrNextRule(dimensions, dropdowns[DMRule]);
-          if (rule) {
-            setNewRule(rule); // Update newRule with the correct format
-            src_tgt[DMRule] = rule.Name; // Update src_tgt with the rule name
+          const res = findMissingOrNextRule(dimensions, dropdowns[DMRule], meta);
+          const ruleObj = res?.rule ?? res; // unwrap if function returns { message, rule }
+          if (ruleObj && ruleObj.Name) {
+            setNewRule(ruleObj); // store only the rule object
+            src_tgt[DMRule] = ruleObj.Name; // set selected member name
           }
+          console.log('Determined new rule:', ruleObj);
         }
       } catch (error) {
         console.error('Error fetching dimensions:', error);
@@ -49,8 +51,12 @@ const AddRow = ({ visible, onCancel, src_tgt, meta, dimensions, columns, newRowD
         acc[key] = src_tgt && key in src_tgt ? src_tgt[key] : newRowData[key] || null; // Use src_tgt value if available, otherwise fallback to newRowData or null
         return acc;
       }, {});
+      
+      // Ensure CreatedMember uses only the unwrapped rule object
+      const cmRule = newRule?.rule ?? newRule;
+      const createdMember = (cmRule && cmRule.Name !== undefined) ? { [DMRule]: cmRule } : {};
 
-      const payload = await generateCellEditPayload(meta, updatedNewRowData, [], { CreatedMember: { [DMRule]: newRule } });
+      const payload = await generateCellEditPayload(meta, updatedNewRowData, [], { CreatedMember: createdMember });
       console.log('Payload for row', updatedNewRowData.key, payload);
       const responseData = await cellEditSubmit({ payload: payload });
       console.log('Response Data:', responseData);
@@ -225,10 +231,9 @@ const AddRow = ({ visible, onCancel, src_tgt, meta, dimensions, columns, newRowD
 const findMissingOrNextRule = (dimensions, memberValues) => {
   if (!dimensions || !Array.isArray(dimensions) || dimensions.length === 0) {
     console.error('Invalid dimensions input');
-    return null;
+    return { message: 'Invalid dimensions input', rule: null };
   }
 
-  // Find a dimension whose header matches DMRule or whose name contains 'Rule' (safely)
   const rule_dim = dimensions.find(
     (dim) =>
       dim?.header === DMRule || (typeof dim?.name === 'string' && dim.name.includes('Rule'))
@@ -237,7 +242,7 @@ const findMissingOrNextRule = (dimensions, memberValues) => {
   const dimensionValues = rule_dim?.meta?.DimensionValues;
   if (!Array.isArray(dimensionValues) || dimensionValues.length === 0) {
     console.error('No rule dimension values found');
-    return null;
+    return { message: 'No rule dimension values found', rule: null };
   }
 
   const ruleNumbers = dimensionValues
@@ -246,29 +251,24 @@ const findMissingOrNextRule = (dimensions, memberValues) => {
     .map((name) => parseInt(name.split('_')[1], 10))
     .sort((a, b) => a - b);
 
-  // Convert memberValues to a list
   const dropdownList = Array.isArray(memberValues) ? memberValues : Object.values(memberValues || {});
 
   for (let i = 1; i <= (ruleNumbers.length || 0); i++) {
     const newRule = `Rule_${String(i).padStart(2, '0')}`;
-    if (!ruleNumbers.includes(i)) {
-      if (!dropdownList.includes(newRule)) {
-        console.error('Member not found in dropdown list', newRule,dropdownList);
-        return null;
-      }
-  const memberIndex = next - 1; // Assuming new rules are added sequentially
-  return { Name: newRule, MemberIndex: memberIndex };
+    if (!ruleNumbers.includes(i) && dropdownList.includes(newRule)) {
+      const next = ruleNumbers.length ? ruleNumbers[ruleNumbers.length - 1] + 1 : 1;
+      return { message: 'Rule found', rule: { Name: newRule, MemberIndex: next - 1 } };
     }
   }
 
   const next = ruleNumbers.length ? ruleNumbers[ruleNumbers.length - 1] + 1 : 1;
   const newRule = `Rule_${String(next).padStart(2, '0')}`;
-  if (!dropdownList.includes(newRule)) {
-    console.error('Member not found in dropdown list', newRule,dropdownList);
-    return null;
+  if (dropdownList.includes(newRule)) {
+    return { message: 'Rule found', rule: { Name: newRule, MemberIndex: next - 1 } };
   }
-  const memberIndex = next - 1; // Assuming new rules are added sequentially
-  return { Name: newRule, MemberIndex: memberIndex };
+
+  console.error('Member not found in dropdown list', newRule, dropdownList);
+  return { message: 'Rule member not found', rule: null };
 };
 
 export default AddRow;

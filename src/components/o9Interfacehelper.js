@@ -99,20 +99,46 @@ export const parseMetaDataPayload = (
     return raw;
   };
 
-  const rows = payload.Data.map((r, idx) => {
-    // Detect if r is an object or array
-    const isArray = Array.isArray(r);
-    const obj = {};
-    let hasNonNull = false;
-    keepAliases.forEach((a) => {
-      const raw = isArray ? r[a] : r[String(a)] || r[a]; // Handle both formats
-      const value = mapValue(metaByAlias[a], raw);
-      obj[aliasHeader[a]] = value;
-      if (value != null) hasNonNull = true;
-    });
-    obj.key = String(idx + 1);
-    return hasNonNull ? obj : null; // Skip empty rows
-  }).filter(Boolean); // Remove nulls
+  // Determine which kept aliases are measures for filtering logic
+  const keptMeasureAliases = keepAliases.filter((a) => !metaByAlias[a]?.DimensionName);
+
+  // Helper to decide if a cell is meaningfully non-empty (0 and false are valid)
+  const isNonEmpty = (v) => {
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'string') return v.trim() !== '';
+    if (typeof v === 'number') return !Number.isNaN(v);
+    if (Array.isArray(v)) return v.length > 0;
+    // objects/booleans considered non-empty
+    return true;
+  };
+
+  const rows = payload.Data
+    .map((r, idx) => {
+      // Detect if r is an object or array
+      const isArray = Array.isArray(r);
+      const obj = {};
+      let hasAnyNonNull = false; // legacy behavior check (any column)
+      let hasNonNullMeasure = false; // new behavior check (measures only)
+
+      keepAliases.forEach((a) => {
+        const raw = isArray ? r[a] : r[String(a)] ?? r[a]; // Handle both formats
+        const value = mapValue(metaByAlias[a], raw);
+        obj[aliasHeader[a]] = value;
+        if (isNonEmpty(value)) hasAnyNonNull = true;
+        // Only consider measures for measure-specific non-null detection
+        if (!metaByAlias[a]?.DimensionName && isNonEmpty(value)) {
+          hasNonNullMeasure = true;
+        }
+      });
+      obj.key = String(idx + 1);
+
+      // Backward compatibility:
+      // - If there are NO kept measures, fall back to legacy rule (any non-null value keeps the row)
+      // - If there ARE kept measures, only keep rows with at least one non-null measure
+      const keepRow = keptMeasureAliases.length === 0 ? hasAnyNonNull : hasNonNullMeasure;
+      return keepRow ? obj : null;
+    })
+    .filter(Boolean); // Remove nulls
 
   const cols = keepAliases.map((a) => ({
     dataIndex: aliasHeader[a],
