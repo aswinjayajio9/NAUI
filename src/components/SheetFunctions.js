@@ -159,6 +159,67 @@ export function getSheetStyles() {
     .ant-table-fixed-left .naui-resizer {
       z-index: 20;
     }
+
+    /* ==========================
+       Empty table (no data) tweaks
+       AntD adds .ant-table-empty on wrapper
+       ========================== */
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .naui-resizer,
+    .naui-sheet-root .naui-table.ant-table-empty .naui-resizer {
+      display: none; /* hide resize handles when no rows */
+    }
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-thead > tr > th,
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-tbody > tr > td,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-thead > tr > th,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-tbody > tr > td {
+      border-right: none !important; /* remove vertical borders when empty */
+      box-shadow: none !important;
+    }
+    /* remove heavy divider in empty state */
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-thead > tr > th.naui-dim-last,
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-tbody > tr > td.naui-dim-last,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-thead > tr > th.naui-dim-last,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-tbody > tr > td.naui-dim-last {
+      border-right: 1px solid #e5e5e5 !important;
+    }
+    /* placeholder row should not show vertical border */
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-tbody > tr.ant-table-placeholder > td,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-tbody > tr.ant-table-placeholder > td {
+      border-right: none !important;
+      background: transparent;
+    }
+    /* hide sticky split shadows when no data to avoid odd divider */
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-cell-fix-left-last::after,
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-cell-fix-right-first::after,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-cell-fix-left-last::after,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-cell-fix-right-first::after {
+      display: none !important;
+    }
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-body,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-body {
+      background: #fafafa; /* subtle background for empty area */
+      overflow: hidden !important; /* avoid stray scrollbars when empty */
+    }
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-empty,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-empty {
+      margin: 24px 0;
+    }
+
+    /* Remove container scroll shadows/edges when empty */
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-container::before,
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-container::after,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-container::before,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-container::after {
+      display: none !important;
+    }
+    /* Force consistent width/layout so header/body don't misalign in empty state */
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-header table,
+    .naui-sheet-root .ant-table-wrapper .ant-table-empty .ant-table-body table,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-header table,
+    .naui-sheet-root .naui-table.ant-table-empty .ant-table-body table {
+      table-layout: fixed !important;
+      width: 100% !important;
+    }
   `;
 }
 

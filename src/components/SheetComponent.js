@@ -1182,7 +1182,7 @@ const getSelectedDimensionFilters = useCallback(() => {
   };
 
   return (
-    <div style={{ padding: 16, backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }}>
+    <div className="naui-sheet-root" style={{ padding: 16, backgroundColor: "#fff", borderRadius: 8, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)" }}>
       {/* Styles for frozen dimension columns and hard divider after last dimension */}
       <style>{getSheetStyles()}</style>
 
@@ -1243,9 +1243,11 @@ const getSelectedDimensionFilters = useCallback(() => {
       {/* Render table or chart based on view mode */}
       {viewMode === "table" ? (
         <Table
+          className="naui-table"
           {...commonTableProps}
           dataSource={dataSource}
           columns={columnsWithTitles}
+          showHeader={dataSource && dataSource.length > 0}
         />
       ) : viewMode === "chart" ? (
         <ChartComponent
@@ -1260,10 +1262,12 @@ const getSelectedDimensionFilters = useCallback(() => {
         />
       ) : (
         <Table
+          className="naui-table"
           {...commonTableProps}
           dataSource={nestedViewRows}
           columns={columnsWithTitles}
           pagination={false}
+          showHeader={nestedViewRows && nestedViewRows.length > 0}
           rowClassName={(record) =>
             expandedRowKeySet.has(record.key) ? "naui-expanded-row" : ""
           }
@@ -1279,12 +1283,14 @@ const getSelectedDimensionFilters = useCallback(() => {
         width={800}
       >
         <Table
+          className="naui-table"
           rowKey="key"
           pagination={false}
           size="small"
           scroll={{ x: "max-content", y: 400 }}
           dataSource={dataSource.filter((r) => selectedRowKeys.includes(r.key))}
           columns={columnsWithTitles}
+          showHeader={selectedRowKeys && selectedRowKeys.length > 0}
         />
       </Modal>
       {/* Filter Modal */}

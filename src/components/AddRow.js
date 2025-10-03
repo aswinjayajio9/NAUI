@@ -30,7 +30,6 @@ const AddRow = ({ visible, onCancel, src_tgt, meta, dimensions, columns, newRowD
             setNewRule(ruleObj); // store only the rule object
             src_tgt[DMRule] = ruleObj.Name; // set selected member name
           }
-          console.log('Determined new rule:', ruleObj);
         }
       } catch (error) {
         console.error('Error fetching dimensions:', error);
@@ -57,9 +56,7 @@ const AddRow = ({ visible, onCancel, src_tgt, meta, dimensions, columns, newRowD
       const createdMember = (cmRule && cmRule.Name !== undefined) ? { [DMRule]: cmRule } : {};
 
       const payload = await generateCellEditPayload(meta, updatedNewRowData, [], { CreatedMember: createdMember });
-      console.log('Payload for row', updatedNewRowData.key, payload);
       const responseData = await cellEditSubmit({ payload: payload });
-      console.log('Response Data:', responseData);
       if (responseData && (responseData.Meta || responseData.Data)) {
         onSuccess();
         handleResetPosition(); // Reset modal position on submit
