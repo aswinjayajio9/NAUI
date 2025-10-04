@@ -285,6 +285,5 @@ export const RowsToDelete = (rows_to_delete) => {
       return 0;
     }
   }
-
   return 0;
 };

@@ -1,49 +1,118 @@
-# python
-import json, sys
-p = r'd:\NetworkAggUI\NAUI\networkaggbackend\data\material_definition_levels.json'
-j = json.load(open(p, encoding='utf-8'))
+import csv
 
-meta = j.get('Meta', [])
-# helpers: find meta entries by Alias
-def meta_by_alias(a):
-    return next((m for m in meta if str(m.get('Alias'))==str(a)), None)
+# Constants
+VERSION = "Version.[Version Name]"
+LOCATION = "Location.[Location]"
+ACTIVITY1 = "Activity1.[Activity1]"
+ITEM = "Item.[Item]"
+ERP_BOM = "ERP BOM Association"
+ERP_BOM_CONSUMED = "ERP BOM Consumed Item Association"
 
-item_meta = meta_by_alias('2')
-loc_meta  = meta_by_alias('3')
 
-def name_for(meta_entry, idx):
-    try:
-        return meta_entry['DimensionValues'][idx]['Name']
-    except Exception:
-        return f'<missing idx={idx}>'
+def read_csv(filepath):
+    with open(filepath, mode="r", newline="", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f)
+        return list(reader)
 
-data = j.get('Data', [])
-parents = {}
-for i,row in enumerate(data):
-    coord = row[0] if row and isinstance(row[0], list) else []
-    if len(coord) < 2:
-        continue
-    level, group = coord[0], coord[1]
-    if level == 1:
-        item_idx = row[2] if len(row) > 2 else None
-        parents[group] = {'row_index': i, 'item_idx': item_idx, 'children': [], 'included': coord[2] if len(coord)>2 else None}
-for i,row in enumerate(data):
-    coord = row[0] if row and isinstance(row[0], list) else []
-    if len(coord) < 2:
-        continue
-    level, group = coord[0], coord[1]
-    if level == 2 and group in parents:
-        item_idx = row[2] if len(row) > 2 else None
-        # measure value may be in last cell
-        last = row[-1]
-        if isinstance(last, list): val = last[0]
-        else: val = last if last not in (None, "") else coord[2] if len(coord)>2 else None
-        parents[group]['children'].append({'row_index': i, 'item_idx': item_idx, 'value': val})
 
-# print summary
-for group, info in parents.items():
-    pname = name_for(item_meta, info['item_idx']) if item_meta else f'idx:{info["item_idx"]}'
-    print(f'Parent group {group} (row {info["row_index"]}) -> {pname}  included={info["included"]}  children={len(info["children"])}')
-    for c in info['children']:
-        print('  -', name_for(item_meta, c['item_idx']), 'value=', c['value'])
-    print()
+def build_bom_bottom_up_sorted(data, max_level=5):
+    """Build bottom-up BOM (L1 = leaf, L2 = parent, ...) and sort from highest to lowest level"""
+    max_level = max(2, max_level)
+
+    activity_to_parent = {}
+    activity_to_children = {}
+
+    for row in data:
+        act = row[ACTIVITY1]
+        item = row[ITEM]
+
+        assoc = str(row.get(ERP_BOM, "")).strip()
+        consumed = str(row.get(ERP_BOM_CONSUMED, "")).strip()
+
+        if assoc == "1":
+            activity_to_parent[act] = {
+                "item": item,
+                "version": row[VERSION],
+                "location": row[LOCATION]
+            }
+        if consumed == "1":
+            activity_to_children.setdefault(act, []).append(item)
+
+    # Build child → parent mapping
+    child_to_parent = {}
+    for act, parent in activity_to_parent.items():
+        for child in activity_to_children.get(act, []):
+            child_to_parent[child] = parent["item"]
+
+    results = []
+
+    # Build path bottom-up
+    for leaf in set(child_to_parent.keys()):
+        path = [leaf]
+        current = leaf
+        while len(path) < max_level:
+            parent = child_to_parent.get(current)
+            if not parent:
+                break
+            path.append(parent)
+            current = parent
+        while len(path) < max_level:
+            path.append(None)
+        row = {VERSION: "", LOCATION: ""}
+        for i, val in enumerate(path, 1):
+            row[f"Item L{i}"] = val
+        results.append(row)
+
+    # Fill version/location from parent if possible
+    for row in results:
+        leaf_item = row["Item L1"]
+        for act, parent in activity_to_parent.items():
+            if parent["item"] == child_to_parent.get(leaf_item, leaf_item):
+                row[VERSION] = parent["version"]
+                row[LOCATION] = parent["location"]
+                break
+
+    # Remove duplicates
+    seen = set()
+    unique_results = []
+    for r in results:
+        key = tuple(r[f"Item L{i}"] for i in range(1, max_level + 1))
+        if key not in seen:
+            seen.add(key)
+            unique_results.append(r)
+
+    # Sort rows: highest ancestor first
+    def sort_key(row):
+        # Build tuple from highest (last in path) → lowest (leaf)
+        return tuple((row[f"Item L{i}"] or "") for i in range(max_level, 0, -1))
+
+    unique_results.sort(key=sort_key)
+    return unique_results
+
+
+def write_csv(filepath, rows):
+    if not rows:
+        return
+    # Dynamic columns
+    fieldnames = set()
+    for row in rows:
+        fieldnames.update(row.keys())
+    fieldnames = sorted(fieldnames)
+    with open(filepath, mode="w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+# ------------------------------
+# Example usage
+# ------------------------------
+if __name__ == "__main__":
+    input_file = r"D:\NetworkAggUI\NAUI\networkaggbackend\data\needtree.csv"
+    output_file = r"D:\NetworkAggUI\NAUI\networkaggbackend\data\outtree.csv"
+
+    data = read_csv(input_file)
+    result = build_bom_bottom_up_sorted(data, max_level=8)
+    write_csv(output_file, result)
+
+    print(f"Expanded BOM written to {output_file}")
