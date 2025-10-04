@@ -1189,24 +1189,53 @@ const getSelectedDimensionFilters = useCallback(() => {
       {/* Toolbar: left controls + right-aligned execute buttons */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <Space wrap>
-          <Button type="primary" icon={<DownloadOutlined />} onClick={onDownload}>
-            Download CSV
-          </Button>
-          <Button type="default" icon={<EyeOutlined />} onClick={onView} disabled={selectedRowKeys.length === 0}>
-            View
-          </Button>
-          <Button type="default" icon={<FilterOutlined />} onClick={openFilter}>
-            Filter
-          </Button>
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={onDownload}
+            title="Download CSV"
+            style={{ padding: '0 8px' }}
+          />
+          <Button
+            type="default"
+            icon={<EyeOutlined />}
+            onClick={onView}
+            disabled={selectedRowKeys.length === 0}
+            title="View"
+            style={{ padding: '0 8px' }}
+          />
+          <Button
+            type="default"
+            icon={<FilterOutlined />}
+            onClick={openFilter}
+            title="Filter"
+            style={{ padding: '0 8px' }}
+          />
+          <Button
+            type="default"
+            icon={<span style={{fontSize:16}}>⟳</span>}
+            onClick={() => requestReload('manual-refresh')}
+            title="Refresh"
+            style={{ padding: '0 8px' }}
+          />
           {enableEdit && (
-            <Button type="default" onClick={() => setAddRowVisible(true)}>
-              Add Row
-            </Button>
+            <Button
+              type="default"
+              icon={<span style={{fontSize:18, fontWeight:'bold'}}>+</span>}
+              onClick={() => setAddRowVisible(true)}
+              title="Add Row"
+              style={{ padding: '0 8px' }}
+            />
           )}
           {enableEdit && (
-            <Button type="default" onClick={deleteRows} disabled={selectedRowKeys.length === 0}>
-              Delete Row
-            </Button>
+            <Button
+              type="default"
+              icon={<span style={{fontSize:18, fontWeight:'bold'}}>-</span>}
+              onClick={deleteRows}
+              disabled={selectedRowKeys.length === 0}
+              title="Delete Row"
+              style={{ padding: '0 8px' }}
+            />
           )}
           {enableEdit && (
             <Button
@@ -1214,8 +1243,10 @@ const getSelectedDimensionFilters = useCallback(() => {
               onClick={saveAllEdited}
               loading={saveLoading}
               disabled={editedKeys.length === 0}
+              title={`Save Changes (${editedKeys.length})`}
+              style={{ padding: '0 8px' }}
             >
-              Save Changes ({editedKeys.length})
+              {/* Save icon could be added here if desired */}
             </Button>
           )}
           <Select

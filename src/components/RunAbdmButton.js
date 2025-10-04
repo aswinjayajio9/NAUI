@@ -17,12 +17,12 @@ export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
-      const payload = JSON.stringify({
+      const payload = {
         Version: src_tgt[Version],
         PlanType: src_tgt[NetworkPlanType],
         Data_Object: config.abdmpayload,
         Rule: config.selectedFilters[DMRule] || [],
-      });
+      };
       console.log("Payload for ABDM:", payload);
 
       let resdata;
@@ -39,6 +39,7 @@ export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
       if (typeof resdata === "string") {
         try {
           resdata = JSON.parse(resdata);
+          console.log("ABDM Response Data:", resdata); 
         } catch (parseError) {
           throw new Error(`Failed to parse ${Name} process response as JSON: ` + parseError.message);
         }
