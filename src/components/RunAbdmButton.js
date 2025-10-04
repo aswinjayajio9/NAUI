@@ -10,8 +10,9 @@ export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
   const [abdmRunning, setAbdmRunning] = React.useState(false);
   const isNoImpactResult = (result) => {
     return (
-      result?.ImpactResult?.length === 0 &&
-      result?.Results?.[0]?.Measures?.length === 0
+      (result?.ImpactResult?.length === 0 &&
+      result?.Results?.[0]?.Measures?.length === 0) ||
+      result?.detail === ""
     );
   };
   const runAbdm = async () => {

@@ -2,12 +2,12 @@ import { generateGetDataPayload } from "./payloadGenerator";
 export const Version = '[Version].[Version Name]'
 export const DataObject = '[Data Object].[Data Object]'
 export const DMRule = '[DM Rule].[Rule]'
-export const o9PCComponent = '[o9PC Component].[Component]'
+export const o9PCComponent = '[o9PC Component].[Component Instance]'
 export const NetworkPlanType = '[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]'
 export const HideDimensions = {
   '[Version].[Version Name]': '[Version].[Version Name]',
   '[Data Object].[Data Object]': '[Data Object].[Data Object]',
-  '[o9PC Component].[Component]': '[o9PC Component].[Component]',
+  '[o9PC Component].[Component Instance]': '[o9PC Component].[Component Instance]',
   '[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]': '[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]'
 };
 export const getNetworkSummaryPayload = () => ({

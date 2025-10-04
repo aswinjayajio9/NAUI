@@ -117,7 +117,7 @@ export const generateGetDataPayload = (query) => {
 export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], CreatedMember = {}) => {
   const unwrap = (cm) => (cm && cm.CreatedMember) ? cm.CreatedMember : (cm || {});
   const toKey = (k) => (k || '').trim().toLowerCase();
-
+  
   // Normalize created member values: accept {Name, MemberIndex} or {message, rule}
   const normalizeCMVal = (v) => {
     if (!v) return undefined;
@@ -296,8 +296,18 @@ export const generateCellEditPayload = (o9Meta, updatedRow, Filters = [], Create
       let memberIndex = null;
 
       if (val != null && Array.isArray(m.DimensionValues) && m.DimensionValues.length) {
-        const lookup = new Map(m.DimensionValues.map(dv => [toKey(dv?.Name), dv.MemberIndex]));
-        memberIndex = lookup.get(toKey(String(val))) ?? null;
+        // Remove numeric prefix (e.g. "01.") if present
+        const valStr = String(val).replace(/^\d+\./, '').trim();
+        const valLower = valStr.toLowerCase();
+        for (const dv of m.DimensionValues) {
+          const nameLower = String(dv.Name ?? '').toLowerCase();
+          // Always check DisplayName if present, do not skip
+          const displayLower = dv.DisplayName ? String(dv.DisplayName).toLowerCase() : null;
+          if (valLower === nameLower || (displayLower && valLower === displayLower)) {
+            memberIndex = dv.MemberIndex;
+            break;
+          }
+        }
       }
       if (memberIndex === null && cm && cm.MemberIndex !== undefined) memberIndex = cm.MemberIndex;
 

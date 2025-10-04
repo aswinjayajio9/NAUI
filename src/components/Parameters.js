@@ -32,33 +32,37 @@ export default function ResourceDefinitionPage({
   const [summaryParameters, setSummaryParameters] = useState([]);
   const [summaryParametersLoading, setSummaryParametersLoading] = useState(true);
   const [summaryParametersError, setSummaryParametersError] = useState(null);
+  const [sheetReloadKey, setSheetReloadKey] = useState(0);
   const src_tgt = { 'Version':srcVersion, 'o9NetworkAggregation Network Plan Type': tgtPlan, 'o9PC Component': new_component };
-  useEffect(() => {
-    const loadParameters = async () => {
-      setSummaryParametersLoading(true);
-      setSummaryParametersError(null);
-      try {
-        const payload = generateGetDataPayload(getPayloadForParameters(srcVersion,new_component)?.Query);
-        let data = await getPayloadFromUrl({ payload });
-        if (typeof data === "string") {
-          data = JSON.parse(data);
-          setSummaryParameters(data.Results[0]);
-        }
-        else{
-          setSummaryParameters(data);
-        }
-        
-        console.log("Parameters data:", data);
-      } catch (error) {
-        console.error("Error loading parameters:", error);
-        setSummaryParametersError(error.message || "Failed to load parameters");
-      } finally {
-        setSummaryParametersLoading(false);
-      }
-    };
 
+  // Move loadParameters outside useEffect so it can be called from reload
+  const loadParameters = async () => {
+    setSummaryParametersLoading(true);
+    setSummaryParametersError(null);
+    try {
+      const payload = generateGetDataPayload(getPayloadForParameters(srcVersion,new_component)?.Query);
+      let data = await getPayloadFromUrl({ payload });
+      if (typeof data === "string") {
+        data = JSON.parse(data);
+        setSummaryParameters(data.Results[0]);
+      }
+      else{
+        setSummaryParameters(data);
+      }
+      
+      console.log("Parameters data:", data);
+    } catch (error) {
+      console.error("Error loading parameters:", error);
+      setSummaryParametersError(error.message || "Failed to load parameters");
+    } finally {
+      setSummaryParametersLoading(false);
+    }
+  };
+
+  // Effect: load parameters on mount and when reload key changes
+  useEffect(() => {
     loadParameters();
-  }, [srcVersion, tgtPlan]);
+  }, [srcVersion, tgtPlan, sheetReloadKey]);
 
   return (
     <Box p={6}>
@@ -83,6 +87,10 @@ export default function ResourceDefinitionPage({
         error={summaryParametersError}
         enableEdit={true}
         hideDims={Object.keys(HideDimensions)}
+        onRequestReload={(reason) => {
+          console.log("SheetComponent requested reload:", reason);
+          setSheetReloadKey((k) => k + 1);
+        }}
       />
     </Box>
   );

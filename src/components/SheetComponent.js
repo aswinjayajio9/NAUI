@@ -1243,10 +1243,8 @@ const getSelectedDimensionFilters = useCallback(() => {
               onClick={saveAllEdited}
               loading={saveLoading}
               disabled={editedKeys.length === 0}
-              title={`Save Changes (${editedKeys.length})`}
-              style={{ padding: '0 8px' }}
             >
-              {/* Save icon could be added here if desired */}
+              Save ({editedKeys.length})
             </Button>
           )}
           <Select
