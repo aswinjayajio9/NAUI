@@ -1,24 +1,24 @@
-﻿Item L1,Item L2,Item L3,Item L4,Item L5,Item L6,Item L7,Item L8,Location.[Location],Version.[Version Name]
-SFG6,FG,,,,,,,Plant1,Operational Plan
-SFG7,FG,,,,,,,Plant1,Operational Plan
-SFG8,FG,,,,,,,Plant1,Operational Plan
-RM14,SFG6,FG,,,,,,Plant1,Operational Plan
-RM15,SFG6,FG,,,,,,Plant1,Operational Plan
-SFG3,SFG7,FG,,,,,,Plant1,Operational Plan
-SFG4,SFG8,FG,,,,,,Plant1,Operational Plan
-SFG5,SFG8,FG,,,,,,Plant1,Operational Plan
-RM6,SFG3,SFG7,FG,,,,,Plant1,Operational Plan
-RM7,SFG3,SFG7,FG,,,,,Plant1,Operational Plan
-RM8,SFG3,SFG7,FG,,,,,Plant1,Operational Plan
-SFG1,SFG3,SFG7,FG,,,,,Plant1,Operational Plan
-RM9,SFG4,SFG8,FG,,,,,Plant1,Operational Plan
-SFG2A,SFG4,SFG8,FG,,,,,Plant1,Operational Plan
-RM11,SFG5,SFG8,FG,,,,,Plant1,Operational Plan
-RM12,SFG5,SFG8,FG,,,,,Plant1,Operational Plan
-RM13,SFG5,SFG8,FG,,,,,Plant1,Operational Plan
-SFG2,SFG5,SFG8,FG,,,,,Plant1,Operational Plan
-RM1,SFG1,SFG3,SFG7,FG,,,,Plant1,Operational Plan
-RM2,SFG1,SFG3,SFG7,FG,,,,Plant1,Operational Plan
-RM3,SFG1,SFG3,SFG7,FG,,,,Plant1,Operational Plan
-RM4,SFG2A,SFG4,SFG8,FG,,,,Plant1,Operational Plan
-RM5,SFG2,SFG5,SFG8,FG,,,,Plant1,Operational Plan
+﻿Item L1,Item L2,Item L3,Item L4,Item L5
+SFG6,FG,,,
+SFG7,FG,,,
+SFG8,FG,,,
+RM14,SFG6,FG,,
+RM15,SFG6,FG,,
+SFG3,SFG7,FG,,
+SFG4,SFG8,FG,,
+SFG5,SFG8,FG,,
+RM6,SFG3,SFG7,FG,
+RM7,SFG3,SFG7,FG,
+RM8,SFG3,SFG7,FG,
+SFG1,SFG3,SFG7,FG,
+RM9,SFG4,SFG8,FG,
+SFG2A,SFG4,SFG8,FG,
+RM11,SFG5,SFG8,FG,
+RM12,SFG5,SFG8,FG,
+RM13,SFG5,SFG8,FG,
+SFG2,SFG5,SFG8,FG,
+RM1,SFG1,SFG3,SFG7,FG
+RM2,SFG1,SFG3,SFG7,FG
+RM3,SFG1,SFG3,SFG7,FG
+RM4,SFG2A,SFG4,SFG8,FG
+RM5,SFG2,SFG5,SFG8,FG

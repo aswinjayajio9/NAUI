@@ -1,5 +1,18 @@
 import csv
 
+# Small helper to normalize empty/nulls consistently across the module
+def _is_null(value):
+    if value is None:
+        return True
+    if isinstance(value, str):
+        s = value.strip()
+        if s == "":
+            return True
+        # Treat common null tokens as null (case-insensitive)
+        if s.lower() in {"null", "none", "nan", "n/a", "na"}:
+            return True
+    return False
+
 # Constants
 VERSION = "Version.[Version Name]"
 LOCATION = "Location.[Location]"
@@ -10,9 +23,17 @@ ERP_BOM_CONSUMED = "ERP BOM Consumed Item Association"
 
 
 def read_csv(filepath):
+    """Read CSV without filtering columns. Leave shaping to build/write steps.
+
+    We intentionally keep all columns here so downstream logic (e.g., ERP BOM
+    associations, activity, item, version/location) is available for
+    processing. Column pruning (keeping only Item-* and dropping all-null Item
+    columns) is performed in write_csv.
+    """
     with open(filepath, mode="r", newline="", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
-        return list(reader)
+        data = list(reader)
+        return data or []
 
 
 def build_bom_bottom_up_sorted(data, max_level=5):
@@ -23,8 +44,8 @@ def build_bom_bottom_up_sorted(data, max_level=5):
     activity_to_children = {}
 
     for row in data:
-        act = row[ACTIVITY1]
-        item = row[ITEM]
+        act = row.get(ACTIVITY1, "")
+        item = row.get(ITEM, "")
 
         assoc = str(row.get(ERP_BOM, "")).strip()
         consumed = str(row.get(ERP_BOM_CONSUMED, "")).strip()
@@ -32,8 +53,8 @@ def build_bom_bottom_up_sorted(data, max_level=5):
         if assoc == "1":
             activity_to_parent[act] = {
                 "item": item,
-                "version": row[VERSION],
-                "location": row[LOCATION]
+                "version": row.get(VERSION, ""),
+                "location": row.get(LOCATION, "")
             }
         if consumed == "1":
             activity_to_children.setdefault(act, []).append(item)
@@ -91,26 +112,46 @@ def build_bom_bottom_up_sorted(data, max_level=5):
 
 
 def write_csv(filepath, rows):
+    """Write CSV with only Item-* columns and drop all-null Item columns.
+
+    - Keep only columns whose names start with 'Item'.
+    - Drop any Item column if all of its values are null/empty across rows.
+    - Drop rows where all remaining Item columns are null/empty.
+    """
     if not rows:
         return
-    # Dynamic columns
-    fieldnames = set()
+
+    # Only keep columns with 'Item' prefix
+    item_columns = [col for col in rows[0].keys() if col.startswith("Item")]
+
+    # Drop item columns where all values are empty/null at the column level
+    valid_item_columns = []
+    for col in item_columns:
+        if not all(_is_null(row.get(col, "")) for row in rows):
+            valid_item_columns.append(col)
+
+    # Nothing to write if no valid item columns remain
+    if not valid_item_columns:
+        return
+
+    # Filter each row to only valid item columns and drop fully-empty rows
+    filtered_rows = []
     for row in rows:
-        fieldnames.update(row.keys())
-    fieldnames = sorted(fieldnames)
+        filtered_row = {col: row.get(col, "") for col in valid_item_columns}
+        if not all(_is_null(filtered_row.get(col, "")) for col in valid_item_columns):
+            filtered_rows.append(filtered_row)
+
+    if not filtered_rows:
+        return
+
     with open(filepath, mode="w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer = csv.DictWriter(f, fieldnames=valid_item_columns)
         writer.writeheader()
-        writer.writerows(rows)
-
-
-# ------------------------------
-# Example usage
+        writer.writerows(filtered_rows)
 # ------------------------------
 if __name__ == "__main__":
     input_file = r"D:\NetworkAggUI\NAUI\networkaggbackend\data\needtree.csv"
     output_file = r"D:\NetworkAggUI\NAUI\networkaggbackend\data\outtree.csv"
-
     data = read_csv(input_file)
     result = build_bom_bottom_up_sorted(data, max_level=8)
     write_csv(output_file, result)

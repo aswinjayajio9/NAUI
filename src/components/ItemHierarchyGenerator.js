@@ -1,42 +1,57 @@
 import { generateGetDataPayload } from './payloadGenerator';
 import { parseMetaDataPayload } from './o9Interfacehelper';
 import { getItemAssociationPayload } from './payloads';
-
-// Constants
+// Constants kept for compatibility with buildBomBottomUpSorted (if used externally)
 const VERSION = "Version.[Version Name]";
 const LOCATION = "Location.[Location]";
 const ACTIVITY1 = "Activity1.[Activity1]";
 const ITEM = "Item.[Item]";
 const ERP_BOM = "ERP BOM Association";
 const ERP_BOM_CONSUMED = "ERP BOM Consumed Item Association";
-export default function NetworkDefinitionPage({
-  srcVersion,
-  level = 5,
-  attribute = ITEM,
-}) {
 
-  // Get payload from API/query
+// Helper to normalize null/empty consistently
+function isNull(v) {
+  if (v == null) return true;
+  if (typeof v === 'string') {
+    const s = v.trim();
+    if (!s) return true;
+    const tokens = new Set(['null', 'none', 'nan', 'n/a', 'na']);
+    return tokens.has(s.toLowerCase());
+  }
+  return false;
+}
+
+// Keep only Item-* columns and drop Item columns that are all-null across rows
+function keepOnlyItemColumns(rows = []) {
+  if (!rows || rows.length === 0) return [];
+
+  const allKeys = Object.keys(rows[0] || {});
+  const itemCols = allKeys.filter((k) => k.startsWith('Item'));
+
+  // Identify valid item columns (not all null)
+  const validItemCols = itemCols.filter((col) => rows.some((r) => !isNull(r[col])));
+  if (validItemCols.length === 0) return [];
+
+  // Project and drop fully-empty rows
+  const projected = rows
+    .map((r) => {
+      const o = {};
+      validItemCols.forEach((c) => { o[c] = r[c] ?? ''; });
+      return o;
+    })
+    .filter((r) => validItemCols.some((c) => !isNull(r[c])));
+
+  return projected;
+}
+
+// Default export: rows in, rows out (already has all details per backend)
+export default function ItemHierarchy({ srcVersion, level = 5 }) {
+  // Fetch rows using srcVersion
   const payload = generateGetDataPayload(getItemAssociationPayload(srcVersion)?.Query);
-  // Parse payload
-  const {
-    rows,
-    dimensions,
-    measures,
-    nestedData,
-    colsDisplayNameMapping,
-  } = parseMetaDataPayload(payload);
+  const { rows } = parseMetaDataPayload(payload);
 
-  // Build BOM hierarchy in parseMetaDataPayload format
-  const bomHierarchy = buildBomBottomUpSorted(rows, level);
-
-  // Return BOM hierarchy, but use dimensions, measures, nestedData, colsDisplayNameMapping from parseMetaDataPayload
-  return {
-    ...bomHierarchy,
-    dimensions,
-    measures,
-    nestedData,
-    colsDisplayNameMapping: bomHierarchy.colsDisplayNameMapping,
-  };
+  // Return only Item-* columns and drop all-null Item columns
+  return keepOnlyItemColumns(rows);
 }
 
 
@@ -50,7 +65,7 @@ export default function NetworkDefinitionPage({
 
 export function buildBomBottomUpSorted(rows, maxLevel = 5) {
   maxLevel = Math.max(2, maxLevel);
-
+  console.log(`Building BOM bottom-up sorted with maxLevel=${maxLevel}`, rows);
   const activityToParent = {};
   const activityToChildren = {};
 
@@ -137,38 +152,6 @@ export function buildBomBottomUpSorted(rows, maxLevel = 5) {
     return 0;
   });
 
-  // Build cols, dimensions, measures, colsDisplayNameMapping
-  const cols = [];
-  const dimensions = [];
-  const measures = [];
-  const colsDisplayNameMapping = {};
-
-  // Add Item L1..LmaxLevel as dimensions
-  for (let i = 1; i <= maxLevel; i++) {
-    const colName = `Item L${i}`;
-    cols.push({ dataIndex: colName, title: colName, key: colName, isDimension: true });
-    dimensions.push({ alias: colName, header: colName, meta: { DimensionName: `Item L${i}`, Name: colName } });
-    colsDisplayNameMapping[colName] = colName;
-  }
-  // Add Version and Location as dimensions
-  cols.push({ dataIndex: VERSION, title: VERSION, key: VERSION, isDimension: true });
-  dimensions.push({ alias: VERSION, header: VERSION, meta: { DimensionName: "Version", Name: "Version Name" } });
-  colsDisplayNameMapping[VERSION] = VERSION;
-  cols.push({ dataIndex: LOCATION, title: LOCATION, key: LOCATION, isDimension: true });
-  dimensions.push({ alias: LOCATION, header: LOCATION, meta: { DimensionName: "Location", Name: "Location" } });
-  colsDisplayNameMapping[LOCATION] = LOCATION;
-
-  // No measures in this output
-
-  // Use Item L1 as nestedData
-  const nestedData = "Item L1";
-
-  return {
-    rows: uniqueResults,
-    cols,
-    dimensions,
-    measures,
-    nestedData,
-    colsDisplayNameMapping,
-  };
+  // Return only rows; consumers can derive metadata as needed
+  return uniqueResults;
 }
