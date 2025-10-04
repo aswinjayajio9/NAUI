@@ -308,7 +308,7 @@ const httpRequest = async ({ url, method = 'GET', payload = {}, headers = {}, ap
     // If api_method is provided, attempt to delegate the call to o9Interface
     if (api_method && typeof o9Interface[api_method] === 'function') {
       try {
-        console.log(`Delegating to o9Interface.${api_method} with payload:`, payload);
+  console.debug(`Delegating to o9Interface.${api_method} with payload:`, payload);
         const data = o9Interface[api_method]({actionButtonName:actionButton,payloadData: payload,requestParams:undefined});
         if (data?.Meta && data?.Data) {
           return Promise.resolve(data); // Return resolved data if valid
@@ -316,7 +316,7 @@ const httpRequest = async ({ url, method = 'GET', payload = {}, headers = {}, ap
           throw new Error(`o9Interface.${api_method} returned invalid data`);
         }
       } catch (error) {
-        console.warn(`o9Interface.${api_method} failed, falling back to default HTTP request. Error:`, error);
+  console.info(`o9Interface.${api_method} not available or failed; falling back to HTTP.`, error?.message || error);
       }
     }
     const defaultHeaders = {
@@ -348,7 +348,7 @@ const httpRequest = async ({ url, method = 'GET', payload = {}, headers = {}, ap
 
     return await response.json();
   } catch (error) {
-    console.error(`Error in HTTP request to ${url}:`, error);
+  console.error(`Error in HTTP request to ${url}:`, error);
     throw error;
   }
 };

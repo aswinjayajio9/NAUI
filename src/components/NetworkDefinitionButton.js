@@ -105,7 +105,7 @@ const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
                 </FormControl>
                 <FormControl>
                   <FormLabel fontSize="xs">Version</FormLabel>
-                  <Select value={srcVersion} onChange={(e) => setSrcVersion(e.target.value)} menuProps={{ zIndex: 1000 }}>
+                  <Select value={srcVersion} onChange={(e) => setSrcVersion(e.target.value)}>
                     {options.versions.map(v => <option key={`src-ver-${v}`}>{v}</option>)}
                   </Select>
                 </FormControl>
@@ -123,7 +123,7 @@ const NetworkDefinitionButton = ({ firstSheetFilters, onDefine }) => {
                 </FormControl>
                 <FormControl>
                   <FormLabel fontSize="xs">Version</FormLabel>
-                  <Select value={tgtVersion} onChange={(e) => setTgtVersion(e.target.value)} menuProps={{ zIndex: 1000 }}>
+                  <Select value={tgtVersion} onChange={(e) => setTgtVersion(e.target.value)}>
                     {options.versions.map(v => <option key={`tgt-ver-${v}`}>{v}</option>)}
                   </Select>
                 </FormControl>

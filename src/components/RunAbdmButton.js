@@ -1,46 +1,63 @@
 import React from "react";
 import { Button, useToast } from "@chakra-ui/react";
 import { getPayloadFromUrl } from "./o9Interfacehelper";
-import {Version, NetworkPlanType} from "./payloads";
+import {Version, NetworkPlanType, DMRule} from "./payloads";
 import { runExcludeMaterialNodeProcessPayload,runExcludeResourceNodeProcessPayload ,generateMaterialExclusionPayload,generateResourceExclusionPayload} from "./payloads";
 import { convertListToFilterFormat } from "./SheetFunctions";
-import { executeIBPL } from "./o9Interfacehelper";
+import { executeIBPL,executeActionButton } from "./o9Interfacehelper";
 export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
   const toast = useToast();
   const [abdmRunning, setAbdmRunning] = React.useState(false);
+  const isNoImpactResult = (result) => {
+    return (
+      result?.ImpactResult?.length === 0 &&
+      result?.Results?.[0]?.Measures?.length === 0
+    );
+  };
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
-      // Use the correct payload for the ABDM process
-      // if (config.has.selectedFilters) {
-      //   config.selectedFilters 
-      // }
-      if (config.abdmpayload === "Exclude Material Node") {
-        config.abdmpayload = runExcludeMaterialNodeProcessPayload(convertListToFilterFormat(config.selectedFilters));
-      }
-      else if (config.abdmpayload === "Exclude Resource Node") {
-        config.abdmpayload = runExcludeResourceNodeProcessPayload(convertListToFilterFormat(config.selectedFilters));
-      }
-      else if (config.abdmpayload === "Generate Material Exclusion") {
-        config.abdmpayload = generateMaterialExclusionPayload(src_tgt[Version],src_tgt[NetworkPlanType]);
-      }
-      else if (config.abdmpayload === "Generate Resource Exclusion") {
-        config.abdmpayload = generateResourceExclusionPayload(src_tgt[Version],src_tgt[NetworkPlanType]);
-      }
-      var resdata = await executeIBPL({
-        payload: config.abdmpayload,
+      const payload = JSON.stringify({
+        Version: src_tgt[Version],
+        PlanType: src_tgt[NetworkPlanType],
+        Data_Object: config.abdmpayload,
+        Rule: config.selectedFilters[DMRule] || [],
       });
+      console.log("Payload for ABDM:", payload);
+
+      let resdata;
+      if (config.abdmpayload === "Exclude Material Node") {
+        resdata = await executeActionButton({ actionButton: "SupplyPlan0017AggregationMaterialSkipRuleABDM", payload });
+      } else if (config.abdmpayload === "Exclude Resource Node") {
+        resdata = await executeActionButton({ actionButton: "SupplyPlan0017AggregationResourceSkipRuleABDM", payload });
+      } else if (config.abdmpayload === "Generate Material Exclusion") {
+        resdata = await executeActionButton({ actionButton: "SupplyPlan0010AggregationPreprocessingMaterialSkip", payload });
+      } else if (config.abdmpayload === "Generate Resource Exclusion") {
+        resdata = await executeActionButton({ actionButton: "SupplyPlan0011AggregationPreprocessingResourceSkip", payload });
+      }
+
       if (typeof resdata === "string") {
-        // Attempt to parse the response as JSON
-        try { 
+        try {
           resdata = JSON.parse(resdata);
         } catch (parseError) {
           throw new Error(`Failed to parse ${Name} process response as JSON: ` + parseError.message);
         }
-      } else {
-        resdata = resdata;
       }
-      toast({ title: `${Name} Completed successfully`, status: "success", duration: 3000 });
+
+      if (isNoImpactResult(resdata)) {
+        toast({
+          title: "No impact detected",
+          description: "The operation completed successfully but resulted in no impact.",
+          status: "warning",
+          duration: 5000,
+        });
+      } else {
+        toast({
+          title: `${Name} Completed successfully`,
+          status: "success",
+          duration: 3000,
+        });
+      }
 
       // Notify parent component that ABDM is completed
       if (onAbdmComplete) {

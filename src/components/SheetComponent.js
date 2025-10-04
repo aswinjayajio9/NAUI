@@ -1276,7 +1276,7 @@ const getSelectedDimensionFilters = useCallback(() => {
         />
       )}
       <Modal
-        visible={viewVisible}
+        open={viewVisible}
         title="View Rows"
         onCancel={() => setViewVisible(false)}
         footer={null}
@@ -1295,7 +1295,7 @@ const getSelectedDimensionFilters = useCallback(() => {
       </Modal>
       {/* Filter Modal */}
       <Modal
-        visible={filterVisible}
+        open={filterVisible}
         title="Apply Filters"
         onCancel={() => setFilterVisible(false)}
         footer={

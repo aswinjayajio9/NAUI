@@ -167,7 +167,7 @@ const AddRow = ({ visible, onCancel, src_tgt, meta, dimensions, columns, newRowD
 
   return (
     <Modal
-      visible={visible}
+      open={visible}
       title={
         <div
           className="draggable-modal-title"

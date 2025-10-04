@@ -102,7 +102,7 @@ function DashboardComponent({ dataUrl = `${API_BASE_URL}/read/network_summary1.c
       />
       <TableCard title="Vs Previous Period">
         {loading ? (
-          <Spin tip="Loading..." />
+          <Spin />
         ) : error ? (
           <Alert type="error" message={error} />
         ) : (
