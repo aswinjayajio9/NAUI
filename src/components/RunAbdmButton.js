@@ -18,12 +18,12 @@ export default function RunAbdmButton({Name,src_tgt, config, onAbdmComplete }) {
   const runAbdm = async () => {
     setAbdmRunning(true);
     try {
-      const payload = {
+      const payload = JSON.stringify({
         Version: src_tgt[Version],
         PlanType: src_tgt[NetworkPlanType],
         Data_Object: config.abdmpayload,
         Rule: config.selectedFilters[DMRule] || [],
-      };
+      });
       console.log("Payload for ABDM:", payload);
 
       let resdata;

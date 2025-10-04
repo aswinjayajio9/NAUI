@@ -2,6 +2,7 @@ import { generateGetDataPayload } from "./payloadGenerator";
 export const Version = '[Version].[Version Name]'
 export const DataObject = '[Data Object].[Data Object]'
 export const DMRule = '[DM Rule].[Rule]'
+export const Item = '[Item].[Item]'
 export const o9PCComponent = '[o9PC Component].[Component Instance]'
 export const NetworkPlanType = '[o9NetworkAggregation Network Plan Type].[o9NetworkAggregation Network Plan Type]'
 export const HideDimensions = {
@@ -79,7 +80,12 @@ export const getPayloadForParameters = (srcVersion, ComponentInstanceName) => ({
     "ExecutionContext": "Kibo Debugging Workspace",
     "EnableMultipleResults": true
 });
-
+export const getItemAssociationPayload = (srcVersion) => ({
+    "Tenant": 6760,
+    "Query": `Select ([Version].[Version Name].[${srcVersion}] * [Location].[Location] * [Activity1].[Activity1] * [Item].[Item] ) on row, ({Measure.[ERP BOM Association],Measure.[ERP BOM Consumed Item Association]}) on column;`,
+    "ExecutionContext": "Kibo Debugging Workspace",
+    "EnableMultipleResults": true
+});
 export const aliasHeader = {
     "[Version].[Version Name]": "Version",
     "[Data Object].[Data Object]": "Data Object",

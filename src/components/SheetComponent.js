@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { API_BASE_URL } from "./HomePage";
 import { generateCellEditPayload } from "./payloadGenerator";
+import {Item} from "./payloads";
 import {
   Table,
   Input,
@@ -1250,15 +1251,17 @@ const getSelectedDimensionFilters = useCallback(() => {
           <Select
             value={viewMode}
             onChange={setViewMode}
-            options={enableEdit ? [
-              { label: "Table View", value: "table" },
-              { label: "Chart View", value: "chart" },
-              { label: "Nested View", value: "nested" },
-            ] : [
-              { label: "Table View", value: "table" },
-              { label: "Chart View", value: "chart" },
-              { label: "Nested View", value: "nested" },
-            ]}
+            options={(() => {
+              const hasItemDim = dimensions.some(d => d.header === "Item" || d.header === "Item.[Item]" || d.header?.toLowerCase().includes("item"));
+              const baseOptions = [
+                { label: "Table View", value: "table" },
+                { label: "Chart View", value: "chart" },
+              ];
+              if (hasItemDim) {
+                baseOptions.push({ label: "Nested View", value: "nested" });
+              }
+              return baseOptions;
+            })()}
             style={{ width: 110 }}
           />
         </Space>

@@ -49,8 +49,6 @@ export default function ResourceDefinitionPage({
       else{
         setSummaryParameters(data);
       }
-      
-      console.log("Parameters data:", data);
     } catch (error) {
       console.error("Error loading parameters:", error);
       setSummaryParametersError(error.message || "Failed to load parameters");
