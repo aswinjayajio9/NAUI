@@ -103,6 +103,12 @@ export default function SheetComponent({
   const columnsRef = useRef(columns);
   useEffect(() => { columnsRef.current = columns; }, [columns]);
   
+  // Visible dimensions = payload dimensions minus any hidden via hideDims prop
+  const visibleDimensions = useMemo(
+    () => (dimensions || []).filter((d) => !hideDims.includes(d.header)),
+    [dimensions, hideDims]
+  );
+  
   // Initialize reasonable widths when columns change (preserve any manual widths)
   useEffect(() => {
     const next = { ...columnWidths };
@@ -737,7 +743,7 @@ export default function SheetComponent({
   const openFilter = () => setFilterVisible(true);
 
   // Helper: Compute options map for filters (only dimensions if present, else all columns)
-  const computeOptionsMap = (data = originalData, dims = dimensions, cols = columns) => {
+  const computeOptionsMap = (data = originalData, dims = visibleDimensions, cols = columns) => {
     // Only dimension columns if we have them; else fall back to all columns
     const colsToUse = (dims && dims.length)
       ? dims.map(d => d.header)
@@ -863,14 +869,14 @@ const deleteRows = () => {
 
   // Build / refresh dimension group metadata whenever dimensions or dataSource change
   useEffect(() => {
-    if (!dimensions.length || !dataSource.length) {
+    if (!visibleDimensions.length || !dataSource.length) {
       setDimGroupsMap({});
       setCollapsedGroups({});
       return;
     }
     const nextMap = {};
     const nextCollapsed = {};
-    dimensions.forEach((d) => {
+    visibleDimensions.forEach((d) => {
       const header = d.header;
       const groups = [];
       let curVal = null;
@@ -892,7 +898,7 @@ const deleteRows = () => {
     });
     setDimGroupsMap(nextMap);
     setCollapsedGroups(nextCollapsed);
-  }, [dimensions, dataSource]);
+  }, [visibleDimensions, dataSource]);
 
   // Toggle a single dimension group (expand / collapse)
   const toggleDimGroup = (dimHeader, groupId) => {
@@ -907,7 +913,7 @@ const deleteRows = () => {
   // For each row, if it belongs to ANY collapsed group (for ANY dimension) and is NOT that group's first row -> hide.
   const nestedViewRows = useMemo(() => {
     if (viewMode !== "nested") return dataSource;
-    if (!dimensions.length) return dataSource;
+    if (!visibleDimensions.length) return dataSource;
     const collapsed = collapsedGroups;
     const dimGroupIndex = {}; // dim -> rowKey -> { group, isFirst }
     Object.entries(dimGroupsMap).forEach(([dim, groups]) => {
@@ -922,7 +928,7 @@ const deleteRows = () => {
 
     return dataSource.filter(row => {
       // if any dimension group is collapsed and row not first in that group => filter out
-      for (const dim of dimensions.map(d => d.header)) {
+      for (const dim of visibleDimensions.map(d => d.header)) {
         const info = dimGroupIndex[dim]?.[row.key];
         if (info && collapsed[dim]?.has(info.group.id) && !info.isFirst) {
           return false;
@@ -930,7 +936,7 @@ const deleteRows = () => {
       }
       return true;
     });
-  }, [viewMode, dataSource, dimensions, collapsedGroups, dimGroupsMap]);
+  }, [viewMode, dataSource, visibleDimensions, collapsedGroups, dimGroupsMap]);
 
   // Helper: quick lookup to know if a cell is first of its group & group size
   const dimGroupCellMeta = useMemo(() => {
@@ -1053,8 +1059,8 @@ const deleteRows = () => {
 
   // Build nested tree WITHOUT mutating the base dataSource (so table view shows no +/-)
   const nestedTreeData = useMemo(() => {
-    if (!dimensions.length || !dataSource.length) return dataSource;
-    const dimHeaders = dimensions.map(d => d.header);
+    if (!visibleDimensions.length || !dataSource.length) return dataSource;
+    const dimHeaders = visibleDimensions.map(d => d.header);
     const groups = new Map();
     dataSource.forEach(r => {
       const key = dimHeaders.map(h => String(r[h] ?? "")).join("||");
@@ -1079,12 +1085,12 @@ const deleteRows = () => {
       }
     });
     return tree;
-  }, [dataSource, dimensions]);
+  }, [dataSource, visibleDimensions]);
 
   // Recompute vertical rowSpan map for dimension columns whenever dataSource or dimensions change
   useEffect(() => {
     const map = {};
-    const dimHeaders = dimensions.map((d) => d.header);
+    const dimHeaders = visibleDimensions.map((d) => d.header);
     dimHeaders.forEach((col) => {
       map[col] = {};
       let startKey = null;
@@ -1113,7 +1119,7 @@ const deleteRows = () => {
       });
     });
     setRowSpanMap(map);
-  }, [dataSource, dimensions]);
+  }, [dataSource, visibleDimensions]);
 
   // Define all hooks at the top of the component
 const getSelectedDimensionFilters = useCallback(() => {
@@ -1122,9 +1128,9 @@ const getSelectedDimensionFilters = useCallback(() => {
     ? dataSource.filter((r) => selectedRowKeys.includes(r.key))
     : dataSource;
 
-  if (!rowsToFilter.length || !dimensions?.length) return {};
+  if (!rowsToFilter.length || !visibleDimensions?.length) return {};
 
-  const dimHeaders = dimensions.map((d) => d.header);
+  const dimHeaders = visibleDimensions.map((d) => d.header);
   const out = {};
 
   dimHeaders.forEach((h) => {
@@ -1139,7 +1145,7 @@ const getSelectedDimensionFilters = useCallback(() => {
   });
 
   return out;
-}, [selectedRowKeys, dimensions, dataSource]);
+}, [selectedRowKeys, visibleDimensions, dataSource]);
 
   // Render section
   if (loading) return <Spin size="large" />;
@@ -1252,7 +1258,7 @@ const getSelectedDimensionFilters = useCallback(() => {
             value={viewMode}
             onChange={setViewMode}
             options={(() => {
-              const hasItemDim = dimensions.some(d => d.header === "Item" || d.header === "Item.[Item]" || d.header?.toLowerCase().includes("item"));
+              const hasItemDim = visibleDimensions.some(d => d.header === "Item" || d.header === "Item.[Item]" || d.header?.toLowerCase().includes("item"));
               const baseOptions = [
                 { label: "Table View", value: "table" },
                 { label: "Chart View", value: "chart" },
@@ -1342,7 +1348,7 @@ const getSelectedDimensionFilters = useCallback(() => {
         }
         width={600}
       >
-        {(dimensions.length > 0 ? dimensions : columns.map(c => ({ header: c.dataIndex }))).map((col) => {
+        {(visibleDimensions.length > 0 ? visibleDimensions : columns.map(c => ({ header: c.dataIndex }))).map((col) => {
           const displayName = aliasHeader[col.header] || col.header; // Use aliasHeader or fallback to original header
           return (
             <div key={col.header} style={{ marginBottom: 16 }}>
